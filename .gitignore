@@ -1,0 +1,25 @@
+# Node
+node_modules/
+dist/
+*.local
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+src-tauri/binaries/
+
+# Python
+backend/.venv/
+backend/__pycache__/
+**/__pycache__/
+backend/build/
+backend/dist/
+backend/*.egg-info/
+*.pyc
+
+# App data (DB, index, logs) — never commit
+.notes-assistant/
+
+.DS_Store
+.env
+tsconfig.tsbuildinfo
