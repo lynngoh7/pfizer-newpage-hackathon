@@ -1,7 +1,7 @@
 /**
  * Settings: folder access, engine info, clear data.
  * Step 2 replaces the folder stub with a list + picker (Tauri dialog plugin).
- * Step 7 wires "Clear all data" to DELETE /api/data.
+ * Step 5 wires "Forget everything" to DELETE /api/session (Trust panel).
  */
 import { useEffect, useState } from "react";
 import { health, Health } from "../lib/api";
@@ -45,9 +45,12 @@ export default function Settings() {
 
       <section className="card">
         <h3>Data</h3>
-        <p className="muted">“Clear all data” arrives in build step 7.</p>
+        <p className="muted">
+          The app keeps your notes in memory for this session only and writes nothing to disk.
+          “Forget everything” (clears the session) arrives with the Trust panel in build step 5.
+        </p>
         <button className="btn danger" disabled>
-          Clear all data
+          Forget everything
         </button>
       </section>
     </div>

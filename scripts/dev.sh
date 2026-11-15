@@ -5,7 +5,7 @@ set -e
 cd "$(dirname "$0")/.."
 TOKEN=$(python3 -c 'import secrets; print(secrets.token_hex(32))')
 PORT=${NOTES_PORT:-8765}
-export NOTES_SESSION_TOKEN="$TOKEN" NOTES_PORT="$PORT"
+export NOTES_SESSION_TOKEN="$TOKEN" NOTES_PORT="$PORT" NOTES_DEV=1
 sh scripts/dev-backend.sh &
 BACKEND=$!
 trap 'kill $BACKEND 2>/dev/null' EXIT INT TERM

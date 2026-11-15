@@ -72,6 +72,9 @@ impl Backend {
         let child = backend_command().and_then(|mut cmd| {
             cmd.env("NOTES_SESSION_TOKEN", &session.token)
                 .env("NOTES_PORT", session.port.to_string())
+                // `tauri dev` loads the UI from the Vite server, so the backend
+                // must accept that origin. Release builds never set this.
+                .env("NOTES_DEV", if cfg!(debug_assertions) { "1" } else { "0" })
                 .stdin(Stdio::null())
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit());

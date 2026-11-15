@@ -10,6 +10,62 @@ A **fully local desktop AI assistant** that helps managers find the exact docume
 - Answers must be grounded in the user's files, with citations. If nothing backs an answer, say so. No hallucinations.
 - The app is **read-only by default**.
 
+## 1a. Hackathon brief (AI Studio at Pfizer × Newpage — "Second Brain for Managers")
+
+**The ask:** prototype a personal AI assistant for a manager with scattered notes (meeting notes, action items, saved links, screenshots, reminders, half-written updates) on their own device. It helps them use what they already know, while that knowledge stays local and **is never stored by the assistant**. Pick **one moment** where scattered notes let a manager down and show it working better.
+
+**The four pain points named in the brief:** Capture (written and forgotten), Find (you know you wrote it, but not where or in what words), Connect (a decision and its context sit in separate notes), Trust (notes are too personal to hand over).
+
+**The One Rule: "Your knowledge stays yours."**
+- *On device:* nothing the assistant reads leaves the device.
+- *No copies:* the assistant keeps no copy of its own. When it has finished helping, the knowledge is exactly where it was, and nowhere else.
+- We must show how we uphold this **and how a user could tell**.
+
+**Our chosen demo moment:** _TBD by team_. Recommended: "find a decision made weeks ago, and has it changed since?" (hits Find, Connect and messy notes in one query; needs no calendar). Other candidates: preparing for a meeting, connecting related ideas. Every build decision should serve this one moment end to end first.
+
+**Minimum to pass ("good enough"):** one useful moment working end to end in a short demo, running on a device, One Rule respected, using **sample manager notes we wrote ourselves** (never anyone's real notes).
+
+**Stretch goals (from the brief):**
+- User can check for themselves that nothing left the device or was kept
+- Works across more than one kind of personal content (e.g. notes + screenshots/links)
+- Assistant explains in plain language where its help came from
+
+**Judging (50 pts, 10 each):**
+| Criterion | What they look for |
+|---|---|
+| Insight & Problem Understanding | Tackles a real capture/find/connect/trust moment; something a manager would actually use |
+| Creative Use of AI & Design | Changes how someone uses what they know — **not just a chatbot over notes**; copes with messy, fragmentary, out-of-date notes |
+| Working End to End | One moment working end to end on a device with our sample notes. Bonus: more than one kind of notes |
+| Trust & Explainability | Honest when the answer isn't there or it's unsure; plain-language explanation of where help came from |
+| Knowledge Stays Yours | Nothing leaves the device, **no copy kept**; user can verify this, choose what it sees, and change their mind |
+
+**Questions the brief asks us to answer (design against these):**
+- Helpful without remembering — how do we help without holding on to what we learn?
+- How would you know — what makes a user genuinely confident their notes stayed put?
+- In control — how does someone choose what it sees, and change their mind?
+- Messy is normal — notes are fragmentary and out of date; what does helpful look like then?
+- Honest when unsure — what happens when the answer isn't there?
+
+**Submission:** prototype + video demo by **23:59, Sunday 22 November 2026**, emailed to careers-uobinterns@bristol.ac.uk, subject **"Pfizer Hackathon Submission"**.
+
+### ⚠ Impact on our design: "No copies"
+Our original plan stores parsed text in an encrypted SQLite index. Even encrypted, that is arguably "the assistant keeping its own copy", which breaks the One Rule. Default approach until the team decides otherwise:
+- **Store no note text on disk.** The index holds only file path, mtime, content hash, chunk offsets (and embeddings/FTS data **in memory only**). Passages shown to the user are re-read from the original file at display time.
+- **Session-scoped index:** build in memory (SQLite `:memory:` with FTS5 + sqlite-vec) on launch/folder grant; discard on quit, on "Clear session", and when access to a folder is revoked.
+- If a persistent cache is ever needed for speed, it must be opt-in, clearly labelled in the UI, and wiped by one button. SQLCipher stays as the fallback for that case only.
+- Ollama: use `keep_alive: 0` or short so the model doesn't hold context; no chat history saved to disk.
+- **"How would you know" feature (demo it):** a Trust panel showing (a) the live audit log of files read, (b) zero outbound connections (e.g. the app's own network status, plus a "turn Wi-Fi off" demo), (c) what the app has stored on disk right now (should be nothing, or only the folder list), and (d) a "forget everything" button with visible confirmation.
+- The audit log itself must not contain note content — paths and actions only — and is session-scoped too.
+- **Folder grants are session-only too** (decided 2026-11-15): the user picks folders on launch. Then "stored on disk: nothing" is literally true. Revoking a folder drops its chunks from memory at once.
+- Ollama: keep the model warm during the session (cold loads make the demo slow); unload on quit and on "forget everything".
+- Browser dev mode (`npm run dev:all`) is development only. The backend accepts the Vite origin only when `NOTES_DEV=1`; packaged builds never set it. Never demo in a browser.
+
+### Other implications
+- **Not just a chatbot:** lead the UI with the chosen moment (e.g. a "Prep for meeting" view or a decision timeline), with the search bar as the entry point, not a chat transcript.
+- **Messy/out-of-date notes:** the superseded/conflict detection (#6) directly scores here — surface "newer note says otherwise" prominently.
+- **More than one kind of content (bonus):** screenshots (local OCR, e.g. Tesseract — must be offline) and saved links (read the link text/title from the file only; **never fetch URLs**) are candidates after P0.
+- **Sample data:** create a `sample_notes/` folder of realistic, fictional manager notes (meetings, action items, a contradicting update, an outdated decision, a half-written status update, a screenshot) designed to show off the demo moment.
+
 ## 2. Current focus (this phase)
 Build the **core search + answer loop only**. Calendar, to-dos and other dashboard widgets are **future add-ons**. Do not build them now, but keep the home screen layout able to host widgets later.
 
@@ -45,7 +101,7 @@ Build the **core search + answer loop only**. Calendar, to-dos and other dashboa
 | Backend | Python + FastAPI, bound to `127.0.0.1`, session token, run as a PyInstaller sidecar. Rust for everything else (Tauri side) |
 | LLM | Ollama (local) |
 | Embeddings | `nomic-embed-text` via Ollama |
-| Database | SQLite + SQLCipher (encrypted at rest) |
+| Database | SQLite **in memory, session-scoped** (see §1a "No copies"). SQLCipher only for an opt-in persistent cache |
 | Search | FTS5 + sqlite-vec in that same database (hybrid keyword + vector) |
 | Parsing | markitdown + PyMuPDF |
 | File watching | watchdog (P2) |
@@ -58,7 +114,7 @@ Build the **core search + answer loop only**. Calendar, to-dos and other dashboa
 React UI  ──(Tauri IPC / localhost + session token)──▶  FastAPI sidecar (127.0.0.1)
                                                           ├── folder allowlist / denylist
                                                           ├── ingest: markitdown / PyMuPDF → chunks
-                                                          ├── index: FTS5 + sqlite-vec (SQLCipher DB)
+                                                          ├── index: FTS5 + sqlite-vec (SQLite in memory, session only)
                                                           ├── agent loop (narrow tools, Python-enforced)
                                                           ├── audit log
                                                           └── Ollama (localhost only): LLM + embeddings
@@ -81,8 +137,10 @@ Suggested backend modules:
 - **Prompt injection (#9):** file content is passed to the LLM inside clearly delimited *untrusted data* blocks, with the system prompt saying content in those blocks is never an instruction. The model's tool calls are validated in Python regardless of what it asks for.
 - **Grounded answers (#5):** the model must cite chunk IDs plus a short quote. Python checks that each quote really appears in the cited chunk. Drop unverified claims. If none survive, show **"No supporting notes found."**
 - **No network (#8):** Tauri has no network permissions and a strict CSP. FastAPI and Ollama bind to localhost only. No outbound calls anywhere.
-- **Audit log (#8):** record timestamp, action, file path, and which query triggered it. Viewable in the UI.
+- **Audit log (#8):** record timestamp, action, file path, and which query triggered it (no note content). Viewable in the UI, session-scoped.
 - **Data wipe (#13):** delete the DB, index and logs, and reset the session.
+- **No copies (One Rule):** never write note text, snippets, LLM prompts/answers or chat history to disk. Index and audit log live in memory for the session only. Show passages by re-reading the source file.
+- **Never fetch URLs** found in notes; links are treated as text only.
 
 ## 7. UI design (current phase)
 Keep it **simple and straightforward, similar to Obsidian plus a web-browser search page**.
@@ -118,9 +176,12 @@ Keep it **simple and straightforward, similar to Obsidian plus a web-browser sea
 4. Ollama Q&A with verified citations (#3, #5, #9)
 5. Audit log + viewer (#8)
 6. Decisions/to-dos extraction (#4), conflicts/superseded detection (#6)
+6b. Trust panel ("how would you know"): audit log, stored-on-disk view, forget-everything button. Build demo around `sample_notes/`.
 7. P1: embeddings + hybrid search (#10), summary screen (#11), clear data (#13)
 
 ## 9. Known risks
-- Bundling SQLCipher + sqlite-vec inside PyInstaller can be painful. Test packaging early.
+- Loading sqlite-vec needs `enable_load_extension`, which the macOS system Python lacks. Use python.org or Homebrew Python (or `pysqlite3-binary`) and test packaging early. SQLCipher is no longer needed unless the opt-in cache is built.
 - Local LLM speed: use a small model for the demo and keep the context tight (top-k chunks only).
 - Demo idea: turn Wi-Fi off live to prove everything runs offline.
+- In-memory index means re-indexing on every launch. Keep the sample set small and parsing fast; show indexing progress.
+- Deadline: video + prototype due 23:59 Sun 22 Nov 2026. Reserve the last day for recording the demo video.

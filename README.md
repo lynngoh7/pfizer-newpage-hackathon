@@ -1,49 +1,59 @@
-# Local Notes Assistant (hackathon prototype)
+# Local Notes Assistant
 
-Fully local desktop assistant that finds the note you mean. Nothing leaves the machine.
-See [docs/BRIEF.md](docs/BRIEF.md) for the brief, stack and safety rules.
+A desktop app that finds the note you mean. Everything runs on your own computer. Nothing leaves it, and the app keeps no copy of your notes.
 
-## Layout
+## 1. Install these once
 
-| Path | What |
+1. **Node.js 20 or newer** — https://nodejs.org
+2. **Python 3.10 or newer** — https://www.python.org/downloads
+3. **Rust** (builds the desktop window) — run in a terminal:
+   ```sh
+   curl https://sh.rustup.rs -sSf | sh
+   ```
+   then close and reopen the terminal.
+4. **Ollama** (the local AI model) — https://ollama.com/download. Needed from build step 4 onwards.
+
+## 2. Run the app
+
+```sh
+npm install          # first time only
+npm run tauri dev    # opens the desktop window
+```
+
+The first run compiles Rust and can take a few minutes. After that it is fast.
+The Python backend sets itself up automatically on first run (it creates `backend/.venv`).
+
+**No Rust yet?** You can still work on the UI in a browser:
+
+```sh
+npm run dev:all      # then open http://127.0.0.1:1420
+```
+
+This is for development only. It still runs only on your computer, but it is not the real app and must not be used for the demo.
+
+## 3. Before you commit
+
+```sh
+cd backend && .venv/bin/pytest && cd ..   # backend tests
+npm run build                              # frontend compiles
+```
+
+## 4. Where things are
+
+| Folder | What |
 |---|---|
-| `src/` | React UI (sidebar + search layout) |
-| `src-tauri/` | Tauri v2 shell: strict CSP, no network plugins, spawns the sidecar and issues the session token |
-| `backend/` | FastAPI sidecar, bound to 127.0.0.1, session token required on every request |
-| `scripts/` | dev and packaging helpers |
+| `src/` | The UI (React) |
+| `src-tauri/` | The desktop window (Rust). Starts the backend, no network access |
+| `backend/` | The engine (Python). Reads notes, searches, talks to Ollama. Localhost only |
+| `scripts/` | Helper scripts for running and packaging |
+| `docs/` | Team docs, see below |
 
-## Prerequisites
+## 5. Read next
 
-- Node 20+ (`npm install`)
-- Python 3.10+
-- Rust toolchain (`rustup`) for the desktop shell
-- Ollama (later steps)
+- [docs/STATUS.md](docs/STATUS.md) — what is done, what to pick up next
+- [docs/BRIEF.md](docs/BRIEF.md) — the brief, the One Rule, the safety rules
+- [docs/FILES.md](docs/FILES.md) — every file and what it does
 
-## Run
+## Packaging (later)
 
-```sh
-npm install
-npm run tauri dev        # full app: Rust launcher starts backend + webview
-npm run dev:all          # browser only (no Rust): backend + Vite on http://127.0.0.1:1420
-```
-
-Backend tests:
-
-```sh
-cd backend && .venv/bin/pytest
-```
-
-Package the sidecar: `sh scripts/build-sidecar.sh` (then `npm run tauri build`).
-
-## Security model (step 1)
-
-- Tauri capability exposes only `core:default`; no shell/fs/http plugins reach the webview.
-- CSP allows connections only to Tauri IPC and `http://127.0.0.1:*`.
-- The Rust launcher generates a 256-bit session token per launch, passes it to the backend via env and to the UI via the `get_session` command.
-- The backend hard-codes host `127.0.0.1`, refuses to start without a token, and returns 401 on every route without it.
-
-## Docs for the team
-
-- [docs/BRIEF.md](docs/BRIEF.md) — product brief, feature checklist, tech stack, safety rules
-- [docs/STATUS.md](docs/STATUS.md) — what's done, in progress, next (per build step)
-- [docs/FILES.md](docs/FILES.md) — every source file, what it does, which step edits it next
+`sh scripts/build-sidecar.sh` then `npm run tauri build`.

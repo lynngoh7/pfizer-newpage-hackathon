@@ -18,6 +18,10 @@ class Settings:
     port: int
     session_token: str
     read_only: bool = True
+    # True only during development (NOTES_DEV=1). Lets the browser-only dev
+    # server (Vite on port 1420) call the backend. Packaged builds never set it,
+    # so a packaged app only ever answers the desktop window.
+    dev: bool = False
 
 
 def load_settings() -> Settings:
@@ -29,4 +33,5 @@ def load_settings() -> Settings:
         )
         sys.exit(2)
     port = int(os.environ.get("NOTES_PORT", "8765"))
-    return Settings(port=port, session_token=token)
+    dev = os.environ.get("NOTES_DEV", "") == "1"
+    return Settings(port=port, session_token=token, dev=dev)

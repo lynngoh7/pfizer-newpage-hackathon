@@ -1,44 +1,69 @@
 # Project status
 
-Build order follows the brief. Update this file in the same change as the code.
+What is done, what is next. Update this file in the same change as your code.
 
-Legend: ✅ done · 🔧 in progress · ⬜ not started
+✅ done · 🔧 in progress · ⬜ not started
 
-## Step 1 — App shell + sidecar ✅
-- ✅ Tauri v2 config: strict CSP, `core:default` capability only, no network plugins
-- ✅ Rust launcher: per-launch 256-bit session token, free localhost port, spawns backend, kills it on exit, `get_session` command
-- ✅ React layout: fixed sidebar, wide search bar, home with reserved widget grid, placeholder views, Settings page showing engine health
-- ✅ FastAPI sidecar: 127.0.0.1 only, refuses to start without token, 401 on every route without bearer token, `/api/health`
-- ✅ Backend tests (`backend/tests/test_health.py`), dev scripts, PyInstaller spec
-- ⬜ Not yet compiled on a machine with Rust (`cargo` was missing). First person with `rustup`: run `npm run tauri dev` and fix anything that breaks.
-- ⬜ Real app icons (`npm run tauri icon <1024px.png>`); current icon is a 1×1 placeholder
+## The plan in one paragraph
 
-## Step 2 — Folder access + ingest ⬜
-Files to create/edit: `backend/app/permissions.py`, `backend/app/ingest.py`, `backend/app/db.py`, routes in `api.py`, `src/pages/Settings.tsx`, Tauri dialog plugin for folder picker.
-- ⬜ Allowlist/denylist with one `resolve_and_check(path)` function (follows symlinks)
-- ⬜ Folder picker in Settings → add/remove folders
-- ⬜ Parse PDF (PyMuPDF), DOCX/TXT/MD (markitdown) → chunks with path, page/heading, offsets
-- ⬜ SQLCipher DB, chunk metadata table
+Build one demo moment end to end: the manager asks about a decision made weeks ago, and the app finds it, shows the newer note that changed it, and cites both. Everything stays in memory for the session. Nothing is written to disk. A Trust panel lets the user see that for themselves.
+
+## Step 1 — App shell + backend ✅
+- ✅ Desktop window (Tauri): strict CSP, no network plugins
+- ✅ Launcher: new session token on every launch, starts and stops the backend
+- ✅ UI: sidebar, search bar, home page, placeholder pages, Settings
+- ✅ Backend: localhost only, refuses to start without a token, rejects requests without it
+- ✅ Browser dev mode is allowed only when `NOTES_DEV=1` (never in packaged builds)
+- ✅ Compiled and run on macOS (2026-11-15): window opens, backend starts on a random localhost port, sidebar shows the engine as ready. Only localhost ports open
+- ⬜ Real app icon (`npm run tauri icon <1024px.png>`)
+
+## Step 2 — Folder access + reading notes ⬜
+New files: `backend/app/permissions.py`, `ingest.py`, `db.py`, `audit.py`. Edit: `api.py`, `src/pages/Settings.tsx`.
+- ⬜ One function `resolve_and_check(path)` that every file read goes through (follows symlinks, blocks `.ssh`, `.env`, keychains)
+- ⬜ Folder picker in Settings. Grants last for the session only, not saved to disk
+- ⬜ Read PDF (PyMuPDF) and DOCX / TXT / MD (markitdown), split into chunks with path, page or heading, and character offsets
+- ⬜ In-memory SQLite (`:memory:`) holding path, mtime, hash and offsets. **No note text on disk, ever**
+- ⬜ Audit log (in memory): every file read gets a line with time, action, path, query. No note content
+- ⬜ `sample_notes/`: fictional manager notes built around the demo moment (a decision, its context, a newer note that changes it, a half-written update, a to-do list)
 
 ## Step 3 — Keyword search ⬜
-- ⬜ FTS5 table + `search.py` keyword search
-- ⬜ Results UI: source cards (file, path, snippet, open-file button)
+- ⬜ FTS5 table in the same in-memory database, `search.py`
+- ⬜ Results page: source cards (file, path, snippet re-read from the file, open-file button)
 
-## Step 4 — Q&A with verified citations ⬜
-- ⬜ Ollama client (localhost only), untrusted-data delimiting, citation verification, "No supporting notes found."
+## Step 4 — Questions with verified citations ⬜
+- ⬜ Ollama client (localhost only). Note text goes in clearly marked "untrusted data" blocks
+- ⬜ Check every quoted citation really appears in the file. Show "No supporting notes found." when none survive
+- ⬜ Keep the model warm during the session, unload on quit and "forget everything"
 
-## Step 5 — Audit log ⬜
-## Step 6 — Decisions/to-dos, conflicts ⬜
-## Step 7 — P1: embeddings + hybrid search, summary screen, clear data ⬜
+## Step 5 — Trust panel ⬜
+Covers 20 of the 50 judging points. Do not leave it to the end.
+- ⬜ Activity log page (from the step 2 audit log)
+- ⬜ "Stored on disk right now" view: should list nothing
+- ⬜ Network view: the only open sockets are localhost. Rehearse the "turn Wi-Fi off" demo
+- ⬜ "Forget everything" button: drops the index, log and folder grants, with visible confirmation
+
+## Step 6 — Decisions, to-dos, conflicts ⬜
+- ⬜ Pull decisions and to-dos out of notes
+- ⬜ Flag notes that disagree, and newer notes that replace older ones ("superseded" badge)
+
+## Step 7 — Later ⬜
+- ⬜ Search by meaning (embeddings via `nomic-embed-text`, hybrid with keyword). Build FTS first, embed in the background, because the index is rebuilt on every launch
+- ⬜ Summary page for managers
 
 ## Performance notes
-- Frontend bundle after step 1: ~148 kB JS (48 kB gzip). Keep an eye on this; lazy-load non-home views when they grow.
+- Frontend bundle after step 1: about 148 kB JS (48 kB gzipped)
 
-## Where to start (pick one, say so in the team chat, update this file)
+## Pick a task
 
-1. **Compile the desktop shell** — install Rust (`curl https://sh.rustup.rs -sSf | sh`), run `npm install && npm run tauri dev`. Fix any compile errors in `src-tauri/`. Confirm the sidebar shows "Local engine ready". Then replace the placeholder icon.
-2. **Step 2a: folder permissions (backend)** — create `backend/app/permissions.py` with the allowlist/denylist and a single `resolve_and_check(path)` that follows symlinks and rejects `.ssh`, `.env`, keychains, etc. Add `GET/POST/DELETE /api/folders`. Tests first: symlink escape, denylist hit, revoke.
-3. **Step 2b: folder picker (frontend + Tauri)** — add `tauri-plugin-dialog`, `dialog:allow-open` in `capabilities/default.json`, and a folder list with add/remove in `src/pages/Settings.tsx` calling the routes from 2a.
-4. **Step 2c: ingest** — `backend/app/ingest.py`: walk allowed folders, parse PDF (PyMuPDF), DOCX/TXT/MD (markitdown), chunk with path, page/heading and char offsets. Store in `db.py` (SQLCipher). Benchmark on a folder of ~200 files and note the time here.
+Say which one in the team chat, then update this file.
 
-Rules of the road: run `backend/.venv/bin/pytest` and `npm run build` before every commit; add a row to `docs/FILES.md` for every new file; keep every file access behind `resolve_and_check`.
+1. **App icon.** Make a 1024px PNG and run `npm run tauri icon <file.png>`
+2. **Step 2a, folder permissions (backend).** Write `permissions.py` and the `GET/POST/DELETE /api/folders` routes. Tests first: symlink escape, blocked folder, revoke
+3. **Step 2b, folder picker (UI).** Add `tauri-plugin-dialog`, allow `dialog:allow-open` in `capabilities/default.json`, folder list with add and remove in Settings
+4. **Step 2c, reading notes.** Write `ingest.py` and `db.py` (in memory). Time it on about 200 files and note the result here
+5. **Sample notes.** Write `sample_notes/` for the demo moment (see step 2)
+
+Rules: run the backend tests and `npm run build` before every commit. Add a row to `docs/FILES.md` for every new file. Every file read goes through `resolve_and_check`.
+
+### Early risk to test
+Loading sqlite-vec needs `enable_load_extension`. The Python that ships with macOS does not support it. Use Python from python.org or Homebrew, or add `pysqlite3-binary`.
