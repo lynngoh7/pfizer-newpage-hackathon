@@ -36,7 +36,9 @@ def list_allowed_paths() -> list[Path]:
 
 
 def resolve_and_check(path: str) -> Path:
-    """Resolve symlinks and enforce the denylist and session allowlist."""
+    """Resolve symlinks and enforce the denylist and session allowlist.
+    Given a Path should return resolved path if the path is allowed
+    Use when reading a file!"""
     real = Path(path).resolve(strict=True)
     if any(part in DENY_PARTS for part in real.parts):
         raise PermissionError("Blocked location")
