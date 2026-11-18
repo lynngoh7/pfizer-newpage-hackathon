@@ -17,6 +17,7 @@ pub fn run() {
     let backend = Backend::start();
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .manage(backend)
         .invoke_handler(tauri::generate_handler![get_session])
         .build(tauri::generate_context!())

@@ -19,8 +19,9 @@ Build one demo moment end to end: the manager asks about a decision made weeks a
 
 ## Step 2 — Folder access + reading notes ⬜
 New files: `backend/app/permissions.py`, `ingest.py`, `db.py`, `audit.py`. Edit: `api.py`, `src/pages/Settings.tsx`.
-- ⬜ One function `resolve_and_check(path)` that every file read goes through (follows symlinks, blocks `.ssh`, `.env`, keychains)
-- ⬜ Folder picker in Settings. Grants last for the session only, not saved to disk
+- ✅ Settings folder/file picker and session-only grants; users can revoke access
+- ✅ Backend `GET/POST/DELETE /api/folders` endpoints and access checks for selected files/folders
+- ⬜ One function `resolve_and_check(path)` used by every file read (follows symlinks, blocks `.ssh`, `.env`, keychains)
 - ⬜ Read PDF (PyMuPDF) and DOCX / TXT / MD (markitdown), split into chunks with path, page or heading, and character offsets
 - ⬜ In-memory SQLite (`:memory:`) holding path, mtime, hash and offsets. **No note text on disk, ever**
 - ⬜ Audit log (in memory): every file read gets a line with time, action, path, query. No note content
@@ -58,10 +59,8 @@ Covers 20 of the 50 judging points. Do not leave it to the end.
 Say which one in the team chat, then update this file.
 
 1. **App icon.** Make a 1024px PNG and run `npm run tauri icon <file.png>`
-2. **Step 2a, folder permissions (backend).** Write `permissions.py` and the `GET/POST/DELETE /api/folders` routes. Tests first: symlink escape, blocked folder, revoke
-3. **Step 2b, folder picker (UI).** Add `tauri-plugin-dialog`, allow `dialog:allow-open` in `capabilities/default.json`, folder list with add and remove in Settings
-4. **Step 2c, reading notes.** Write `ingest.py` and `db.py` (in memory). Time it on about 200 files and note the result here
-5. **Sample notes.** Write `sample_notes/` for the demo moment (see step 2)
+2. **Step 2c, reading notes.** Write `ingest.py` and `db.py` (in memory); ensure every file read uses `resolve_and_check`. Time it on about 200 files and note the result here
+3. **Sample notes.** Write `sample_notes/` for the demo moment (see step 2)
 
 Rules: run the backend tests and `npm run build` before every commit. Add a row to `docs/FILES.md` for every new file. Every file read goes through `resolve_and_check`.
 

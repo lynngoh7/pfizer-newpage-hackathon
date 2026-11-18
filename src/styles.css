@@ -147,6 +147,18 @@ body {
 .muted { color: var(--muted); }
 .error { color: var(--danger); }
 
+.access-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.access-list { list-style: none; margin: 0; padding: 0; }
+.access-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.access-path { min-width: 0; overflow-wrap: anywhere; }
+
 .btn {
   padding: 8px 14px; font: inherit; border-radius: 8px;
   border: 1px solid var(--border); background: var(--card); color: var(--fg); cursor: pointer;

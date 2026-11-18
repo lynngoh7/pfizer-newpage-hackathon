@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "Minimal capability: core IPC only. No shell, fs, http or network plugins are exposed to the webview.",
   "windows": ["main"],
-  "permissions": ["core:default"]
+  "permissions": ["core:default", "dialog:allow-open"]
 }
