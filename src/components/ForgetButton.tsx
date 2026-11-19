@@ -59,7 +59,7 @@ export default function ForgetButton({ onDone }: Props) {
       </button>
       {error && <p className="error">Could not forget: {error}</p>}
       {result && (
-        <div className="done" role="status">
+        <p className="done" role="status">
           <strong>Done at {new Date().toLocaleTimeString()}.</strong>{" "}
           Cleared{" "}
           {Object.entries(result.cleared)
@@ -67,7 +67,7 @@ export default function ForgetButton({ onDone }: Props) {
             .join(", ")}
           . Stored on disk now:{" "}
           {result.storage.files === 0 ? "nothing" : `${result.storage.files} files (see Privacy)`}.
-        </div>
+        </p>
       )}
     </div>
   );

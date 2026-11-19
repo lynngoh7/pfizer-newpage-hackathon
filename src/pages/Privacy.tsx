@@ -10,11 +10,12 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import ForgetButton from "../components/ForgetButton";
 import { AuditEntry, auditLog, network, NetworkReport, storage, StorageReport } from "../lib/trust";
 
-const ROLE: Record<string, string> = {
-  engine: "Notes engine",
-  app: "Notes app window",
-  model: "Ollama (local AI model)",
-};
+// Plain-language names, in the order a user thinks of them.
+const PROGRAMS: { role: "app" | "engine" | "model"; name: string }[] = [
+  { role: "app", name: "Notes app" },
+  { role: "engine", name: "Search engine" },
+  { role: "model", name: "AI model (Ollama)" },
+];
 
 const ACTION: Record<AuditEntry["action"], string> = {
   read: "Read",
@@ -71,6 +72,8 @@ export default function Privacy() {
 
   const filesRead = log.filter((e) => e.action === "read").length;
 
+  const outside = net?.external ?? 0;
+
   return (
     <div className="page">
       <h2>Privacy</h2>
@@ -79,46 +82,33 @@ export default function Privacy() {
         that live, so you don't have to take our word for it.
       </p>
 
-      <div className="tiles">
-        <Tile
-          ok={net ? net.external === 0 : null}
-          label="Internet"
-          value={!net ? "Checking…" : net.external === 0 ? "Nothing leaves this computer" : `${net.external} outside connection${net.external > 1 ? "s" : ""}`}
-        />
-        <Tile
-          ok={disk ? disk.files === 0 : null}
-          label="Stored on disk"
-          value={!disk ? "Checking…" : disk.files === 0 ? "Nothing" : `${disk.files} files`}
-        />
-        <Tile ok={null} label="This session" value={`${filesRead} file${filesRead === 1 ? "" : "s"} read`} />
-      </div>
+      {/* Summary: a plain list, not clickable. Only a problem gets colour. */}
+      <dl className="props">
+        <dt>Internet</dt>
+        <dd className={outside ? "error" : ""}>
+          {!net ? "Checking…" : outside ? `${outside} connection${outside > 1 ? "s" : ""} outside this computer` : "Nothing has left this computer"}
+        </dd>
+        <dt>Saved to disk</dt>
+        <dd className={disk?.files ? "error" : ""}>
+          {!disk ? "Checking…" : disk.files ? `${disk.files} files` : "Nothing"}
+        </dd>
+        <dt>Files read</dt>
+        <dd>{filesRead ? `${filesRead} this session` : "None yet"}</dd>
+      </dl>
 
       <section className="card">
-        <h3>Network connections</h3>
-        <p className="muted">
-          Every connection the app's own programs have open right now. "Local" means it stays
-          inside this computer.
-        </p>
+        <h3>Internet</h3>
         {netError && <p className="error">Could not check: {netError}</p>}
-        {net?.processes.map((p) => (
-          <div key={p.pid} className="proc">
-            <div className="proc-name">
-              {ROLE[p.role]} <span className="muted">· {p.name} (pid {p.pid})</span>
-            </div>
-            {p.error && <div className="muted">Couldn't inspect ({p.error})</div>}
-            {!p.error && p.connections.length === 0 && <div className="muted">No connections</div>}
-            {p.connections.map((c, i) => (
-              <div key={i} className="conn">
-                <span className={`badge ${c.kind === "external" ? "bad" : "good"}`}>
-                  {c.kind === "listening" ? "Waiting for the app" : c.kind === "local" ? "Local" : "Outside!"}
-                </span>
-                <code>{c.remote ? `${c.local} → ${c.remote}` : c.local}</code>
-              </div>
-            ))}
-          </div>
-        ))}
-        <details className="verify">
-          <summary>Check it yourself</summary>
+        {net && (
+          <p>
+            {outside
+              ? "Something is connected outside this computer. See below."
+              : "The app's parts only talk to each other, inside this machine. Checked every few seconds."}
+          </p>
+        )}
+        {net && <NetworkSummary report={net} />}
+        <details className="more">
+          <summary>How to check this yourself</summary>
           <ol>
             <li>Turn Wi-Fi off. Search and answers keep working, because nothing needs the internet.</li>
             <li>
@@ -127,38 +117,59 @@ export default function Privacy() {
             </li>
           </ol>
         </details>
+        {net && (
+          <details className="more">
+            <summary>Technical details</summary>
+            <ul className="paths">
+              {net.processes.map((p) => (
+                <li key={p.pid}>
+                  {p.name} (pid {p.pid}){p.error && ` — couldn't inspect (${p.error})`}
+                  <ul>
+                    {p.connections.map((c, i) => (
+                      <li key={i} className={c.kind === "external" ? "error" : ""}>
+                        <code>{c.remote ? `${c.local} → ${c.remote}` : `${c.local} (listening)`}</code>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
       </section>
 
       <section className="card">
-        <h3>Stored on disk</h3>
+        <h3>Saved to disk</h3>
         {diskError && <p className="error">Could not check: {diskError}</p>}
         {disk && disk.files === 0 && (
-          <p>
-            <span className="badge good">Nothing</span> The app has written no files. These are the
-            places a desktop app normally keeps data, checked just now:
-          </p>
+          <p>All {disk.locations.length} places where apps usually keep data are empty. Checked just now.</p>
         )}
         {disk && disk.files > 0 && (
-          <p className="warn-text">
-            Found {disk.files} file{disk.files > 1 ? "s" : ""} in the app's folders. They are listed
-            below so you can see exactly what they are.
-          </p>
+          <>
+            <p className="error">
+              Found {disk.files} file{disk.files > 1 ? "s" : ""} in the app's folders:
+            </p>
+            <ul className="paths">
+              {disk.locations.filter((l) => l.files > 0).map((l) => (
+                <li key={l.path}>
+                  <code>{l.path}</code> <span className="muted">— {l.files} files, {Math.ceil(l.bytes / 1024)} KB</span>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
-        <ul className="paths">
-          {disk?.locations.map((l) => (
-            <li key={l.path}>
-              <code>{l.path}</code>{" "}
-              {l.files === 0 ? (
-                <span className="muted">— {l.exists ? "empty" : "doesn't exist"}</span>
-              ) : (
-                <>
-                  <span className="warn-text">— {l.files} files, {Math.ceil(l.bytes / 1024)} KB</span>
-                  <ul>{l.listed.map((f) => <li key={f}><code>{f}</code></li>)}</ul>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+        {disk && (
+          <details className="more">
+            <summary>Places checked</summary>
+            <ul className="paths">
+              {disk.locations.map((l) => (
+                <li key={l.path}>
+                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : l.exists ? "empty" : "not there"}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
       </section>
 
       <section className="card">
@@ -179,12 +190,25 @@ export default function Privacy() {
   );
 }
 
-function Tile({ ok, label, value }: { ok: boolean | null; label: string; value: string }) {
+// One line per program: what it is talking to, in plain words.
+function NetworkSummary({ report }: { report: NetworkReport }) {
   return (
-    <div className={`tile ${ok === true ? "good" : ok === false ? "bad" : ""}`}>
-      <div className="tile-label">{label}</div>
-      <div className="tile-value">{value}</div>
-    </div>
+    <dl className="props">
+      {PROGRAMS.map(({ role, name }) => {
+        const procs = report.processes.filter((p) => p.role === role);
+        const conns = procs.flatMap((p) => p.connections);
+        const out = conns.filter((c) => c.kind === "external").length;
+        const text = procs.length === 0 ? "Not running"
+          : procs.some((p) => p.error) ? "Couldn't check"
+          : out ? `Connected outside this computer (${out})`
+          : conns.length ? "Only talks inside this computer"
+          : "No connections";
+        return [
+          <dt key={`${role}-t`}>{name}</dt>,
+          <dd key={`${role}-d`} className={out ? "error" : ""}>{text}</dd>,
+        ];
+      })}
+    </dl>
   );
 }
 
@@ -199,8 +223,8 @@ const ActivityTable = memo(function ActivityTable({ entries }: { entries: AuditE
       <tbody>
         {[...entries].reverse().map((e) => (
           <tr key={e.seq}>
-            <td>{new Date(e.time * 1000).toLocaleTimeString()}</td>
-            <td><span className={`badge ${e.action === "blocked" ? "bad" : ""}`}>{ACTION[e.action]}</span></td>
+            <td className="muted">{new Date(e.time * 1000).toLocaleTimeString()}</td>
+            <td className={e.action === "blocked" ? "error" : ""}>{ACTION[e.action]}</td>
             <td title={e.path ?? ""}>{e.path ? fileName(e.path) : "—"}</td>
             <td className="muted">{[e.query && `“${e.query}”`, e.outcome !== "ok" && e.outcome].filter(Boolean).join(" · ")}</td>
           </tr>
