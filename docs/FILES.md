@@ -58,7 +58,9 @@ Add a row whenever you create a file.
 | `app/auth.py` | bearer-token middleware, constant-time compare, every request | — |
 | `app/api.py` | routes under `/api`; `GET /api/health` | every step adds routes here (or split into routers) |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
+| `app/citations.py` | citation checker: verifies each cited quote is in its chunk, drops unbacked claims, returns NO_SUPPORT if none survive. Pure, no I/O | step 4: called by `qa.py` |
+| `tests/test_citations.py` | quote matching, rejections, claim filtering, one real sample note | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
 
 ### Planned backend modules (not yet created)
-`permissions.py` (allow/denylist, single path-check function) · `ingest.py` · `db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` · `extract.py` · `conflicts.py` · `audit.py` (in memory, paths and actions only)
+`permissions.py` (allow/denylist, single path-check function) · `ingest.py` · `db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py` · `audit.py` (in memory, paths and actions only)

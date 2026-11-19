@@ -35,7 +35,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`, `audit.py`. Edit:
 
 ## Step 4 — Questions with verified citations ⬜
 - ⬜ Ollama client (localhost only). Note text goes in clearly marked "untrusted data" blocks
-- ⬜ Check every quoted citation really appears in the file. Show "No supporting notes found." when none survive
+- ✅ Citation checker `citations.py`: every quote must appear in the chunk it cites (exact after folding case, spacing, smart quotes, accents, Markdown, `...` gaps; no fuzzy matching). Unbacked claims are dropped; none left → "No supporting notes found." qa.py calls `check_answer` with the chunks it put in the prompt
 - ⬜ Keep the model warm during the session, unload on quit and "forget everything"
 
 ## Step 5 — Trust panel ⬜
