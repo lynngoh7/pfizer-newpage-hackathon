@@ -1,3 +1,5 @@
+// Frontend entry point: mounts <App /> into index.html's #root.
+// StrictMode runs effects twice in dev only, to surface missing cleanups.
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";

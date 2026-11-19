@@ -27,6 +27,7 @@ const ACTION: Record<AuditEntry["action"], string> = {
   forget: "Forgot everything",
 };
 
+// Call `fn` now and every `ms` while the page is open. Returns [data, error, refresh].
 function usePoll<T>(fn: () => Promise<T>, ms: number): [T | null, string | null, () => void] {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +50,7 @@ export default function Privacy() {
   const [net, netError] = usePoll<NetworkReport>(network, 3000);
   const [disk, diskError, refreshDisk] = usePoll<StorageReport>(storage, 10000);
   const [log, setLog] = useState<AuditEntry[]>([]);
+  // A ref, not state: changing it must not re-render, it only marks how far we have read.
   const lastSeq = useRef(0);
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function Privacy() {
         const fresh = await auditLog(lastSeq.current);
         if (alive && fresh.length) {
           lastSeq.current = fresh[fresh.length - 1].seq;
-          setLog((old) => [...old, ...fresh]);
+          setLog((old) => [...old, ...fresh]); // append only the new lines
         }
       } catch { /* engine offline: the sidebar already says so */ }
     }
@@ -186,6 +188,7 @@ function Tile({ ok, label, value }: { ok: boolean | null; label: string; value: 
   );
 }
 
+// memo: re-renders only when the log changes, not on every network/disk poll.
 const ActivityTable = memo(function ActivityTable({ entries }: { entries: AuditEntry[] }) {
   if (entries.length === 0) return <p className="muted">Nothing yet this session.</p>;
   return (

@@ -18,6 +18,7 @@ interface Props {
 }
 
 export default function ForgetButton({ onDone }: Props) {
+  // idle → confirm (user must click twice) → working → idle with a result shown.
   const [state, setState] = useState<"idle" | "confirm" | "working">("idle");
   const [result, setResult] = useState<ForgetResult | null>(null);
   const [error, setError] = useState<string | null>(null);

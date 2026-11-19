@@ -13,7 +13,7 @@ export default function SearchBar({ onSubmit }: Props) {
   const [value, setValue] = useState("");
 
   function submit(e: FormEvent) {
-    e.preventDefault();
+    e.preventDefault(); // stop the browser reloading the page on submit
     const q = value.trim();
     if (q) onSubmit(q);
   }

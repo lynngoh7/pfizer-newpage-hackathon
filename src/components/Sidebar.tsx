@@ -26,7 +26,7 @@ export default function Sidebar({ view, onNavigate }: Props) {
   const [backend, setBackend] = useState<Backend>("checking");
 
   useEffect(() => {
-    let alive = true;
+    let alive = true; // stops setState after the component is gone
     async function ping() {
       try {
         await health();
@@ -37,6 +37,7 @@ export default function Sidebar({ view, onNavigate }: Props) {
     }
     ping();
     const t = setInterval(ping, 5000);
+    // Cleanup when the sidebar unmounts: stop polling.
     return () => {
       alive = false;
       clearInterval(t);

@@ -15,6 +15,7 @@ import Home from "./pages/Home";
 import Placeholder from "./pages/Placeholder";
 import Settings from "./pages/Settings";
 
+// Lazy: this page's code downloads only when first opened, keeping startup fast.
 const Privacy = lazy(() => import("./pages/Privacy"));
 
 export default function App() {
@@ -26,6 +27,7 @@ export default function App() {
     setView("search");
   }
 
+  // Pick the page for the current view. No router library: one switch is enough.
   let main;
   switch (view) {
     case "home":
@@ -47,6 +49,7 @@ export default function App() {
       break;
     case "privacy":
       main = (
+        // Suspense shows nothing for the split second the lazy page loads.
         <Suspense fallback={null}>
           <Privacy />
         </Suspense>

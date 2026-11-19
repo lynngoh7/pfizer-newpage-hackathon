@@ -40,6 +40,7 @@ export interface ForgetResult {
   storage: StorageReport;
 }
 
+// `after` = last seq the page already has; the backend returns only newer entries.
 export const auditLog = (after = 0) => apiFetch<AuditEntry[]>(`/api/audit?after=${after}`);
 export const network = () => apiFetch<NetworkReport>("/api/trust/network");
 export const storage = () => apiFetch<StorageReport>("/api/trust/storage");

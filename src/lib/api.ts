@@ -12,8 +12,10 @@ export interface Session {
   token: string;
 }
 
+// Fetched once and reused: the port and token never change during a run.
 let sessionPromise: Promise<Session> | null = null;
 
+// True inside the desktop window, false in a plain browser (dev only).
 function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 }
@@ -22,6 +24,7 @@ export function getSession(): Promise<Session> {
   if (!sessionPromise) {
     sessionPromise = (async () => {
       if (isTauri()) {
+        // Ask the Rust side (src-tauri/src/lib.rs, `get_session`) for port + token.
         const { invoke } = await import("@tauri-apps/api/core");
         return await invoke<Session>("get_session");
       }
