@@ -8,6 +8,7 @@ mod sidecar;
 use sidecar::{Backend, Session};
 use tauri::{Manager, RunEvent, State};
 
+// A "command" is a Rust function the webview can call with invoke("get_session").
 #[tauri::command]
 fn get_session(backend: State<'_, Backend>) -> Session {
     backend.session.clone()
@@ -17,7 +18,7 @@ pub fn run() {
     let backend = Backend::start();
 
     tauri::Builder::default()
-        .manage(backend)
+        .manage(backend) // makes `Backend` available to commands as State
         .invoke_handler(tauri::generate_handler![get_session])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

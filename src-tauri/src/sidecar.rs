@@ -23,12 +23,16 @@ pub struct Backend {
     child: Mutex<Option<Child>>,
 }
 
+/// 32 random bytes as hex (64 chars). New every launch, never saved.
 fn random_token() -> String {
     let mut bytes = [0u8; 32];
     rand::thread_rng().fill_bytes(&mut bytes);
     bytes.iter().map(|b| format!("{:02x}", b)).collect()
 }
 
+/// Ask the OS for an unused localhost port (port 0 = "any free one"), then
+/// release it for the backend to bind. A random port avoids clashes with
+/// other apps and with a second copy of this one.
 fn free_port() -> u16 {
     TcpListener::bind("127.0.0.1:0")
         .and_then(|l| l.local_addr())
@@ -76,6 +80,7 @@ impl Backend {
                 // must accept that origin. Release builds never set this.
                 .env("NOTES_DEV", if cfg!(debug_assertions) { "1" } else { "0" })
                 .stdin(Stdio::null())
+                // Backend logs appear in the same terminal as `tauri dev`.
                 .stdout(Stdio::inherit())
                 .stderr(Stdio::inherit());
             match cmd.spawn() {
@@ -100,6 +105,7 @@ impl Backend {
     }
 }
 
+// Safety net: if the app exits without the Exit event, still kill the backend.
 impl Drop for Backend {
     fn drop(&mut self) {
         self.stop();

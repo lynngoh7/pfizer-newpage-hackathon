@@ -3,6 +3,7 @@
 # Usage: NOTES_SESSION_TOKEN=<token> NOTES_PORT=8765 sh scripts/dev-backend.sh
 set -e
 cd "$(dirname "$0")/../backend"
+# First run only: create the virtualenv and install the backend + test tools.
 if [ ! -d .venv ]; then
   python3 -m venv .venv
   .venv/bin/pip install -q -e ".[dev]"
