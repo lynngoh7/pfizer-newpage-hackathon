@@ -3,6 +3,8 @@
 a = Analysis(
     ["app/main.py"],
     pathex=["."],
+    # uvicorn picks these modules by name at runtime, so PyInstaller cannot
+    # see them being imported. Step 7 adds sqlite-vec here.
     hiddenimports=["uvicorn.logging", "uvicorn.loops.auto", "uvicorn.protocols.http.auto",
                    "uvicorn.protocols.websockets.auto", "uvicorn.lifespan.on"],
     noarchive=False,

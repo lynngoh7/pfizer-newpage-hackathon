@@ -17,6 +17,7 @@ from typing import Callable
 
 from . import audit
 
+# name -> reset function. Registering the same name again replaces it.
 _resets: dict[str, Callable[[], int | None]] = {}
 
 

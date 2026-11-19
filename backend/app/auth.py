@@ -18,8 +18,11 @@ class SessionTokenMiddleware(BaseHTTPMiddleware):
         # CORS preflight carries no Authorization header; let CORSMiddleware answer it.
         if request.method == "OPTIONS":
             return await call_next(request)
+        # Expected header: "Authorization: Bearer <token>".
         header = request.headers.get("authorization", "")
         scheme, _, presented = header.partition(" ")
+        # compare_digest takes the same time whether the first or last
+        # character is wrong, so the token cannot be guessed by timing replies.
         if scheme.lower() != "bearer" or not hmac.compare_digest(
             presented.encode(), self._expected
         ):

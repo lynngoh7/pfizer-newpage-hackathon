@@ -30,14 +30,15 @@ MIN_QUOTE_CHARS = 15
 # be stitched together from scattered common words.
 MIN_SEGMENT_CHARS = 8
 
+# Characters the model often swaps for plain ones: curly quotes and dashes.
 _FOLD = {
     "‘": "'", "’": "'", "‚": "'", "‛": "'", "′": "'",
     "“": '"', "”": '"', "„": '"', "‟": '"', "″": '"',
     "‐": "-", "‑": "-", "‒": "-", "–": "-", "—": "-",
     "―": "-", "−": "-",
 }
-_DROP = frozenset("*_`")
-_GAP = "..."
+_DROP = frozenset("*_`")  # Markdown emphasis: the model quotes the words, not the stars
+_GAP = "..."              # the model writes "..." where it skipped words
 
 
 @dataclass(frozen=True)
@@ -94,10 +95,10 @@ def _normalise(text: str) -> tuple[str, list[int]]:
     """Fold harmless differences away. Returns the folded text and, for each
     folded character, its index in `text` (so matches map back to the note)."""
     out: list[str] = []
-    where: list[int] = []
+    where: list[int] = []   # where[k] = position in `text` of out[k]
     space = True  # also trims leading whitespace
     for i, ch in enumerate(text):
-        if ch.isspace():
+        if ch.isspace():  # any run of spaces/newlines becomes one space
             if not space:
                 out.append(" ")
                 where.append(i)
@@ -120,7 +121,7 @@ def _normalise(text: str) -> tuple[str, list[int]]:
 
 def _segments(quote: str) -> list[str]:
     q, _ = _normalise(quote)
-    q = q.strip(" \"'")
+    q = q.strip(" \"'")  # the model often wraps quotes in quote marks
     return [s.strip(" \"'") for s in q.split(_GAP) if s.strip(" \"'")]
 
 
@@ -148,7 +149,7 @@ def _find(segments: list[str], text: str) -> tuple[int, int] | None:
 
 def verify_citation(citation: Citation, chunks: Mapping[Hashable, str]) -> VerifiedCitation | RejectedCitation:
     text = chunks.get(citation.chunk_id)
-    if text is None:
+    if text is None:  # cited a chunk that was not in the prompt
         return RejectedCitation(citation.chunk_id, citation.quote, "unknown_chunk")
     segments = _segments(citation.quote)
     if (sum(len(s) for s in segments) < MIN_QUOTE_CHARS
@@ -158,6 +159,7 @@ def verify_citation(citation: Citation, chunks: Mapping[Hashable, str]) -> Verif
     span = _find(segments, folded)
     if span is None:
         return RejectedCitation(citation.chunk_id, citation.quote, "not_found")
+    # Map the folded span back to positions in the original chunk text.
     return VerifiedCitation(citation.chunk_id, citation.quote, where[span[0]], where[span[1] - 1] + 1)
 
 

@@ -29,6 +29,8 @@ def _kind(remote) -> str:
     if not remote:
         return "listening"
     try:
+        # Loopback (127.x, ::1) never leaves the machine. Anything else does,
+        # including LAN addresses like 192.168.x: those still leave the device.
         return "local" if ipaddress.ip_address(remote.ip).is_loopback else "external"
     except ValueError:
         return "external"  # unknown address format: assume the worst
@@ -39,6 +41,7 @@ def _our_processes() -> list[tuple[str, psutil.Process]]:
     me = psutil.Process()
     procs = [("engine", me)]
     parent = me.parent()
+    # pid 1 is the OS itself (we were orphaned), not our app.
     if parent is not None and parent.pid > 1:
         procs.append(("app", parent))  # the desktop app (or the dev script during development)
     for p in psutil.process_iter(["name"]):
@@ -84,7 +87,13 @@ def _app_dirs() -> list[Path]:
 def storage() -> dict:
     locations, total = [], 0
     for path in _app_dirs():
-        files = [path] if path.is_file() else sorted(f for f in path.rglob("*") if f.is_file()) if path.is_dir() else []
+        # Each location is a folder, a single file (e.g. a .plist), or absent.
+        if path.is_dir():
+            files = sorted(f for f in path.rglob("*") if f.is_file())
+        elif path.is_file():
+            files = [path]
+        else:
+            files = []
         total += len(files)
         locations.append({
             "path": str(path),

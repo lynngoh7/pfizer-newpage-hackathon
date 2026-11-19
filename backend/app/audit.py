@@ -42,9 +42,10 @@ class Entry:
     outcome: str
 
 
+# FastAPI runs plain `def` routes in a thread pool, so guard shared state.
 _lock = threading.Lock()
 _entries: deque[Entry] = deque(maxlen=MAX_ENTRIES)
-_seq = 0
+_seq = 0  # increases forever; the UI asks for "entries after seq N"
 
 
 def record(action: str, path: str | None = None, query: str | None = None, outcome: str = "ok") -> None:

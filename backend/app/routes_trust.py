@@ -17,6 +17,7 @@ router = APIRouter(prefix="/api")
 
 @router.get("/audit")
 def get_audit(after: int = 0) -> list[dict]:
+    # The Privacy page passes the last seq it has, so each poll is tiny.
     return audit.entries(after)
 
 
@@ -32,4 +33,5 @@ def get_storage() -> dict:
 
 @router.delete("/session")
 def delete_session() -> dict:
+    # Re-check the disk straight away so the UI can show proof, not a promise.
     return {"cleared": session.forget(), "storage": trust.storage()}
