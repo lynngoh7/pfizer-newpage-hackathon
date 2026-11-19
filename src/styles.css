@@ -93,7 +93,10 @@ body {
 .status {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 10px; font-size: 12px; color: var(--muted);
+  border: 0; border-radius: 8px; background: transparent; font-family: inherit;
+  text-align: left; cursor: pointer;
 }
+.status:hover { background: var(--hover); color: var(--fg); }
 .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
 .status-online .dot { background: var(--ok); }
 .status-offline .dot { background: var(--danger); }

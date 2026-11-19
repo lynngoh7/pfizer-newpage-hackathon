@@ -1,7 +1,8 @@
 /**
- * Privacy page (Trust panel, build step 5): answers "how would you know?".
- * Shows, live: the app's network connections, what it has stored on disk,
- * every file it read this session, and a "forget everything" button.
+ * Privacy page (Trust panel, build step 5): the whole "your knowledge stays
+ * yours" story on one page, in order: which folders the app can see, proof
+ * that nothing left (network) or stayed (disk), what it read (activity log),
+ * and "forget everything".
  *
  * Polls only while open: activity every 2 s (new entries only, by seq),
  * network every 3 s, disk every 10 s. Nothing here is cached or saved.
@@ -95,6 +96,16 @@ export default function Privacy() {
         <dt>Files read</dt>
         <dd>{filesRead ? `${filesRead} this session` : "None yet"}</dd>
       </dl>
+
+      {/* Step 2b fills this in: folder list with add/remove (Tauri dialog plugin).
+          Grants are session-only, so this list starts empty on every launch. */}
+      <section className="card">
+        <h3>Folders the app can see</h3>
+        <p className="muted">
+          None yet. The app can only read folders you choose here, only for this session, and you
+          can remove one at any time. Removing a folder makes the app forget it straight away.
+        </p>
+      </section>
 
       <section className="card">
         <h3>Internet</h3>

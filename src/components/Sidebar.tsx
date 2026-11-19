@@ -1,6 +1,7 @@
 /**
  * Fixed left sidebar: brand, navigation, engine status, Settings.
  * Polls /api/health every 5 s so the user can see the local engine is alive.
+ * Clicking the status opens Privacy: the proof is one click from anywhere.
  * `View` is the single source of truth for screen ids.
  */
 import { useEffect, useState } from "react";
@@ -64,12 +65,16 @@ export default function Sidebar({ view, onNavigate }: Props) {
       </nav>
 
       <div className="sidebar-bottom">
-        <div className={`status status-${backend}`} title="Local backend (127.0.0.1)">
+        <button
+          className={`status status-${backend}`}
+          title="See what the app can see, and check nothing left this computer"
+          onClick={() => onNavigate("privacy")}
+        >
           <span className="dot" aria-hidden="true" />
           {backend === "checking" && "Connecting…"}
           {backend === "online" && "Local engine ready"}
           {backend === "offline" && "Engine offline"}
-        </div>
+        </button>
         <button
           className={`nav-item ${view === "settings" ? "active" : ""}`}
           onClick={() => onNavigate("settings")}

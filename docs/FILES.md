@@ -32,13 +32,13 @@ Add a row whenever you create a file.
 | `styles.css` | all styling; CSS variables, light/dark via `prefers-color-scheme`; system fonts only | per feature |
 | `lib/trust.ts` | client + types for the Trust panel routes (audit, network, storage, forget) | step 5 |
 | `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); `apiFetch` adds bearer header | add a typed function per new route |
-| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s) | — |
+| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); clicking the status opens Privacy | — |
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
-| `pages/Privacy.tsx` | Trust panel: summary tiles, network connections, stored on disk, live activity log, forget everything | step 5 |
+| `pages/Privacy.tsx` | Trust panel: folders the app can see (placeholder), summary, network, saved to disk, activity log, forget everything | step 2b: folder list + picker |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
-| `pages/Settings.tsx` | folder access (stub), engine info, forget everything, link to Privacy | step 2: folder list + picker |
+| `pages/Settings.tsx` | engine info, forget everything, link to Privacy | — |
 
 ## Tauri `src-tauri/`
 | File | Purpose | Next edit |
