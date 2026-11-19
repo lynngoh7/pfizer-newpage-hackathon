@@ -28,19 +28,22 @@ Add a row whenever you create a file.
 | File | Purpose | Next edit |
 |---|---|---|
 | `main.tsx` | React entry | — |
-| `App.tsx` | view switch (home/search/decisions/conflicts/activity/settings); owns the current query | step 3: render `SearchResults`; step 4: answer view |
+| `App.tsx` | view switch (home/search/decisions/conflicts/privacy/settings); owns the current query; Privacy is lazy-loaded | step 3: render `SearchResults`; step 4: answer view |
 | `styles.css` | all styling; CSS variables, light/dark via `prefers-color-scheme`; system fonts only | per feature |
+| `lib/trust.ts` | client + types for the Trust panel routes (audit, network, storage, forget) | step 5 |
 | `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); `apiFetch` adds bearer header | add a typed function per new route |
 | `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s) | — |
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
+| `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
+| `pages/Privacy.tsx` | Trust panel: summary tiles, network connections, stored on disk, live activity log, forget everything | step 5 |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
-| `pages/Settings.tsx` | folder access (stub), engine info, forget-everything (disabled) | step 2: folder list + picker; step 5: forget everything |
+| `pages/Settings.tsx` | folder access (stub), engine info, forget everything, link to Privacy | step 2: folder list + picker |
 
 ## Tauri `src-tauri/`
 | File | Purpose | Next edit |
 |---|---|---|
-| `tauri.conf.json` | window, strict CSP (`connect-src` = IPC + `127.0.0.1:*`), bundle config | step 2: none; CSP must not loosen |
+| `tauri.conf.json` | window (`incognito`: the webview keeps nothing on disk), strict CSP (`connect-src` = IPC + `127.0.0.1:*`), bundle config | step 2: none; CSP must not loosen |
 | `capabilities/default.json` | webview permissions: `core:default` only | step 2: add `dialog:allow-open` for folder picker |
 | `Cargo.toml` | Rust deps: tauri, serde, rand | step 2: `tauri-plugin-dialog` |
 | `src/main.rs` | binary entry → `lib::run()` | — |
@@ -51,16 +54,21 @@ Add a row whenever you create a file.
 ## Backend `backend/`
 | File | Purpose | Next edit |
 |---|---|---|
-| `pyproject.toml` | deps (fastapi, uvicorn), dev extras (pytest, httpx), package extra (pyinstaller) | step 2: pymupdf, markitdown; step 7: sqlite-vec |
+| `pyproject.toml` | deps (fastapi, uvicorn, psutil), dev extras (pytest, httpx), package extra (pyinstaller) | step 2: pymupdf, markitdown; step 7: sqlite-vec |
 | `notes-backend.spec` | PyInstaller spec | step 7: hidden imports for sqlite-vec |
 | `app/__init__.py` | version | — |
 | `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (no data dir: nothing is stored on disk) |
-| `app/auth.py` | bearer-token middleware, constant-time compare, every request | — |
+| `app/auth.py` | bearer-token middleware, constant-time compare, every request; marks every response `no-store` | — |
 | `app/api.py` | routes under `/api`; `GET /api/health` | every step adds routes here (or split into routers) |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
+| `app/audit.py` | in-memory activity log: fixed action list, path, query, short outcome. Never note text | step 2: ingest/permissions call `record` |
+| `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
+| `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders | — |
+| `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/storage`, `DELETE /api/session` | — |
 | `app/citations.py` | citation checker: verifies each cited quote is in its chunk, drops unbacked claims, returns NO_SUPPORT if none survive. Pure, no I/O | step 4: called by `qa.py` |
 | `tests/test_citations.py` | quote matching, rejections, claim filtering, one real sample note | — |
+| `tests/test_trust.py` | audit rules, forget, connection kinds, storage report, routes need token | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
 
 ### Planned backend modules (not yet created)
-`permissions.py` (allow/denylist, single path-check function) · `ingest.py` · `db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py` · `audit.py` (in memory, paths and actions only)
+`permissions.py` (allow/denylist, single path-check function) · `ingest.py` · `db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py`

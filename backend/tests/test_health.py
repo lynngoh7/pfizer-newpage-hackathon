@@ -22,6 +22,7 @@ def test_health_ok_with_token():
     assert body["status"] == "ok"
     assert body["read_only"] is True
     assert body["network"] == "localhost-only"
+    assert r.headers["cache-control"] == "no-store"
 
 
 def test_browser_dev_origin_only_allowed_in_dev_mode():

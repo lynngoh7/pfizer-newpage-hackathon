@@ -1,4 +1,5 @@
-"""Session-token check applied to every request."""
+"""Session-token check applied to every request. Also marks every response
+no-store so the webview never caches note text on disk."""
 from __future__ import annotations
 
 import hmac
@@ -23,4 +24,8 @@ class SessionTokenMiddleware(BaseHTTPMiddleware):
             presented.encode(), self._expected
         ):
             return JSONResponse({"detail": "invalid or missing session token"}, status_code=401)
-        return await call_next(request)
+        response = await call_next(request)
+        # No copies (brief §6): responses can carry note passages, so the
+        # webview must never write them to its disk cache.
+        response.headers["Cache-Control"] = "no-store"
+        return response

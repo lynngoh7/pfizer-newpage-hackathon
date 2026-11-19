@@ -21,12 +21,13 @@ Build one demo moment end to end: the manager asks about a decision made weeks a
 - ⬜ Real app icon (`npm run tauri icon <1024px.png>`)
 
 ## Step 2 — Folder access + reading notes ⬜
-New files: `backend/app/permissions.py`, `ingest.py`, `db.py`, `audit.py`. Edit: `api.py`, `src/pages/Settings.tsx`.
+New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `src/pages/Settings.tsx`.
 - ⬜ One function `resolve_and_check(path)` that every file read goes through (follows symlinks, blocks `.ssh`, `.env`, keychains)
 - ⬜ Folder picker in Settings. Grants last for the session only, not saved to disk
 - ⬜ Read PDF (PyMuPDF) and DOCX / TXT / MD (markitdown), split into chunks with path, page or heading, and character offsets
 - ⬜ In-memory SQLite (`:memory:`) holding path, mtime, hash and offsets. **No note text on disk, ever**
-- ⬜ Audit log (in memory): every file read gets a line with time, action, path, query. No note content
+- ✅ Audit log `audit.py` (in memory). **Ingest/permissions must call** `audit.record("read" | "skipped" | "blocked" | "folder_added" | "folder_removed", path=..., outcome="short reason")`. Never pass note text
+- ⬜ **Every module holding session data must register** `session.on_forget("index", fn)` (fn clears it, returns a count). Otherwise "forget everything" misses it
 - ✅ `sample_notes/`: fictional notes for the demo moment plus edge cases. Guide and expected answers in `docs/SAMPLE_NOTES.md`. Run `scripts/make_sample_notes.py` after cloning
 
 ## Step 3 — Keyword search ⬜
@@ -38,12 +39,16 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`, `audit.py`. Edit:
 - ✅ Citation checker `citations.py`: every quote must appear in the chunk it cites (exact after folding case, spacing, smart quotes, accents, Markdown, `...` gaps; no fuzzy matching). Unbacked claims are dropped; none left → "No supporting notes found." qa.py calls `check_answer` with the chunks it put in the prompt
 - ⬜ Keep the model warm during the session, unload on quit and "forget everything"
 
-## Step 5 — Trust panel ⬜
-Covers 20 of the 50 judging points. Do not leave it to the end.
-- ⬜ Activity log page (from the step 2 audit log)
-- ⬜ "Stored on disk right now" view: should list nothing
-- ⬜ Network view: the only open sockets are localhost. Rehearse the "turn Wi-Fi off" demo
-- ⬜ "Forget everything" button: drops the index, log and folder grants, with visible confirmation
+## Step 5 — Trust panel 🔧
+Covers 20 of the 50 judging points. Sidebar → **Privacy**.
+- ✅ Activity log: live, newest first, paths and actions only (`GET /api/audit?after=N`)
+- ✅ Stored on disk: checks the app's data, cache, log and WebKit folders (`GET /api/trust/storage`)
+- ✅ Network: every socket of the engine, the app and Ollama, marked local or outside (`GET /api/trust/network`, uses psutil). Includes "check it yourself" steps (Wi-Fi off, `lsof`)
+- ✅ Forget everything: confirm step, then shows what was cleared and re-checks the disk (`DELETE /api/session`). Same button in Settings
+- ✅ Webview runs `incognito` and every API response is `Cache-Control: no-store`. Before this, WebKit kept an HTTP cache in `~/Library/Caches/local-notes-assistant`, which would have kept copies of note passages
+- ⬜ Test in the real app (`npm run tauri dev`): confirm "Stored on disk: Nothing" after a session with incognito on. Delete old dev leftovers first: `rm -rf ~/Library/Caches/local-notes-assistant ~/Library/WebKit/local-notes-assistant`
+- ⬜ Unload the Ollama model on forget (register in `session.py` once the Ollama client exists, step 4)
+- ⬜ Rehearse the "turn Wi-Fi off" demo
 
 ## Step 6 — Decisions, to-dos, conflicts ⬜
 - ⬜ Pull decisions and to-dos out of notes

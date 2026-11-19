@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { health } from "../lib/api";
 
-export type View = "home" | "search" | "decisions" | "conflicts" | "activity" | "settings";
+export type View = "home" | "search" | "decisions" | "conflicts" | "privacy" | "settings";
 
 interface Props {
   view: View;
@@ -17,7 +17,7 @@ const NAV: { id: View; label: string }[] = [
   { id: "search", label: "Search" },
   { id: "decisions", label: "Decisions & To-dos" },
   { id: "conflicts", label: "Conflicts" },
-  { id: "activity", label: "Activity Log" },
+  { id: "privacy", label: "Privacy" },
 ];
 
 type Backend = "checking" | "online" | "offline";

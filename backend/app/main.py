@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api import router
+from .routes_trust import router as trust_router
 from .auth import SessionTokenMiddleware
 from .config import HOST, Settings, load_settings
 
@@ -35,6 +36,7 @@ def create_app(settings: Settings) -> FastAPI:
         allow_headers=["Authorization", "Content-Type"],
     )
     app.include_router(router)
+    app.include_router(trust_router)
     return app
 
 

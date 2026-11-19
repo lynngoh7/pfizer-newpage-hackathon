@@ -1,12 +1,13 @@
 /**
  * Settings: folder access, engine info, clear data.
  * Step 2 replaces the folder stub with a list + picker (Tauri dialog plugin).
- * Step 5 wires "Forget everything" to DELETE /api/session (Trust panel).
+ * "Forget everything" is the same component as on the Privacy page.
  */
 import { useEffect, useState } from "react";
 import { health, Health } from "../lib/api";
+import ForgetButton from "../components/ForgetButton";
 
-export default function Settings() {
+export default function Settings({ onOpenPrivacy }: { onOpenPrivacy: () => void }) {
   const [info, setInfo] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,12 +47,10 @@ export default function Settings() {
       <section className="card">
         <h3>Data</h3>
         <p className="muted">
-          The app keeps your notes in memory for this session only and writes nothing to disk.
-          “Forget everything” (clears the session) arrives with the Trust panel in build step 5.
+          The app keeps your notes in memory for this session only and writes nothing to disk.{" "}
+          <button className="link" onClick={onOpenPrivacy}>See for yourself on the Privacy page.</button>
         </p>
-        <button className="btn danger" disabled>
-          Forget everything
-        </button>
+        <ForgetButton />
       </section>
     </div>
   );
