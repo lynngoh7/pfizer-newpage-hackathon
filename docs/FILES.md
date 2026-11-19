@@ -19,6 +19,9 @@ Add a row whenever you create a file.
 | `scripts/dev-backend.sh` | run sidecar alone (creates venv on first run) | — |
 | `scripts/privacy-guard.sh` | fails if `src/` or `backend/app/` contain a URL other than localhost; run by CI | — |
 | `.github/workflows/ci.yml` | CI: backend tests, frontend build, privacy guard on PRs and pushes to main | — |
+| `scripts/make_sample_notes.py` | generates the .docx/.pdf/.png samples, symlinks and file dates in `sample_notes/` (dev only: needs pymupdf, python-docx) | when sample notes change |
+| `docs/SAMPLE_NOTES.md` | sample notes guide: demo story, test questions, edge cases | when sample notes change |
+| `sample_notes/` | fictional manager notes + `edge_cases/`. Never real notes | add files as needed |
 | `scripts/build-sidecar.sh` | PyInstaller build → `src-tauri/binaries/notes-backend` | step 7 (bundle sqlite-vec) |
 
 ## Frontend `src/`

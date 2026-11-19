@@ -22,4 +22,6 @@ backend/*.egg-info/
 
 .DS_Store
 .env
+# fake .env used to test the denylist
+!sample_notes/edge_cases/.env
 tsconfig.tsbuildinfo

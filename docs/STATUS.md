@@ -27,7 +27,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`, `audit.py`. Edit:
 - ⬜ Read PDF (PyMuPDF) and DOCX / TXT / MD (markitdown), split into chunks with path, page or heading, and character offsets
 - ⬜ In-memory SQLite (`:memory:`) holding path, mtime, hash and offsets. **No note text on disk, ever**
 - ⬜ Audit log (in memory): every file read gets a line with time, action, path, query. No note content
-- ⬜ `sample_notes/`: fictional manager notes built around the demo moment (a decision, its context, a newer note that changes it, a half-written update, a to-do list)
+- ✅ `sample_notes/`: fictional notes for the demo moment plus edge cases. Guide and expected answers in `docs/SAMPLE_NOTES.md`. Run `scripts/make_sample_notes.py` after cloning
 
 ## Step 3 — Keyword search ⬜
 - ⬜ FTS5 table in the same in-memory database, `search.py`
@@ -64,7 +64,6 @@ Say which one in the team chat, then update this file.
 2. **Step 2a, folder permissions (backend).** Write `permissions.py` and the `GET/POST/DELETE /api/folders` routes. Tests first: symlink escape, blocked folder, revoke
 3. **Step 2b, folder picker (UI).** Add `tauri-plugin-dialog`, allow `dialog:allow-open` in `capabilities/default.json`, folder list with add and remove in Settings
 4. **Step 2c, reading notes.** Write `ingest.py` and `db.py` (in memory). Time it on about 200 files and note the result here
-5. **Sample notes.** Write `sample_notes/` for the demo moment (see step 2)
 
 Rules: run the backend tests and `npm run build` before every commit. Add a row to `docs/FILES.md` for every new file. Every file read goes through `resolve_and_check`.
 
