@@ -14,6 +14,7 @@ Add a row whenever you create a file.
 | `docs/BRIEF.md` | product brief, feature checklist, stack, safety rules | when a decision changes |
 | `docs/STATUS.md` | progress per build step + where to start | every change |
 | `docs/FILES.md` | this file | every new file |
+| `.github/pull_request_template.md` | checklist shown when opening a PR (tests, docs, privacy rules) | when team rules change |
 | `scripts/dev.sh` | browser-only dev: shared token for backend + Vite, sets `NOTES_DEV=1` | — |
 | `scripts/dev-backend.sh` | run sidecar alone (creates venv on first run) | — |
 | `scripts/privacy-guard.sh` | fails if `src/` or `backend/app/` contain a URL other than localhost; run by CI | — |
