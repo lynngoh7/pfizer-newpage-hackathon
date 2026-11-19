@@ -1,14 +1,9 @@
-## What and why
+## Description
+<!-- what this changes and why (1-3 lines). -->
 
-<!-- 1 to 3 lines: what this changes and why. -->
-
-## How to test
-
-1.
-2.
 
 ## Checklist
-
+<!-- tick what you've done. -->
 - [ ] Title uses conventional commit style (feat / fix / docs / chore / ci …)
 - [ ] Backend tests pass (`cd backend && .venv/bin/pytest`)
 - [ ] Frontend builds (`npm run build`)
