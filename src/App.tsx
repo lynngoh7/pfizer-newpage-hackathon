@@ -65,7 +65,8 @@ export default function App() {
       <Sidebar view={view} onNavigate={setView} />
       <div className="main">
         <SearchBar onSubmit={onSearch} />
-        <section className="content">{main}</section>
+        {/* <main> landmark: VoiceOver users can jump straight to the page content. */}
+        <main className="content">{main}</main>
       </div>
     </div>
   );

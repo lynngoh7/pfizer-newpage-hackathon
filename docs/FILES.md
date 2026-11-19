@@ -29,16 +29,16 @@ Add a row whenever you create a file.
 |---|---|---|
 | `main.tsx` | React entry | — |
 | `App.tsx` | view switch (home/search/decisions/conflicts/privacy/settings); owns the current query; Privacy is lazy-loaded | step 3: render `SearchResults`; step 4: answer view |
-| `styles.css` | all styling; CSS variables, light/dark via `prefers-color-scheme`; system fonts only | per feature |
+| `styles.css` | all styling; CSS variables; follows macOS light/dark, increase contrast, reduce motion; focus rings; system fonts only | per feature |
 | `lib/trust.ts` | client + types for the Trust panel routes (audit, network, storage, forget) | step 5 |
 | `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); `apiFetch` adds bearer header | add a typed function per new route |
-| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); clicking the status opens Privacy | — |
+| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes | — |
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
 | `pages/Privacy.tsx` | Trust panel: folders the app can see (placeholder), summary, network, saved to disk, activity log, forget everything | step 2b: folder list + picker |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
-| `pages/Settings.tsx` | engine info, forget everything, link to Privacy | — |
+| `pages/Settings.tsx` | engine, AI model picker (one fixed model for now), indexing, accessibility note, built-in safety facts, forget everything (always last). Nothing saved | step 2c: indexing card; step 4: real model list from Ollama |
 
 ## Tauri `src-tauri/`
 | File | Purpose | Next edit |

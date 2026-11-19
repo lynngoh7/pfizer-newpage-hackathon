@@ -1,15 +1,46 @@
 /**
- * Settings: engine info and clear data. Folder access lives on the Privacy
- * page, so everything about what the app sees and keeps is in one place.
- * "Forget everything" is the same component as on the Privacy page.
+ * Settings: what the app runs on and how it keeps notes safe, in plain words.
+ *
+ * Nothing on this page is saved: saving a preference would write to disk and
+ * break "Stored on disk: Nothing" on the Privacy page (One Rule, CLAUDE.md §1a).
+ * Accessibility comes from the Mac's own settings for the same reason.
+ *
+ * Fills in: step 2c (Indexing card: files read, chunks, skipped, re-index),
+ * step 4 (AI model card: real model list and warm/unloaded state from Ollama).
  */
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { health, Health } from "../lib/api";
 import ForgetButton from "../components/ForgetButton";
+
+// Fixed until step 4 lists installed models. The picker stays so the layout is final.
+// Placeholder name: confirm the demo model in step 4.
+const ANSWER_MODELS = ["llama3.2:3b"];
+const SEARCH_MODEL = "nomic-embed-text";
+
+// Short labels so they fit the .props label column.
+const SAFETY: { fact: string; why: string }[] = [
+  {
+    fact: "Read-only",
+    why: "The app can open your notes but has no way to change, move or delete them.",
+  },
+  {
+    fact: "Ignores note instructions",
+    why: "Text in a file is treated as information, never as a command. Only you tell the app what to do.",
+  },
+  {
+    fact: "Checks every quote",
+    why: "Each quote in an answer must really appear in the note it cites. Anything it can't back up is removed, and if nothing is left it says “No supporting notes found.”",
+  },
+  {
+    fact: "Never opens links",
+    why: "Web addresses in your notes are read as plain text. The app never visits them.",
+  },
+];
 
 export default function Settings({ onOpenPrivacy }: { onOpenPrivacy: () => void }) {
   const [info, setInfo] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [model, setModel] = useState(ANSWER_MODELS[0]); // session only, never saved
 
   useEffect(() => {
     health().then(setInfo).catch((e) => setError(String(e)));
@@ -18,30 +49,93 @@ export default function Settings({ onOpenPrivacy }: { onOpenPrivacy: () => void 
   return (
     <div className="page">
       <h2>Settings</h2>
+      <p className="muted lead">Nothing here is saved. The app starts fresh every time you open it.</p>
 
-      <section className="card">
-        <h3>Local engine</h3>
+      <section className="card" aria-labelledby="s-engine">
+        <h3 id="s-engine">Engine</h3>
         {error && <p className="error">Could not reach the local engine: {error}</p>}
+        <dl className="props">
+          <dt>Status</dt>
+          <dd className={error ? "error" : ""}>{error ? "Not running" : info ? "Running on this computer" : "Checking…"}</dd>
+          <dt>Mode</dt>
+          <dd>{info ? (info.read_only ? "Read-only" : "Can change files") : "…"}</dd>
+          <dt>Internet</dt>
+          <dd>{info ? (info.network === "localhost-only" ? "Not used" : info.network) : "…"}</dd>
+        </dl>
         {info && (
-          <dl className="kv">
-            <dt>Status</dt>
-            <dd>{info.status}</dd>
-            <dt>Version</dt>
-            <dd>{info.version}</dd>
-            <dt>Mode</dt>
-            <dd>{info.read_only ? "Read-only" : "Read/write"}</dd>
-            <dt>Network</dt>
-            <dd>{info.network}</dd>
-          </dl>
+          <details className="more">
+            <summary>Technical details</summary>
+            <dl className="props">
+              <dt>Version</dt>
+              <dd>{info.version}</dd>
+              <dt>Network</dt>
+              <dd><code>{info.network}</code></dd>
+            </dl>
+          </details>
         )}
       </section>
 
-      <section className="card">
-        <h3>Data</h3>
+      <section className="card" aria-labelledby="s-model">
+        <h3 id="s-model">AI model</h3>
+        {/* Enabled, not `disabled`: VoiceOver skips disabled fields and their text is too faint. */}
+        <div className="field">
+          <label htmlFor="answer-model">Answers</label>
+          <span className="select">
+            <select
+              id="answer-model"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              aria-describedby="answer-model-help"
+            >
+              {ANSWER_MODELS.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </span>
+        </div>
+        <p id="answer-model-help" className="muted">
+          Runs on this computer through Ollama. More models will be available later.
+        </p>
+        <dl className="props">
+          <dt>Search by meaning</dt>
+          <dd>{SEARCH_MODEL}</dd>
+        </dl>
+      </section>
+
+      <section className="card" aria-labelledby="s-index">
+        <h3 id="s-index">Indexing</h3>
         <p className="muted">
-          The app keeps your notes in memory for this session only and writes nothing to disk.{" "}
-          Choose which folders it can see, and check for yourself, on the{" "}
+          No folders yet. Choose them on the{" "}
           <button className="link" onClick={onOpenPrivacy}>Privacy page</button>.
+        </p>
+      </section>
+
+      <section className="card" aria-labelledby="s-a11y">
+        <h3 id="s-a11y">Accessibility</h3>
+        <p className="muted">
+          The app follows your Mac's appearance, reduce motion and increase contrast settings. Press
+          ⌘+ or ⌘− to change text size for this session.
+        </p>
+      </section>
+
+      {/* Facts, not settings: these rules are built in and can't be switched off. */}
+      <section className="card" aria-labelledby="s-safety">
+        <h3 id="s-safety">How your notes are kept safe</h3>
+        <p className="muted">Built in, and can't be turned off.</p>
+        <dl className="props">
+          {SAFETY.map((s) => (
+            <Fragment key={s.fact}>
+              <dt>{s.fact}</dt>
+              <dd>{s.why}</dd>
+            </Fragment>
+          ))}
+        </dl>
+      </section>
+
+      {/* Always last on the page, as on Privacy. */}
+      <section className="card" aria-labelledby="s-forget">
+        <h3 id="s-forget">Forget everything</h3>
+        <p className="muted">
+          Ends this session's memory now. To see what the app can see and check that nothing left
+          or stayed, open the <button className="link" onClick={onOpenPrivacy}>Privacy page</button>.
         </p>
         <ForgetButton />
       </section>

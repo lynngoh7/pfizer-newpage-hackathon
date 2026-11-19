@@ -1,7 +1,7 @@
 /**
  * Fixed left sidebar: brand, navigation, engine status, Settings.
  * Polls /api/health every 5 s so the user can see the local engine is alive.
- * Clicking the status opens Privacy: the proof is one click from anywhere.
+ * The status is a plain label: dot colour and text change, nothing to click.
  * `View` is the single source of truth for screen ids.
  */
 import { useEffect, useState } from "react";
@@ -52,11 +52,12 @@ export default function Sidebar({ view, onNavigate }: Props) {
         <span className="brand-name">Local Notes</span>
       </button>
 
-      <nav className="nav">
+      <nav className="nav" aria-label="Main">
         {NAV.map((n) => (
           <button
             key={n.id}
             className={`nav-item ${view === n.id ? "active" : ""}`}
+            aria-current={view === n.id ? "page" : undefined}
             onClick={() => onNavigate(n.id)}
           >
             {n.label}
@@ -65,18 +66,16 @@ export default function Sidebar({ view, onNavigate }: Props) {
       </nav>
 
       <div className="sidebar-bottom">
-        <button
-          className={`status status-${backend}`}
-          title="See what the app can see, and check nothing left this computer"
-          onClick={() => onNavigate("privacy")}
-        >
+        {/* A label, not a button. Announced only when it changes (e.g. engine goes offline); the colour dot alone isn't enough. */}
+        <div className={`status status-${backend}`} aria-live="polite">
           <span className="dot" aria-hidden="true" />
           {backend === "checking" && "Connecting…"}
           {backend === "online" && "Local engine ready"}
           {backend === "offline" && "Engine offline"}
-        </button>
+        </div>
         <button
           className={`nav-item ${view === "settings" ? "active" : ""}`}
+          aria-current={view === "settings" ? "page" : undefined}
           onClick={() => onNavigate("settings")}
         >
           Settings
