@@ -16,6 +16,8 @@ Add a row whenever you create a file.
 | `docs/FILES.md` | this file | every new file |
 | `scripts/dev.sh` | browser-only dev: shared token for backend + Vite, sets `NOTES_DEV=1` | — |
 | `scripts/dev-backend.sh` | run sidecar alone (creates venv on first run) | — |
+| `scripts/privacy-guard.sh` | fails if `src/` or `backend/app/` contain a URL other than localhost; run by CI | — |
+| `.github/workflows/ci.yml` | CI: backend tests, frontend build, privacy guard on PRs and pushes to main | — |
 | `scripts/build-sidecar.sh` | PyInstaller build → `src-tauri/binaries/notes-backend` | step 7 (bundle sqlite-vec) |
 
 ## Frontend `src/`

@@ -8,6 +8,9 @@ What is done, what is next. Update this file in the same change as your code.
 
 Build one demo moment end to end: the manager asks about a decision made weeks ago, and the app finds it, shows the newer note that changed it, and cites both. Everything stays in memory for the session. Nothing is written to disk. A Trust panel lets the user see that for themselves.
 
+## CI ✅
+- ✅ GitHub Actions on every PR and push to main: backend `pytest` (Python 3.10), `npm ci && npm run build` (Node 22), privacy guard (`sh scripts/privacy-guard.sh`: no URLs except localhost in `src/` or `backend/app/`)
+
 ## Step 1 — App shell + backend ✅
 - ✅ Desktop window (Tauri): strict CSP, no network plugins
 - ✅ Launcher: new session token on every launch, starts and stops the backend
