@@ -20,6 +20,7 @@ Add a row whenever you create a file.
 | `scripts/privacy-guard.sh` | fails if `src/` or `backend/app/` contain a URL other than localhost; run by CI | — |
 | `.github/workflows/ci.yml` | CI: backend tests, frontend build, privacy guard on PRs and pushes to main | — |
 | `scripts/make_sample_notes.py` | generates the .docx/.pdf/.png samples, symlinks and file dates in `sample_notes/` (dev only: needs pymupdf, python-docx) | when sample notes change |
+| `docs/THIRD_PARTY.md` | licence notices for code copied in (Lucide icons) | when copying in third-party code |
 | `docs/SAMPLE_NOTES.md` | sample notes guide: demo story, test questions, edge cases | when sample notes change |
 | `sample_notes/` | fictional manager notes + `edge_cases/`. Never real notes | add files as needed |
 | `scripts/build-sidecar.sh` | PyInstaller build → `src-tauri/binaries/notes-backend` | step 7 (bundle sqlite-vec) |
@@ -32,7 +33,7 @@ Add a row whenever you create a file.
 | `styles.css` | all styling; CSS variables; follows macOS light/dark, increase contrast, reduce motion; focus rings; system fonts only | per feature |
 | `lib/trust.ts` | client + types for the Trust panel routes (audit, network, storage, forget) | step 5 |
 | `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); `apiFetch` adds bearer header | add a typed function per new route |
-| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes | — |
+| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes; inline Lucide nav icons (no icon package) | — |
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
 | `pages/Privacy.tsx` | Trust panel: folders the app can see (placeholder), summary, network, saved to disk, activity log, forget everything | step 2b: folder list + picker |
