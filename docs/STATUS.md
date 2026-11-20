@@ -28,7 +28,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ Folder list and settings saved to `prefs.json` (`prefs.py`, paths and allowlisted settings only); restored on launch, deleted by "Forget everything". `GET/PUT /api/settings`, `GET /api/trust/saved`
 - ✅ Folder/file picker (`components/FolderAccess.tsx`) on the **Privacy page**, first section. The list is saved, so it is back on the next launch
 - ✅ Folder add/remove/blocked are logged (`permissions.grant_path`/`revoke_path`; launch restore logs "restored" or "missing or blocked on launch")
-- ⬜ Drop the folder's chunks from memory on revoke (needs the index)
+- 🟡 Revoke drops chunks: hook ready (`permissions.on_revoke("index", fn)`, fn(path) -> count). **db.py must register it**; tests in `tests/test_privacy_edges.py`
 - ⬜ Read PDF (PyMuPDF) and DOCX / TXT / MD (markitdown), split into chunks with path, page or heading, and character offsets
 - ⬜ In-memory SQLite (`:memory:`) holding path, mtime, hash and offsets. **No note text on disk, ever**
 - ✅ Audit log `audit.py` (in memory). **Ingest/permissions must call** `audit.record("read" | "skipped" | "blocked" | "folder_added" | "folder_removed", path=..., outcome="short reason")`. Never pass note text
