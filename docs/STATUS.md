@@ -75,12 +75,44 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - Frontend bundle after step 1: about 148 kB JS (48 kB gzipped)
 - After Settings + sidebar icons: about 154 kB JS (50 kB gzipped)
 
-## Pick a task
+## Who does what (Fri 20 – Sun 22 Nov)
 
-Say which one in the team chat, then update this file.
+Tick a box here in the same PR as the code. Sunday evening is for recording the video.
 
-1. **App icon.** Make a 1024px PNG and run `npm run tauri icon <file.png>`
-2. **Step 2c, reading notes.** Write `ingest.py` and `db.py` (in memory); every file read uses `permissions.resolve_and_check`. Time it on about 200 files and note the result here
+**E: reading notes and search** (step 2c, 3)
+- ⬜ 1a. `ingest.py`: text extraction (Sat)
+- ⬜ 1b. `db.py`: in-memory DB and chunk metadata (Sat)
+- ⬜ 1c. FTS5 keyword search, `search.py` (Sat), needs 1a, 1b
+- ⬜ 1d. Ingest and search API endpoints (Sat), needs 1c
+- ⬜ 1e. Tests: parsing, permissions, cleanup (Sun)
+
+**S: answers and decisions** (step 4, 6)
+- ⬜ 2a. Check local Ollama model and inference (Fri)
+- ⬜ 2b. `qa.py` with source-aware prompts (Sat), needs 2a; real chunks from 1c
+- ⬜ 2c. Wire in `citations.py` and "No supporting notes found." (Sat), needs 2b
+- ⬜ 2d. Compare old decisions with newer notes (Sun), needs 1c, 2c
+- ⬜ 2e. Unload the model on quit and forget; AI tests (Sun), needs 2a
+
+**L: results UI** (step 3, 4, 6)
+- ⬜ 3a. Results page with mock data (Sat)
+- ⬜ 3b. Source cards and file excerpts (Sat)
+- ⬜ 3c. Connect search and questions to the backend (Sat), needs 1d, 2c
+- ⬜ 3d. Show decision changes and error states (Sun), needs 2d
+- ⬜ 3e. Demo polish and accessibility check (Sun, P1)
+
+**C: privacy and trust** (step 2, 5)
+- ⬜ 4a. Audit events for folder add/remove (Sat)
+- ⬜ 4b. Revoking a folder drops its chunks (Sat), needs 1b
+- ⬜ 4c. Verify Forget everything clears everything (Sat), needs 1b; recheck after 2e
+- ⬜ 4d. Test storage, network and offline claims (Sun), needs 1d, 2c
+- ⬜ 4e. Edge-case tests and trust demo (Sun), needs everything above
+
+### Dependencies
+- **Critical path:** 1a/1b → 1c → 1d → 3c → 2d → 3d → demo. E's Saturday work blocks the most people, so land 1b first.
+- **Agree two shapes on Friday** so nobody waits: the chunk record from `db.py` (id, path, page/heading, start, end) and the JSON for search and answer responses. Then 2b, 3a, 3b and 4b can start against stubs.
+- `db.py` must register `session.on_forget("index", ...)` and offer "drop chunks for folder"; 4b and 4c depend on it.
+- 2e must register the model unload in `session.py`; 4c re-checks it.
+- No dependencies: 2a, 3a, 4a, so start those first.
 
 Rules: work on a branch, never push to `main`; conventional commit messages; open a PR and fill in the template; merge only when CI is green. Run the backend tests, `npm run build` and `sh scripts/privacy-guard.sh` before pushing (README §3). Add a row to `docs/FILES.md` for every new file. Every file read goes through `resolve_and_check`. Comments: one short line saying *why*, where a newcomer would get stuck; safety checks name the rule they enforce.
 
