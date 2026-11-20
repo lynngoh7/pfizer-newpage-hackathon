@@ -33,3 +33,12 @@ What `search.py` and `qa.py` return to the UI. Build against this shape with fak
 | `flag` | `"superseded"`, `"newer"`, `"conflict"`, or `null` |
 
 Keep it lean: sources are top-k only (5 at most), snippets are 300 characters at most, and nothing else goes in.
+
+# Hooks `db.py` must register
+
+Without these, "remove folder" and "Forget everything" leave chunks in memory.
+
+```python
+permissions.on_revoke("index", drop_chunks_under)  # fn(path: Path) -> int: drop chunks at or under path, return count
+session.on_forget("index", drop_everything)        # fn() -> int: empty the index, return count
+```
