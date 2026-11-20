@@ -28,6 +28,18 @@
   }
 }
 
+/* Accessibility follows macOS settings rather than in-app toggles: an in-app
+   choice would have to be saved to disk, which the One Rule forbids. */
+@media (prefers-contrast: more) {
+  :root { --muted: #3f3f44; --border: #8a8a92; --hover: rgba(0, 0, 0, 0.1); }
+}
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root { --muted: #c4c4cc; --border: #6a6a74; --hover: rgba(255, 255, 255, 0.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { transition: none !important; animation: none !important; }
+}
+
 * { box-sizing: border-box; }
 
 html, body, #root { height: 100%; margin: 0; }
@@ -93,10 +105,7 @@ body {
 .status {
   display: flex; align-items: center; gap: 8px;
   padding: 6px 10px; font-size: 12px; color: var(--muted);
-  border: 0; border-radius: 8px; background: transparent; font-family: inherit;
-  text-align: left; cursor: pointer;
 }
-.status:hover { background: var(--hover); color: var(--fg); }
 .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
 .status-online .dot { background: var(--ok); }
 .status-offline .dot { background: var(--danger); }
@@ -117,6 +126,10 @@ body {
   outline: none;
 }
 .searchbar input:focus { border-color: var(--accent); }
+
+/* Keyboard focus ring on every control; mouse clicks don't show it. */
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.searchbar input:focus-visible { outline-offset: 0; }
 
 .content { flex: 1; overflow: auto; padding: 24px; display: flex; flex-direction: column; }
 
@@ -147,10 +160,24 @@ body {
 }
 .card > * { margin: 0; }
 
-.kv { display: grid; grid-template-columns: 120px 1fr; gap: 6px 12px; margin: 0; }
-.kv dt { color: var(--muted); }
-.kv dd { margin: 0; }
-
+/* Label + control on one row, label column lines up with .props. */
+.field { display: grid; grid-template-columns: 140px 1fr; align-items: center; }
+.field label { color: var(--muted); }
+/* macOS WebKit draws its own grey/blue select unless appearance is off. The
+   wrapper draws the same chevron as the expanders (a <select> can't have ::after). */
+.select { position: relative; justify-self: start; }
+.select select {
+  -webkit-appearance: none; appearance: none;
+  min-width: 220px; padding: 6px 30px 6px 10px; font: inherit;
+  color: var(--fg); background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  cursor: pointer;
+}
+.select select:hover { border-color: var(--muted); }
+.select::after {
+  content: ""; position: absolute; right: 12px; top: 50%; width: 6px; height: 6px; margin-top: -5px;
+  border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg); pointer-events: none;
+}
 .muted { color: var(--muted); }
 .error { color: var(--danger); }
 
@@ -211,7 +238,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1
    block container; .content, .page, .card and .props cells are flex for that
    reason, so a highlight stays on the text. */
 .app { -webkit-user-select: none; user-select: none; }
-.content p, .content li, .content td, .content dd, .content code, .content input {
+.content p, .content li, .content td, .content dd, .content code, .content input, .searchbar input {
   -webkit-user-select: text; user-select: text;
 }
 ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }

@@ -51,6 +51,15 @@ Covers 20 of the 50 judging points. Sidebar → **Privacy**.
 - ⬜ Unload the Ollama model on forget (register in `session.py` once the Ollama client exists, step 4)
 - ⬜ Rehearse the "turn Wi-Fi off" demo
 
+## Settings + accessibility ✅
+Nothing in Settings is saved (that would put a file on disk). Accessibility follows the Mac's own settings for the same reason.
+- ✅ Settings page: engine, AI model picker (one fixed model until step 4), indexing placeholder (step 2c), built-in safety facts, forget everything (always last)
+- ✅ Follows macOS appearance, Increase contrast, Reduce motion. ⌘+ / ⌘− change text size (`zoomHotkeysEnabled`, needs `core:webview:allow-set-webview-zoom`)
+- ✅ Keyboard focus ring on every control; `<main>` and `<nav>` landmarks; `aria-current` on the open page; engine status announced to VoiceOver
+- ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (placeholder `llama3.2:3b`)
+- ⬜ Step 2c: indexing card (files read, passages, skipped, re-index)
+- ⬜ Check in the real app with VoiceOver (⌘F5) and with Increase contrast on
+
 ## Step 6 — Decisions, to-dos, conflicts ⬜
 - ⬜ Pull decisions and to-dos out of notes
 - ⬜ Flag notes that disagree, and newer notes that replace older ones ("superseded" badge)

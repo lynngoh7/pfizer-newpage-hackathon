@@ -161,7 +161,7 @@ Keep it **simple and straightforward, similar to Obsidian plus a web-browser sea
 - **Left sidebar (fixed):**
   - Top: product logo and name
   - Middle: navigation (e.g. Search, Decisions & To-dos, Conflicts, Activity Log). Keep minimal.
-  - Bottom: engine status (click → Privacy) and **Settings** (engine info, clear data)
+  - Bottom: engine status (label only: dot colour shows ready or not) and **Settings** (engine info, clear data)
 - **Main area:**
   - Top: one wide **search bar** (like a browser). Handles both keyword search and plain-English questions.
   - Below: results. For a question, show the answer with inline citations, and a list of source cards (file name, path, passage snippet, open-file button). Show conflict or "superseded" badges where relevant.
