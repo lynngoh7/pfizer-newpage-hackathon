@@ -44,7 +44,10 @@ def create_app(settings: Settings) -> FastAPI:
 def main() -> None:
     import uvicorn
 
+    from . import prefs
+
     settings = load_settings()
+    prefs.restore_folders()  # saved folder list from last time (paths only)
     uvicorn.run(create_app(settings), host=HOST, port=settings.port, log_level="info")
 
 

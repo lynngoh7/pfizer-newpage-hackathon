@@ -3,6 +3,7 @@ every other route. Kept apart from api.py so step 2-4 route work does not clash.
 
   GET    /api/audit?after=N   activity log entries newer than N
   GET    /api/trust/network   app processes and their sockets
+  GET    /api/trust/saved     the saved folder list and settings (prefs.json)
   GET    /api/trust/storage   what the app has on disk right now
   DELETE /api/session         forget everything
 """
@@ -10,7 +11,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from . import audit, session, trust
+from . import audit, prefs, session, trust
 
 router = APIRouter(prefix="/api")
 
@@ -24,6 +25,12 @@ def get_audit(after: int = 0) -> list[dict]:
 @router.get("/trust/network")
 def get_network() -> dict:
     return trust.network()
+
+
+@router.get("/trust/saved")
+def get_saved() -> dict:
+    # Exactly what prefs.json holds, so the user can read it on the Privacy page.
+    return {"path": str(prefs.path()), "exists": prefs.path().exists(), **prefs.load()}
 
 
 @router.get("/trust/storage")

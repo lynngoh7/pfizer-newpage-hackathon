@@ -40,7 +40,7 @@ Add a row whenever you create a file.
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
-| `pages/Settings.tsx` | engine, AI model picker (one fixed model for now), indexing, accessibility note, built-in safety facts, forget everything (always last). Nothing saved | step 2c: indexing card; step 4: real model list from Ollama |
+| `pages/Settings.tsx` | engine, AI model picker (choice saved to `prefs.json`), indexing, accessibility note, built-in safety facts, forget everything (always last) | step 2c: indexing card; step 4: real model list from Ollama |
 
 ## Tauri `src-tauri/`
 | File | Purpose | Next edit |
@@ -57,20 +57,25 @@ Add a row whenever you create a file.
 | File | Purpose | Next edit |
 |---|---|---|
 | `pyproject.toml` | deps (fastapi, uvicorn, psutil), dev extras (pytest, httpx), package extra (pyinstaller) | step 2: pymupdf, markitdown; step 7: sqlite-vec |
+| `requirements.txt` | same deps as `pyproject.toml` for `pip install -r`; keep in sync | whenever `pyproject.toml` deps change |
 | `notes-backend.spec` | PyInstaller spec | step 7: hidden imports for sqlite-vec |
 | `app/__init__.py` | version | — |
-| `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (no data dir: nothing is stored on disk) |
+| `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (the only saved file is `prefs.json`, see `prefs.py`) |
 | `app/auth.py` | bearer-token middleware, constant-time compare, every request; marks every response `no-store` | — |
-| `app/api.py` | routes under `/api`; health and session folder/file grants (`GET/POST/DELETE /api/folders`) | every step adds routes here (or split into routers) |
-| `app/permissions.py` | session-only allowlist + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
+| `app/api.py` | routes under `/api`; health, folder/file grants (`GET/POST/DELETE /api/folders`, saved via `prefs`), `GET/PUT /api/settings` | every step adds routes here (or split into routers) |
+| `app/prefs.py` | the one file saved to disk: `prefs.json` with folder paths + allowlisted settings, never note content; restores folders on launch; deleted by forget | add a key to `SAVED_SETTINGS` for each new setting |
+| `app/permissions.py` | allowlist (filled from `prefs.json` on launch) + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
 | `app/audit.py` | in-memory activity log: fixed action list, path, query, short outcome. Never note text | step 2: ingest/permissions call `record` |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
-| `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders | — |
-| `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/storage`, `DELETE /api/session` | — |
+| `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders (`prefs.json` is expected, anything else is flagged) | — |
+| `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/saved`, `/api/trust/storage`, `DELETE /api/session` | — |
 | `app/citations.py` | citation checker: verifies each cited quote is in its chunk, drops unbacked claims, returns NO_SUPPORT if none survive. Pure, no I/O | step 4: called by `qa.py` |
 | `tests/test_citations.py` | quote matching, rejections, claim filtering, one real sample note | — |
 | `tests/test_trust.py` | audit rules, forget, connection kinds, storage report, routes need token | — |
+| `tests/conftest.py` | points `prefs.json` at a temp folder for every test | — |
+| `tests/test_privacy_edges.py` | forget clears everything, revoke hook, symlink/deny/missing-folder edge cases, no note text in log or prefs | 4b/4c: add real index checks when db.py lands |
+| `tests/test_prefs.py` | saved folders/settings, paths only, allowlist, restore, forget, disk check | — |
 | `tests/test_permissions.py` | grants, protected paths, symlink escape, revoke | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
 
