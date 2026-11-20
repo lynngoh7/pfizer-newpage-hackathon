@@ -23,8 +23,10 @@ Build one demo moment end to end: the manager asks about a decision made weeks a
 
 ## Step 2 — Folder access + reading notes ⬜
 New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `src/pages/Privacy.tsx` (folder section).
-- ⬜ One function `resolve_and_check(path)` that every file read goes through (follows symlinks, blocks `.ssh`, `.env`, keychains)
-- ⬜ Folder picker on the **Privacy page** (first section, placeholder is there). Grants last for the session only, not saved to disk
+- ✅ `permissions.py` with `resolve_and_check(path)` (follows symlinks, blocks `.ssh`, `.env`, keychains). ⬜ Every file read must go through it (ingest)
+- ✅ Backend `GET/POST/DELETE /api/folders`, session-only grants
+- ✅ Folder/file picker (`components/FolderAccess.tsx`) on the **Privacy page**, first section. Grants last for the session only, not saved to disk
+- ⬜ Folder add/remove should call `audit.record("folder_added" | "folder_removed")` and drop the folder's chunks from memory on revoke
 - ⬜ Read PDF (PyMuPDF) and DOCX / TXT / MD (markitdown), split into chunks with path, page or heading, and character offsets
 - ⬜ In-memory SQLite (`:memory:`) holding path, mtime, hash and offsets. **No note text on disk, ever**
 - ✅ Audit log `audit.py` (in memory). **Ingest/permissions must call** `audit.record("read" | "skipped" | "blocked" | "folder_added" | "folder_removed", path=..., outcome="short reason")`. Never pass note text
@@ -78,9 +80,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 Say which one in the team chat, then update this file.
 
 1. **App icon.** Make a 1024px PNG and run `npm run tauri icon <file.png>`
-2. **Step 2a, folder permissions (backend).** Write `permissions.py` and the `GET/POST/DELETE /api/folders` routes. Tests first: symlink escape, blocked folder, revoke
-3. **Step 2b, folder picker (UI).** Add `tauri-plugin-dialog`, allow `dialog:allow-open` in `capabilities/default.json`, folder list with add and remove in the "Folders the app can see" section of `src/pages/Privacy.tsx` (moved from Settings so the whole privacy story is on one page)
-4. **Step 2c, reading notes.** Write `ingest.py` and `db.py` (in memory). Time it on about 200 files and note the result here
+2. **Step 2c, reading notes.** Write `ingest.py` and `db.py` (in memory); every file read uses `permissions.resolve_and_check`. Time it on about 200 files and note the result here
 
 Rules: work on a branch, never push to `main`; conventional commit messages; open a PR and fill in the template; merge only when CI is green. Run the backend tests, `npm run build` and `sh scripts/privacy-guard.sh` before pushing (README §3). Add a row to `docs/FILES.md` for every new file. Every file read goes through `resolve_and_check`. Comments: one short line saying *why*, where a newcomer would get stuck; safety checks name the rule they enforce.
 

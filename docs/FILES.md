@@ -35,8 +35,9 @@ Add a row whenever you create a file.
 | `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); `apiFetch` adds bearer header | add a typed function per new route |
 | `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes; inline Lucide nav icons (no icon package) | — |
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
+| `components/FolderAccess.tsx` | add/remove folders and files the app may read this session (Tauri dialog); first card on Privacy | step 2c: show indexing progress |
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
-| `pages/Privacy.tsx` | Trust panel: folders the app can see (placeholder), summary, network, saved to disk, activity log, forget everything | step 2b: folder list + picker |
+| `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
 | `pages/Settings.tsx` | engine, AI model picker (one fixed model for now), indexing, accessibility note, built-in safety facts, forget everything (always last). Nothing saved | step 2c: indexing card; step 4: real model list from Ollama |
@@ -45,10 +46,10 @@ Add a row whenever you create a file.
 | File | Purpose | Next edit |
 |---|---|---|
 | `tauri.conf.json` | window (`incognito`: the webview keeps nothing on disk), strict CSP (`connect-src` = IPC + `127.0.0.1:*`), bundle config | step 2: none; CSP must not loosen |
-| `capabilities/default.json` | webview permissions: `core:default` only | step 2: add `dialog:allow-open` for folder picker |
-| `Cargo.toml` | Rust deps: tauri, serde, rand | step 2: `tauri-plugin-dialog` |
+| `capabilities/default.json` | webview permissions: `core:default`, webview zoom (⌘+/⌘−), `dialog:allow-open` | keep permissions minimal |
+| `Cargo.toml` | Rust deps: tauri, dialog plugin, serde, rand | — |
 | `src/main.rs` | binary entry → `lib::run()` | — |
-| `src/lib.rs` | Tauri builder; registers `get_session`; stops backend on exit | add commands as needed |
+| `src/lib.rs` | Tauri builder; registers dialog plugin and `get_session`; stops backend on exit | add commands as needed |
 | `src/sidecar.rs` | token + port generation, spawns backend (packaged binary or Python in debug), sets `NOTES_DEV` in debug builds only, kill on drop | — |
 | `icons/icon.png` | 1×1 placeholder | replace with real icon set |
 
@@ -60,7 +61,8 @@ Add a row whenever you create a file.
 | `app/__init__.py` | version | — |
 | `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (no data dir: nothing is stored on disk) |
 | `app/auth.py` | bearer-token middleware, constant-time compare, every request; marks every response `no-store` | — |
-| `app/api.py` | routes under `/api`; `GET /api/health` | every step adds routes here (or split into routers) |
+| `app/api.py` | routes under `/api`; health and session folder/file grants (`GET/POST/DELETE /api/folders`) | every step adds routes here (or split into routers) |
+| `app/permissions.py` | session-only allowlist + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
 | `app/audit.py` | in-memory activity log: fixed action list, path, query, short outcome. Never note text | step 2: ingest/permissions call `record` |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
@@ -69,7 +71,8 @@ Add a row whenever you create a file.
 | `app/citations.py` | citation checker: verifies each cited quote is in its chunk, drops unbacked claims, returns NO_SUPPORT if none survive. Pure, no I/O | step 4: called by `qa.py` |
 | `tests/test_citations.py` | quote matching, rejections, claim filtering, one real sample note | — |
 | `tests/test_trust.py` | audit rules, forget, connection kinds, storage report, routes need token | — |
+| `tests/test_permissions.py` | grants, protected paths, symlink escape, revoke | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
 
 ### Planned backend modules (not yet created)
-`permissions.py` (allow/denylist, single path-check function) · `ingest.py` · `db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py`
+`ingest.py` · `db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py`

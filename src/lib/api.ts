@@ -1,3 +1,5 @@
+import { invoke } from "@tauri-apps/api/core";
+
 /**
  * Backend client. Every request carries the per-launch session token.
  *
@@ -25,7 +27,6 @@ export function getSession(): Promise<Session> {
     sessionPromise = (async () => {
       if (isTauri()) {
         // Ask the Rust side (src-tauri/src/lib.rs, `get_session`) for port + token.
-        const { invoke } = await import("@tauri-apps/api/core");
         return await invoke<Session>("get_session");
       }
       const port = Number(import.meta.env.VITE_BACKEND_PORT ?? 8765);
@@ -61,4 +62,25 @@ export interface Health {
 
 export function health(): Promise<Health> {
   return apiFetch<Health>("/api/health");
+}
+
+export interface FolderAccess {
+  paths: string[];
+}
+
+export function getAllowedPaths(): Promise<FolderAccess> {
+  return apiFetch<FolderAccess>("/api/folders");
+}
+
+export function allowPath(path: string): Promise<FolderAccess> {
+  return apiFetch<FolderAccess>("/api/folders", {
+    method: "POST",
+    body: JSON.stringify({ path }),
+  });
+}
+
+export function revokePath(path: string): Promise<FolderAccess> {
+  return apiFetch<FolderAccess>(`/api/folders?path=${encodeURIComponent(path)}`, {
+    method: "DELETE",
+  });
 }
