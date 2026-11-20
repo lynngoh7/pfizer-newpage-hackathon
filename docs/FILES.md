@@ -68,6 +68,7 @@ Add a row whenever you create a file.
 | `app/permissions.py` | allowlist (filled from `prefs.json` on launch) + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
 | `app/audit.py` | in-memory activity log: fixed action list, path, query, short outcome. Never note text | step 2: ingest/permissions call `record` |
+| `app/ingest.py` | split TXT (blank lines), MD (headings), PDF (pages, pypdf) into `Chunk`s with path + start/end line or page | step 2c: skip unreadable files, read via `resolve_and_check`; then LLM grouping |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
 | `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders (`prefs.json` is expected, anything else is flagged) | — |
 | `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/saved`, `/api/trust/storage`, `DELETE /api/session` | — |
@@ -82,4 +83,4 @@ Add a row whenever you create a file.
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
 
 ### Planned backend modules (not yet created)
-`ingest.py` · `db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py`
+`db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py`
