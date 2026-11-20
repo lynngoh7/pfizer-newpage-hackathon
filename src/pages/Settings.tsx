@@ -1,15 +1,15 @@
 /**
  * Settings: what the app runs on and how it keeps notes safe, in plain words.
  *
- * Nothing on this page is saved: saving a preference would write to disk and
- * break "Stored on disk: Nothing" on the Privacy page (One Rule, CLAUDE.md §1a).
- * Accessibility comes from the Mac's own settings for the same reason.
+ * Settings are saved to prefs.json with the folder list (backend/app/prefs.py):
+ * setting values only, never note text (One Rule, "no copies").
+ * Accessibility comes from the Mac's own settings, so there is nothing to save.
  *
  * Fills in: step 2c (Indexing card: files read, chunks, skipped, re-index),
  * step 4 (AI model card: real model list and warm/unloaded state from Ollama).
  */
 import { Fragment, useEffect, useState } from "react";
-import { health, Health } from "../lib/api";
+import { getSettings, health, Health, saveSettings } from "../lib/api";
 import ForgetButton from "../components/ForgetButton";
 
 // Fixed until step 4 lists installed models. The picker stays so the layout is final.
@@ -40,16 +40,25 @@ const SAFETY: { fact: string; why: string }[] = [
 export default function Settings({ onOpenPrivacy }: { onOpenPrivacy: () => void }) {
   const [info, setInfo] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [model, setModel] = useState(ANSWER_MODELS[0]); // session only, never saved
+  const [model, setModel] = useState(ANSWER_MODELS[0]);
 
   useEffect(() => {
     health().then(setInfo).catch((e) => setError(String(e)));
+    getSettings().then((s) => s.answer_model && setModel(s.answer_model)).catch(() => {});
   }, []);
+
+  function chooseModel(m: string) {
+    setModel(m);
+    saveSettings({ answer_model: m }).catch((e) => setError(String(e)));
+  }
 
   return (
     <div className="page">
       <h2>Settings</h2>
-      <p className="muted lead">Nothing here is saved. The app starts fresh every time you open it.</p>
+      <p className="muted lead">
+        Your settings and folder list are saved on this computer, so they are still here next time.
+        Your notes are never copied.
+      </p>
 
       <section className="card" aria-labelledby="s-engine">
         <h3 id="s-engine">Engine</h3>
@@ -84,7 +93,7 @@ export default function Settings({ onOpenPrivacy }: { onOpenPrivacy: () => void 
             <select
               id="answer-model"
               value={model}
-              onChange={(e) => setModel(e.target.value)}
+              onChange={(e) => chooseModel(e.target.value)}
               aria-describedby="answer-model-help"
             >
               {ANSWER_MODELS.map((m) => <option key={m} value={m}>{m}</option>)}
@@ -103,7 +112,7 @@ export default function Settings({ onOpenPrivacy }: { onOpenPrivacy: () => void 
       <section className="card" aria-labelledby="s-index">
         <h3 id="s-index">Indexing</h3>
         <p className="muted">
-          No folders yet. Choose them on the{" "}
+          Choose folders on the{" "}
           <button className="link" onClick={onOpenPrivacy}>Privacy page</button>.
         </p>
       </section>
@@ -134,7 +143,7 @@ export default function Settings({ onOpenPrivacy }: { onOpenPrivacy: () => void 
       <section className="card" aria-labelledby="s-forget">
         <h3 id="s-forget">Forget everything</h3>
         <p className="muted">
-          Ends this session's memory now. To see what the app can see and check that nothing left
+          Clears this session's memory and the saved folder list and settings. To see what the app can see and check that nothing left
           or stayed, open the <button className="link" onClick={onOpenPrivacy}>Privacy page</button>.
         </p>
         <ForgetButton />

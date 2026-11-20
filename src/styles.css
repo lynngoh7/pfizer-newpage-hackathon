@@ -28,8 +28,8 @@
   }
 }
 
-/* Accessibility follows macOS settings rather than in-app toggles: an in-app
-   choice would have to be saved to disk, which the One Rule forbids. */
+/* Accessibility follows macOS settings rather than in-app toggles, so there is
+   one place to set it and nothing extra to save. */
 @media (prefers-contrast: more) {
   :root { --muted: #3f3f44; --border: #8a8a92; --hover: rgba(0, 0, 0, 0.1); }
 }

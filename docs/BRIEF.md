@@ -54,9 +54,9 @@ Our original plan stores parsed text in an encrypted SQLite index. Even encrypte
 - **Session-scoped index:** build in memory (SQLite `:memory:` with FTS5 + sqlite-vec) on launch/folder grant; discard on quit, on "Clear session", and when access to a folder is revoked.
 - If a persistent cache is ever needed for speed, it must be opt-in, clearly labelled in the UI, and wiped by one button. SQLCipher stays as the fallback for that case only.
 - Ollama: use `keep_alive: 0` or short so the model doesn't hold context; no chat history saved to disk.
-- **"How would you know" feature (demo it):** a Trust panel showing (a) the live audit log of files read, (b) zero outbound connections (e.g. the app's own network status, plus a "turn Wi-Fi off" demo), (c) what the app has stored on disk right now (should be nothing, or only the folder list), and (d) a "forget everything" button with visible confirmation.
+- **"How would you know" feature (demo it):** a Trust panel showing (a) the live audit log of files read, (b) zero outbound connections (e.g. the app's own network status, plus a "turn Wi-Fi off" demo), (c) what the app has stored on disk right now (only `prefs.json`: folder paths and settings, shown in full on the Privacy page), and (d) a "forget everything" button with visible confirmation.
 - The audit log itself must not contain note content — paths and actions only — and is session-scoped too.
-- **Folder grants are session-only too** (decided 2026-11-15): the user picks folders on launch. Then "stored on disk: nothing" is literally true. Revoking a folder drops its chunks from memory at once.
+- **Folder list and settings are saved** (decided 2026-11-20, replaces "session-only grants" from 2026-11-15): `backend/app/prefs.py` writes one `prefs.json` in the app data folder holding folder/file **paths** and allowlisted setting values only. Never note text or anything derived from it (index, embeddings, extracts, queries, answers). Saved folders are re-checked on launch; missing or blocked ones are dropped. The index is still rebuilt in memory each launch. The Privacy page shows the file's contents; "Forget everything" deletes it. Revoking a folder drops its chunks from memory at once.
 - Ollama: keep the model warm during the session (cold loads make the demo slow); unload on quit and on "forget everything".
 - Browser dev mode (`npm run dev:all`) is development only. The backend accepts the Vite origin only when `NOTES_DEV=1`; packaged builds never set it. Never demo in a browser.
 
@@ -138,8 +138,8 @@ Suggested backend modules:
 - **Grounded answers (#5):** the model must cite chunk IDs plus a short quote. Python checks that each quote really appears in the cited chunk. Drop unverified claims. If none survive, show **"No supporting notes found."**
 - **No network (#8):** Tauri has no network permissions and a strict CSP. FastAPI and Ollama bind to localhost only. No outbound calls anywhere.
 - **Audit log (#8):** record timestamp, action, file path, and which query triggered it (no note content). Viewable in the UI, session-scoped.
-- **Data wipe (#13):** delete the DB, index and logs, and reset the session.
-- **No copies (One Rule):** never write note text, snippets, LLM prompts/answers or chat history to disk. Index and audit log live in memory for the session only. Show passages by re-reading the source file.
+- **Data wipe (#13):** clear the index and logs, delete `prefs.json` (saved folders and settings), and reset the session.
+- **No copies (One Rule):** never write note text, snippets, LLM prompts/answers or chat history to disk. Index and audit log live in memory for the session only. The only file on disk is `prefs.json` (folder paths + settings). Show passages by re-reading the source file.
 - **Never fetch URLs** found in notes; links are treated as text only.
 
 ## 7. UI design (current phase)

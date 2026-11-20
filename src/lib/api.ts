@@ -84,3 +84,12 @@ export function revokePath(path: string): Promise<FolderAccess> {
     method: "DELETE",
   });
 }
+
+// Saved settings (backend/app/prefs.py). Only allowlisted values, never note text.
+export interface SavedSettings {
+  answer_model?: string;
+}
+
+export const getSettings = () => apiFetch<SavedSettings>("/api/settings");
+export const saveSettings = (s: SavedSettings) =>
+  apiFetch<SavedSettings>("/api/settings", { method: "PUT", body: JSON.stringify(s) });

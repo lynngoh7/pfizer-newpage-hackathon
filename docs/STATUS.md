@@ -24,8 +24,9 @@ Build one demo moment end to end: the manager asks about a decision made weeks a
 ## Step 2 — Folder access + reading notes ⬜
 New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `src/pages/Privacy.tsx` (folder section).
 - ✅ `permissions.py` with `resolve_and_check(path)` (follows symlinks, blocks `.ssh`, `.env`, keychains). ⬜ Every file read must go through it (ingest)
-- ✅ Backend `GET/POST/DELETE /api/folders`, session-only grants
-- ✅ Folder/file picker (`components/FolderAccess.tsx`) on the **Privacy page**, first section. Grants last for the session only, not saved to disk
+- ✅ Backend `GET/POST/DELETE /api/folders`
+- ✅ Folder list and settings saved to `prefs.json` (`prefs.py`, paths and allowlisted settings only); restored on launch, deleted by "Forget everything". `GET/PUT /api/settings`, `GET /api/trust/saved`
+- ✅ Folder/file picker (`components/FolderAccess.tsx`) on the **Privacy page**, first section. The list is saved, so it is back on the next launch
 - ⬜ Folder add/remove should call `audit.record("folder_added" | "folder_removed")` and drop the folder's chunks from memory on revoke
 - ⬜ Read PDF (PyMuPDF) and DOCX / TXT / MD (markitdown), split into chunks with path, page or heading, and character offsets
 - ⬜ In-memory SQLite (`:memory:`) holding path, mtime, hash and offsets. **No note text on disk, ever**
@@ -49,7 +50,7 @@ Covers 20 of the 50 judging points. Sidebar → **Privacy**.
 - ✅ Network: every socket of the engine, the app and Ollama, marked local or outside (`GET /api/trust/network`, uses psutil). Includes "check it yourself" steps (Wi-Fi off, `lsof`)
 - ✅ Forget everything: confirm step, then shows what was cleared and re-checks the disk (`DELETE /api/session`). Same button in Settings
 - ✅ Webview runs `incognito` and every API response is `Cache-Control: no-store`. Before this, WebKit kept an HTTP cache in `~/Library/Caches/local-notes-assistant`, which would have kept copies of note passages
-- ⬜ Test in the real app (`npm run tauri dev`): confirm "Stored on disk: Nothing" after a session with incognito on. Delete old dev leftovers first: `rm -rf ~/Library/Caches/local-notes-assistant ~/Library/WebKit/local-notes-assistant`
+- ⬜ Test in the real app (`npm run tauri dev`): confirm "Saved to disk: Folder list and settings only" after a session with incognito on. Delete old dev leftovers first: `rm -rf ~/Library/Caches/local-notes-assistant ~/Library/WebKit/local-notes-assistant`
 - ⬜ Unload the Ollama model on forget (register in `session.py` once the Ollama client exists, step 4)
 - ⬜ Rehearse the "turn Wi-Fi off" demo
 
