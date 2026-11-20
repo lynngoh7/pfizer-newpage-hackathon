@@ -76,17 +76,22 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 ## Performance notes
 - Frontend bundle after step 1: about 148 kB JS (48 kB gzipped)
 - After Settings + sidebar icons: about 154 kB JS (50 kB gzipped)
+- Topic grouping, 37 chunks from the main sample notes, Intel Mac, 32 GB:
+  - One `llama3.2:3b` call per chunk: about 100 s, poor labels. Too slow: `long standup log.md` alone is 901 chunks
+  - `nomic-embed-text` for all chunks in one call (about 5 s), group by similarity ≥ 0.75, then one LLM call to name each group: about 25 s, 6 sensible groups. 0.6 and 0.7 merge too much
+  - Merging small chunks first would cut the count further
 
 ## Who does what (Fri 20 – Sun 22 Nov)
 
 Tick a box here in the same PR as the code. Sunday evening is for recording the video.
 
 **E: reading notes and search** (step 2c, 3)
-- ⬜ 1a. `ingest.py`: text extraction (Sat)
+- 🔧 1a. `ingest.py`: text extraction (Sat). TXT/MD/PDF chunking works on the `ingest` branch (29 sample files → 954 chunks). Next: skip unreadable files (`corrupt.pdf`, `password protected.pdf`, `latin1 windows.txt` crash it now) and read through `resolve_and_check`
 - ⬜ 1b. `db.py`: in-memory DB and chunk metadata (Sat)
 - ⬜ 1c. FTS5 keyword search, `search.py` (Sat), needs 1a, 1b
 - ⬜ 1d. Ingest and search API endpoints (Sat), needs 1c
 - ⬜ 1e. Tests: parsing, permissions, cleanup (Sun)
+- ⬜ 1f. Group chunks by topic (`Groups` table, see `docs/DB_DESIGN.md`). Use embeddings, not one LLM call per chunk (see Performance notes)
 
 **S: answers and decisions** (step 4, 6)
 - ⬜ 2a. Check local Ollama model and inference (Fri)
