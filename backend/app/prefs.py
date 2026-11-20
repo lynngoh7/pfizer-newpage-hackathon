@@ -18,7 +18,7 @@ import os
 import sys
 from pathlib import Path
 
-from . import permissions, session
+from . import audit, permissions, session
 
 APP_ID = "local.notes.assistant"  # same folder name trust.py checks
 
@@ -90,9 +90,10 @@ def restore_folders() -> list[str]:
     dropped = []
     for folder in load()["folders"]:
         try:
-            permissions.grant_path(folder)
+            permissions.grant_path(folder, outcome="restored on launch")
         except (OSError, PermissionError):
             dropped.append(folder)
+            audit.record("folder_removed", path=folder, outcome="missing or blocked on launch")
     if dropped:
         save_folders()
     return dropped

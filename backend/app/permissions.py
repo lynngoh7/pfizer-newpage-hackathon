@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from . import audit
+
 DENY_PARTS = {".ssh", ".env", "Keychains", ".gnupg"} #banned file types
 allowed_folders: set[Path] = set() #paths stored in a set
 
@@ -17,17 +19,26 @@ def _resolve_allowed_location(path: str) -> Path:
     return real
 
 
-def grant_path(path: str) -> Path:
-    """Grant access to an existing file or folder for this backend session."""
-    real = _resolve_allowed_location(path)
+def grant_path(path: str, outcome: str = "ok") -> Path:
+    """Grant access to an existing file or folder for this backend session.
+    Audit (§6): logs folder_added, or blocked when the denylist refuses it.
+    Paths only, never content."""
+    try:
+        real = _resolve_allowed_location(path)
+    except PermissionError as error:
+        audit.record("blocked", path=path, outcome=str(error))
+        raise
     allowed_folders.add(real)
+    audit.record("folder_added", path=str(real), outcome=outcome)
     return real
 
 
-def revoke_path(path: str) -> Path:
-    """Revoke one previously granted file or folder."""
+def revoke_path(path: str, outcome: str = "ok") -> Path:
+    """Revoke one previously granted file or folder. Logged only if it was granted."""
     real = Path(path).resolve()
-    allowed_folders.discard(real)
+    if real in allowed_folders:
+        allowed_folders.discard(real)
+        audit.record("folder_removed", path=str(real), outcome=outcome)
     return real
 
 
