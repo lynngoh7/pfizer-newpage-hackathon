@@ -8,6 +8,7 @@
  * network every 3 s, disk every 10 s. Nothing here is cached or saved.
  */
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import FolderAccess from "../components/FolderAccess";
 import ForgetButton from "../components/ForgetButton";
 import { AuditEntry, auditLog, network, NetworkReport, storage, StorageReport } from "../lib/trust";
 
@@ -97,15 +98,8 @@ export default function Privacy() {
         <dd>{filesRead ? `${filesRead} this session` : "None yet"}</dd>
       </dl>
 
-      {/* Step 2b fills this in: folder list with add/remove (Tauri dialog plugin).
-          Grants are session-only, so this list starts empty on every launch. */}
-      <section className="card">
-        <h3>Folders the app can see</h3>
-        <p className="muted">
-          None yet. The app can only read folders you choose here, only for this session, and you
-          can remove one at any time. Removing a folder makes the app forget it straight away.
-        </p>
-      </section>
+      {/* Grants are session-only, so this list starts empty on every launch. */}
+      <FolderAccess />
 
       <section className="card">
         <h3>Internet</h3>
