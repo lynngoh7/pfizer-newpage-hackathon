@@ -96,7 +96,13 @@ body {
   color: var(--fg);
   font: inherit;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
+/* Monotone line icons, Obsidian-style: muted until hovered or active. */
+.nav-icon { width: 16px; height: 16px; flex: none; opacity: 0.65; }
+.nav-item:hover .nav-icon, .nav-item.active .nav-icon { opacity: 1; }
 .nav-item:hover { background: var(--hover); }
 .nav-item.active { background: var(--hover); font-weight: 600; }
 

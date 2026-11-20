@@ -14,7 +14,27 @@ interface Props {
   onNavigate: (v: View) => void;
 }
 
-const NAV: { id: View; label: string }[] = [
+// Icon paths from Lucide (ISC licence), the set Obsidian uses. Inlined so
+// nothing is fetched and no icon package is added to the bundle.
+const ICONS: Record<Exclude<View, "home">, JSX.Element> = {
+  search: <><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></>,
+  decisions: <><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></>,
+  conflicts: <><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /><path d="M12 9v4" /><path d="M12 17h.01" /></>,
+  privacy: <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />,
+  settings: <><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></>,
+};
+
+// Decorative: the button text already names the tab.
+function NavIcon({ id }: { id: Exclude<View, "home"> }) {
+  return (
+    <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {ICONS[id]}
+    </svg>
+  );
+}
+
+const NAV: { id: Exclude<View, "home">; label: string }[] = [
   { id: "search", label: "Search" },
   { id: "decisions", label: "Decisions & To-dos" },
   { id: "conflicts", label: "Conflicts" },
@@ -60,6 +80,7 @@ export default function Sidebar({ view, onNavigate }: Props) {
             aria-current={view === n.id ? "page" : undefined}
             onClick={() => onNavigate(n.id)}
           >
+            <NavIcon id={n.id} />
             {n.label}
           </button>
         ))}
@@ -78,6 +99,7 @@ export default function Sidebar({ view, onNavigate }: Props) {
           aria-current={view === "settings" ? "page" : undefined}
           onClick={() => onNavigate("settings")}
         >
+          <NavIcon id="settings" />
           Settings
         </button>
       </div>
