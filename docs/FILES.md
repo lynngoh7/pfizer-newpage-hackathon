@@ -75,6 +75,7 @@ Add a row whenever you create a file.
 | `tests/test_trust.py` | audit rules, forget, connection kinds, storage report, routes need token | — |
 | `tests/conftest.py` | points `prefs.json` at a temp folder for every test | — |
 | `tests/test_privacy_edges.py` | forget clears everything, revoke hook, symlink/deny/missing-folder edge cases, no note text in log or prefs | 4b/4c: add real index checks when db.py lands |
+| `tests/test_no_network.py` | blocks non-loopback connects and DNS, runs a whole session through the API; fails on any outbound attempt | 4d: add search and ask calls when 1d and 2c land |
 | `tests/test_prefs.py` | saved folders/settings, paths only, allowlist, restore, forget, disk check | — |
 | `tests/test_permissions.py` | grants, protected paths, symlink escape, revoke | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
