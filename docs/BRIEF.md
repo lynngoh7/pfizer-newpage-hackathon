@@ -103,7 +103,7 @@ Build the **core search + answer loop only**. Calendar, to-dos and other dashboa
 | Embeddings | `nomic-embed-text` via Ollama |
 | Database | SQLite **in memory, session-scoped** (see §1a "No copies"). SQLCipher only for an opt-in persistent cache |
 | Search | FTS5 + sqlite-vec in that same database (hybrid keyword + vector) |
-| Parsing | markitdown + PyMuPDF |
+| Parsing | markitdown + pypdf |
 | File watching | watchdog (P2) |
 | Agent | Custom loop with narrow tools, enforced in Python |
 | Safety | Allowlist and denylist in the backend, read-only by default, approve-and-diff for changes, audit log, source citations |
@@ -113,7 +113,7 @@ Build the **core search + answer loop only**. Calendar, to-dos and other dashboa
 ```
 React UI  ──(Tauri IPC / localhost + session token)──▶  FastAPI sidecar (127.0.0.1)
                                                           ├── folder allowlist / denylist
-                                                          ├── ingest: markitdown / PyMuPDF → chunks
+                                                          ├── ingest: markitdown / pypdf → chunks
                                                           ├── index: FTS5 + sqlite-vec (SQLite in memory, session only)
                                                           ├── agent loop (narrow tools, Python-enforced)
                                                           ├── audit log
