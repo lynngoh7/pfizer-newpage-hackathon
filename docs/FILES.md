@@ -58,8 +58,7 @@ Add a row whenever you create a file.
 ## Backend `backend/`
 | File | Purpose | Next edit |
 |---|---|---|
-| `pyproject.toml` | deps (fastapi, uvicorn, psutil), dev extras (pytest, httpx), package extra (pyinstaller) | step 2: pymupdf, markitdown; step 7: sqlite-vec |
-| `requirements.txt` | same deps as `pyproject.toml` for `pip install -r`; keep in sync | whenever `pyproject.toml` deps change |
+| `pyproject.toml` | **the one place to add Python deps**: deps (fastapi, uvicorn, psutil), dev extras (pytest, httpx), package extra (pyinstaller) | step 2: pymupdf, markitdown; step 7: sqlite-vec |
 | `notes-backend.spec` | PyInstaller spec | step 7: hidden imports for sqlite-vec |
 | `app/__init__.py` | version | — |
 | `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (the only saved file is `prefs.json`, see `prefs.py`) |
