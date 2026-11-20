@@ -95,3 +95,22 @@ def test_folder_access_rejects_missing_and_blocked_paths(tmp_path):
     blocked.mkdir()
     response = api.post("/api/folders", headers=HEADERS, json={"path": str(blocked)})
     assert response.status_code == 403
+
+
+def test_folder_events_are_audited_without_content(tmp_path):
+    from app import audit, permissions
+    audit.clear()
+    permissions.grant_path(str(tmp_path))
+    permissions.revoke_path(str(tmp_path))
+    permissions.revoke_path(str(tmp_path))  # not granted any more: no second line
+    blocked = tmp_path / ".ssh"
+    blocked.mkdir()
+    with pytest.raises(PermissionError):
+        permissions.grant_path(str(blocked))
+    log = [(e["action"], e["path"]) for e in audit.entries()]
+    assert log == [
+        ("folder_added", str(tmp_path.resolve())),
+        ("folder_removed", str(tmp_path.resolve())),
+        ("blocked", str(blocked)),
+    ]
+    audit.clear()

@@ -5,7 +5,8 @@ Answers the brief's "How would you know?" (§1a, Trust panel):
     desktop app that launched it, and Ollama), each marked listening, local or
     external. Anything external is a red flag in the UI.
   * storage(): the places a desktop app would normally write data, with what
-    is in them right now. Expected: nothing.
+    is in them right now. Expected: only prefs.json (folder paths + settings,
+    see prefs.py). Any other file is reported as unexpected.
 
 Read-only: inspects, never changes anything. Called by routes_trust.py.
 """
@@ -85,6 +86,9 @@ def _app_dirs() -> list[Path]:
 
 
 def storage() -> dict:
+    from . import prefs  # late import: prefs imports session, keep trust import-light
+
+    saved = prefs.path().resolve()
     locations, total = [], 0
     for path in _app_dirs():
         # Each location is a folder, a single file (e.g. a .plist), or absent.
@@ -94,6 +98,7 @@ def storage() -> dict:
             files = [path]
         else:
             files = []
+        files = [f for f in files if f.resolve() != saved]  # the one expected file
         total += len(files)
         locations.append({
             "path": str(path),
@@ -102,4 +107,5 @@ def storage() -> dict:
             "bytes": sum(f.stat().st_size for f in files),
             "listed": [str(f.relative_to(path)) if f != path else f.name for f in files[:MAX_LISTED_FILES]],
         })
-    return {"files": total, "locations": locations}
+    return {"files": total, "locations": locations,
+            "saved": {"path": str(saved), "bytes": saved.stat().st_size if saved.exists() else 0}}
