@@ -13,6 +13,7 @@ Add a row whenever you create a file.
 | `README.md` | install and run steps; pointers to docs/ | keep short |
 | `docs/BRIEF.md` | product brief, feature checklist, stack, safety rules | when a decision changes |
 | `docs/STATUS.md` | progress per build step + where to start | every change |
+| `docs/API_SHAPES.md` | agreed JSON shape for search/answer responses (UI ↔ backend) | when search/qa output changes |
 | `docs/FILES.md` | this file | every new file |
 | `.github/pull_request_template.md` | checklist shown when opening a PR (tests, docs, privacy rules) | when team rules change |
 | `scripts/dev.sh` | browser-only dev: shared token for backend + Vite, sets `NOTES_DEV=1` | — |
