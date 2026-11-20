@@ -106,7 +106,7 @@ Tick a box here in the same PR as the code. Sunday evening is for recording the 
 - ✅ 4a. Audit events for folder add/remove (Sat)
 - ⬜ 4b. Revoking a folder drops its chunks (Sat), needs 1b. Hook `permissions.on_revoke` ready; db.py registers it
 - ⬜ 4c. Verify Forget everything clears everything (Sat), needs 1b; recheck after 2e. Grants, prefs, log tested; index part waits on 1b
-- ⬜ 4d. Test storage, network and offline claims (Sun), needs 1d, 2c
+- ⬜ 4d. Test storage, network and offline claims (Sun), needs 1d, 2c. Started: `tests/test_no_network.py` covers current routes
 - ⬜ 4e. Edge-case tests and trust demo (Sun), needs everything above
 
 ### Dependencies
