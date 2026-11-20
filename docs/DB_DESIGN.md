@@ -21,8 +21,8 @@ erDiagram
     Chunks {
         int chunkID PK
         int fileID FK
-        int start "char offset"
-        int end   "char offset"
+        int start "first line (page for PDFs)"
+        int end   "last line (page for PDFs)"
         int groupID FK "one group per chunk"
     }
     Groups {
@@ -46,8 +46,8 @@ erDiagram
 |---|---|---|
 | chunkID | int, PK | |
 | fileID | int, FK → Files | revoke a folder = delete its files' chunks |
-| start | int | char offset into the parsed text |
-| end | int | char offset |
+| start | int | first line of the chunk, counted from 0 (PDF: page number) |
+| end | int | last line of the chunk (PDF: page number) |
 | groupID | int, FK → Groups | one group per chunk (demo) |
 
 **Groups** — related chunks, grouped by meaning by the LLM.
@@ -57,5 +57,5 @@ erDiagram
 | topic | str | e.g. "Q3 budget" |
 
 ## Rules
-- Never add a column holding note text. Show passages by re-reading `filePath[start:end]`.
+- Never add a column holding note text. Show passages by re-reading lines `start`–`end` (or that PDF page) from `filePath`.
 - `topic` is LLM output, so it is memory-only like everything else here.
