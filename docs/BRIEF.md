@@ -161,12 +161,13 @@ Keep it **simple and straightforward, similar to Obsidian plus a web-browser sea
 - **Left sidebar (fixed):**
   - Top: product logo and name
   - Middle: navigation (e.g. Search, Decisions & To-dos, Conflicts, Activity Log). Keep minimal.
-  - Bottom: **Settings** (folder access, clear data)
+  - Bottom: engine status (click → Privacy) and **Settings** (engine info, clear data)
 - **Main area:**
   - Top: one wide **search bar** (like a browser). Handles both keyword search and plain-English questions.
   - Below: results. For a question, show the answer with inline citations, and a list of source cards (file name, path, passage snippet, open-file button). Show conflict or "superseded" badges where relevant.
   - Home/empty state: a clean page. Later this will hold **customisable widgets** (calendar, to-do, ...). **Not in scope now**, so just leave room for it.
-- **Settings:** list of allowed folders with add/remove, indexing status, link to the activity log, a "Clear all data" button.
+- **Privacy page** (sidebar, decided 2026-11-19): the whole One Rule story in one place: folders the app can see (add/remove), network and disk proof, activity log, "Forget everything".
+- **Settings:** engine info, indexing status, link to Privacy, a "Clear all data" button.
 - Visual style: clean, quiet and minimal. Light/dark friendly. All assets bundled locally (no web fonts from CDNs).
 
 ## 8. Build order (suggested)

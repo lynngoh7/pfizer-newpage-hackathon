@@ -1,12 +1,13 @@
 /**
  * Fixed left sidebar: brand, navigation, engine status, Settings.
  * Polls /api/health every 5 s so the user can see the local engine is alive.
+ * Clicking the status opens Privacy: the proof is one click from anywhere.
  * `View` is the single source of truth for screen ids.
  */
 import { useEffect, useState } from "react";
 import { health } from "../lib/api";
 
-export type View = "home" | "search" | "decisions" | "conflicts" | "activity" | "settings";
+export type View = "home" | "search" | "decisions" | "conflicts" | "privacy" | "settings";
 
 interface Props {
   view: View;
@@ -17,7 +18,7 @@ const NAV: { id: View; label: string }[] = [
   { id: "search", label: "Search" },
   { id: "decisions", label: "Decisions & To-dos" },
   { id: "conflicts", label: "Conflicts" },
-  { id: "activity", label: "Activity Log" },
+  { id: "privacy", label: "Privacy" },
 ];
 
 type Backend = "checking" | "online" | "offline";
@@ -26,7 +27,7 @@ export default function Sidebar({ view, onNavigate }: Props) {
   const [backend, setBackend] = useState<Backend>("checking");
 
   useEffect(() => {
-    let alive = true;
+    let alive = true; // stops setState after the component is gone
     async function ping() {
       try {
         await health();
@@ -37,6 +38,7 @@ export default function Sidebar({ view, onNavigate }: Props) {
     }
     ping();
     const t = setInterval(ping, 5000);
+    // Cleanup when the sidebar unmounts: stop polling.
     return () => {
       alive = false;
       clearInterval(t);
@@ -63,12 +65,16 @@ export default function Sidebar({ view, onNavigate }: Props) {
       </nav>
 
       <div className="sidebar-bottom">
-        <div className={`status status-${backend}`} title="Local backend (127.0.0.1)">
+        <button
+          className={`status status-${backend}`}
+          title="See what the app can see, and check nothing left this computer"
+          onClick={() => onNavigate("privacy")}
+        >
           <span className="dot" aria-hidden="true" />
           {backend === "checking" && "Connecting…"}
           {backend === "online" && "Local engine ready"}
           {backend === "offline" && "Engine offline"}
-        </div>
+        </button>
         <button
           className={`nav-item ${view === "settings" ? "active" : ""}`}
           onClick={() => onNavigate("settings")}

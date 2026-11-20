@@ -1,0 +1,9 @@
+1:1 ollie 6/10
+
+- he's ok, bit stretched w/ contractors interviews
+- corvid sandbox up. BUT imogen flagged on the contract: data stays US only, no UK region. problem for wexcombe + hollowfield (they need UK hosting)?? 
+- ollie thinks we could just exclude the council + housing assoc users from tracking. hattie will hate that
+- need to raise w/ rory + imogen this wk
+- ollie wants to go to the dev conf in nov, said yes in principle
+
+todo: chat to imogen re residency, ask rory if ledgerly still interested

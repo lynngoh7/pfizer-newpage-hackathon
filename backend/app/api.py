@@ -14,6 +14,8 @@ from . import __version__
 router = APIRouter(prefix="/api")
 
 
+# Shown in Settings and polled by the sidebar dot. Fixed values on purpose:
+# they state the app's promises, and the tests check they never change.
 class Health(BaseModel):
     status: str = "ok"
     version: str = __version__

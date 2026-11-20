@@ -6,14 +6,17 @@
  * they carry real code; everything here is intentionally tiny.
  *
  * Fills in: step 3 (search results), step 4 (answer + citations),
- * step 5 (activity log), step 6 (decisions, conflicts).
+ * step 6 (decisions, conflicts). Privacy (step 5) is lazy-loaded.
  */
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import Sidebar, { View } from "./components/Sidebar";
 import SearchBar from "./components/SearchBar";
 import Home from "./pages/Home";
 import Placeholder from "./pages/Placeholder";
 import Settings from "./pages/Settings";
+
+// Lazy: this page's code downloads only when first opened, keeping startup fast.
+const Privacy = lazy(() => import("./pages/Privacy"));
 
 export default function App() {
   const [view, setView] = useState<View>("home");
@@ -24,6 +27,7 @@ export default function App() {
     setView("search");
   }
 
+  // Pick the page for the current view. No router library: one switch is enough.
   let main;
   switch (view) {
     case "home":
@@ -43,11 +47,16 @@ export default function App() {
     case "conflicts":
       main = <Placeholder title="Conflicts" note="Contradiction and superseded-note detection arrives in build step 6." />;
       break;
-    case "activity":
-      main = <Placeholder title="Activity Log" note="Every file read and tool call will be listed here (build step 5)." />;
+    case "privacy":
+      main = (
+        // Suspense shows nothing for the split second the lazy page loads.
+        <Suspense fallback={null}>
+          <Privacy />
+        </Suspense>
+      );
       break;
     case "settings":
-      main = <Settings />;
+      main = <Settings onOpenPrivacy={() => setView("privacy")} />;
       break;
   }
 

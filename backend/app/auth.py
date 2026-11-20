@@ -1,4 +1,5 @@
-"""Session-token check applied to every request."""
+"""Session-token check applied to every request. Also marks every response
+no-store so the webview never caches note text on disk."""
 from __future__ import annotations
 
 import hmac
@@ -17,10 +18,17 @@ class SessionTokenMiddleware(BaseHTTPMiddleware):
         # CORS preflight carries no Authorization header; let CORSMiddleware answer it.
         if request.method == "OPTIONS":
             return await call_next(request)
+        # Expected header: "Authorization: Bearer <token>".
         header = request.headers.get("authorization", "")
         scheme, _, presented = header.partition(" ")
+        # compare_digest takes the same time whether the first or last
+        # character is wrong, so the token cannot be guessed by timing replies.
         if scheme.lower() != "bearer" or not hmac.compare_digest(
             presented.encode(), self._expected
         ):
             return JSONResponse({"detail": "invalid or missing session token"}, status_code=401)
-        return await call_next(request)
+        response = await call_next(request)
+        # No copies (brief §6): responses can carry note passages, so the
+        # webview must never write them to its disk cache.
+        response.headers["Cache-Control"] = "no-store"
+        return response

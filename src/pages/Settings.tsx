@@ -1,12 +1,13 @@
 /**
- * Settings: folder access, engine info, clear data.
- * Step 2 replaces the folder stub with a list + picker (Tauri dialog plugin).
- * Step 5 wires "Forget everything" to DELETE /api/session (Trust panel).
+ * Settings: engine info and clear data. Folder access lives on the Privacy
+ * page, so everything about what the app sees and keeps is in one place.
+ * "Forget everything" is the same component as on the Privacy page.
  */
 import { useEffect, useState } from "react";
 import { health, Health } from "../lib/api";
+import ForgetButton from "../components/ForgetButton";
 
-export default function Settings() {
+export default function Settings({ onOpenPrivacy }: { onOpenPrivacy: () => void }) {
   const [info, setInfo] = useState<Health | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,14 +18,6 @@ export default function Settings() {
   return (
     <div className="page">
       <h2>Settings</h2>
-
-      <section className="card">
-        <h3>Folder access</h3>
-        <p className="muted">
-          No folders yet. You choose exactly which folders the app may read, and can revoke access
-          at any time. (Folder picker arrives in build step 2.)
-        </p>
-      </section>
 
       <section className="card">
         <h3>Local engine</h3>
@@ -46,12 +39,11 @@ export default function Settings() {
       <section className="card">
         <h3>Data</h3>
         <p className="muted">
-          The app keeps your notes in memory for this session only and writes nothing to disk.
-          “Forget everything” (clears the session) arrives with the Trust panel in build step 5.
+          The app keeps your notes in memory for this session only and writes nothing to disk.{" "}
+          Choose which folders it can see, and check for yourself, on the{" "}
+          <button className="link" onClick={onOpenPrivacy}>Privacy page</button>.
         </p>
-        <button className="btn danger" disabled>
-          Forget everything
-        </button>
+        <ForgetButton />
       </section>
     </div>
   );
