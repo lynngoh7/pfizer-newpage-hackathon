@@ -14,6 +14,7 @@ Add a row whenever you create a file.
 | `docs/BRIEF.md` | product brief, feature checklist, stack, safety rules | when a decision changes |
 | `docs/STATUS.md` | progress per build step + where to start | every change |
 | `docs/API_SHAPES.md` | agreed JSON shape for search/answer responses (UI ↔ backend) | when search/qa output changes |
+| `docs/DB_DESIGN.md` | in-memory DB tables (Files, Chunks, Groups) + diagram | when db.py changes the schema |
 | `docs/FILES.md` | this file | every new file |
 | `.github/pull_request_template.md` | checklist shown when opening a PR (tests, docs, privacy rules) | when team rules change |
 | `scripts/dev.sh` | browser-only dev: shared token for backend + Vite, sets `NOTES_DEV=1` | — |
