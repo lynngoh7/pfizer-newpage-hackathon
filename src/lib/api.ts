@@ -37,16 +37,33 @@ export function getSession(): Promise<Session> {
   return sessionPromise;
 }
 
+// The window opens before the backend sidecar is listening, so the first
+// requests fail at the network level ("TypeError: Load failed" in WebKit).
+// Retry those quietly for a while instead of showing red errors at launch.
+// HTTP errors (401, 404, 500...) are real answers and are never retried.
+const STARTUP_WAIT_MS = 20000;
+const RETRY_MS = 300;
+const startedAt = Date.now();
+
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const { port, token } = await getSession();
-  const res = await fetch(`http://127.0.0.1:${port}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(init.headers ?? {}),
-    },
-  });
+  let res: Response;
+  for (;;) {
+    try {
+      res = await fetch(`http://127.0.0.1:${port}${path}`, {
+        ...init,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...(init.headers ?? {}),
+        },
+      });
+      break;
+    } catch (e) {
+      if (!(e instanceof TypeError) || Date.now() - startedAt > STARTUP_WAIT_MS) throw e;
+      await new Promise((r) => setTimeout(r, RETRY_MS));
+    }
+  }
   if (!res.ok) {
     throw new Error(`${res.status} ${res.statusText}`);
   }
