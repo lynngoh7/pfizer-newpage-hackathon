@@ -85,6 +85,20 @@ export function revokePath(path: string): Promise<FolderAccess> {
   });
 }
 
+export interface ExtractedTodo {
+  task: string;
+  completed: boolean;
+  chunkID: number;
+  path: string;
+  date: string;
+  start: number;
+  end: number;
+}
+
+export function getTodos(): Promise<{ todos: ExtractedTodo[] }> {
+  return apiFetch<{ todos: ExtractedTodo[] }>("/api/todos");
+}
+
 // Saved settings (backend/app/prefs.py). Only allowlisted values, never note text.
 export interface SavedSettings {
   answer_model?: string;

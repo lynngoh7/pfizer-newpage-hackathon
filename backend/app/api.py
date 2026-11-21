@@ -14,6 +14,7 @@ from . import permissions
 from . import models
 from . import prefs
 from . import search as search_mod
+from . import extractions as extraction_mod
 
 router = APIRouter(prefix="/api")
 
@@ -34,6 +35,17 @@ class FolderAccess(BaseModel):
 class FolderAccessRequest(BaseModel):
     path: str = Field(min_length=1)
 
+@router.get("/decisions")
+def decisions() -> dict:
+    return extraction_mod.decisions()
+
+@router.get("/todos")
+def todos() -> dict:
+    return extraction_mod.todos()
+
+@router.get("/conflicts")
+def conflicts() -> dict:
+    return extraction_mod.conflicts()
 
 @router.get("/health", response_model=Health)
 def health() -> Health:
@@ -56,6 +68,7 @@ def add_folder(request: FolderAccessRequest) -> FolderAccess:
     except OSError as error: #if the OS doesn't allow it
         raise HTTPException(status_code=400, detail="Could not access the selected path") from error
     prefs.save_folders()  # paths only, never note content (One Rule)
+    search_mod.reindex()
     return FolderAccess(paths=[str(path) for path in permissions.list_allowed_paths()]) #return new allowed list
 
 

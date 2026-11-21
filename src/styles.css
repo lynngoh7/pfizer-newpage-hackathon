@@ -166,6 +166,12 @@ body {
 }
 .card > * { margin: 0; }
 
+.todo-card { gap: 6px; }
+.todo-task { display: flex; align-items: baseline; gap: 10px; }
+.todo-state { flex: 0 0 1em; color: var(--accent); }
+.todo-completed { color: var(--muted); text-decoration: line-through; }
+.todo-source { overflow-wrap: anywhere; font-size: 12px; }
+
 /* Label + control on one row, label column lines up with .props. */
 .field { display: grid; grid-template-columns: 140px 1fr; align-items: center; }
 .field label { color: var(--muted); }

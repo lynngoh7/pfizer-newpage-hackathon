@@ -12,6 +12,7 @@ import { lazy, Suspense, useState } from "react";
 import Sidebar, { View } from "./components/Sidebar";
 import SearchBar from "./components/SearchBar";
 import Home from "./pages/Home";
+import Decisions from "./pages/Decisions";
 import Placeholder from "./pages/Placeholder";
 import Settings from "./pages/Settings";
 
@@ -42,7 +43,7 @@ export default function App() {
       );
       break;
     case "decisions":
-      main = <Placeholder title="Decisions & To-dos" note="Extraction arrives in build step 6." />;
+      main = <Decisions />;
       break;
     case "conflicts":
       main = <Placeholder title="Conflicts" note="Contradiction and superseded-note detection arrives in build step 6." />;
