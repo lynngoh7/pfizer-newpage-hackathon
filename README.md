@@ -49,7 +49,7 @@ Windows: run this in Git Bash.
 |---|---|---|
 | Tauri v2 + React | Desktop window and UI | Small app with a strict security policy and no network permissions, so the window can't reach the internet |
 | Python + FastAPI | Backend | Bound to `127.0.0.1` with a session token, so only the app can talk to it |
-| Ollama (`llama3.2:3b`, `nomic-embed-text`) | AI answers and search by meaning | Runs the models on the computer itself. No cloud AI, so notes never leave the device |
+| Ollama (`qwen3:4b-instruct`, `nomic-embed-text`) | AI answers and search by meaning | Runs the models on the computer itself. No cloud AI, so notes never leave the device |
 | SQLite in memory (FTS5 + sqlite-vec) | Keyword + meaning search index | Lives in memory only and is gone when the app quits, so the app keeps no copy of your notes |
 | markitdown + pypdf | Reading PDF, Word, text and Markdown | Parse files locally, with no conversion service |
 
@@ -68,7 +68,7 @@ Install these once:
    then close and reopen the terminal.
 4. **Ollama** (the local AI model) — https://ollama.com/download (Intel Mac with Homebrew: `brew install --cask ollama-app`). Then download the two models (about 2.3 GB):
    ```sh
-   ollama pull llama3.2:3b        # answers and topic names
+   ollama pull qwen3:4b-instruct      # answers and topic names
    ollama pull nomic-embed-text   # search by meaning, grouping
    ```
 

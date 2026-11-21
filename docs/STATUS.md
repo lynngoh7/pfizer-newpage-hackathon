@@ -61,7 +61,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Follows macOS appearance, Increase contrast, Reduce motion. ⌘+ / ⌘− change text size (`zoomHotkeysEnabled`, needs `core:webview:allow-set-webview-zoom`)
 - ✅ Keyboard focus ring on every control; `<main>` and `<nav>` landmarks; `aria-current` on the open page; engine status announced to VoiceOver
 - ✅ Sidebar icons (Lucide paths inlined, no icon package; decorative, hidden from VoiceOver). Licence in `docs/THIRD_PARTY.md`
-- ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (placeholder `llama3.2:3b`)
+- ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (`qwen3:4b-instruct`, chosen 2026-11-21)
 - ⬜ Step 2c: indexing card (files read, passages, skipped, re-index)
 - ⬜ Check in the real app with VoiceOver (⌘F5) and with Increase contrast on
 
@@ -109,7 +109,7 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 - ✅ Models warmed at startup and kept loaded (`models.py`); unloaded on quit and Forget everything (registered in `session.py`). Warm-up takes about 6 s in the background
 
 **S: answers and decisions** (step 4, 6)
-- ✅ 2a. Check local Ollama model and inference (Fri). `nomic-embed-text` and `llama3.2:3b` run locally (timings under Performance notes); qa.py defaults to `qwen3:4b-instruct`
+- ✅ 2a. Check local Ollama model and inference (Fri). `nomic-embed-text` and `llama3.2:3b` run locally (timings under Performance notes); answer model switched to `qwen3:4b-instruct` on 2026-11-21 (no thinking step, faster)
 - ✅ 2b. `qa.py` with source-aware prompts (Sat), on `feature/ai-qa`, not merged yet
 - 🔧 2c. Wire in `citations.py` and "No supporting notes found." (Sat). qa.py calls `check_answer`; ⬜ needs an ask route fed by `search.py` chunks
 - ⬜ 2d. Compare old decisions with newer notes (Sun), needs 1c, 2c
