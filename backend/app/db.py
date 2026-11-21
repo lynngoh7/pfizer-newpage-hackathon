@@ -113,18 +113,31 @@ def set_groups(rows: list[dict], chunks) -> None:
     """Store group.group() output. Replaces all groups (grouping runs over
     the whole index). Chunks need chunkID and groupID set."""
     with _lock, _db:
+        live = _live([c.chunkID for c in chunks])
+        chunks = [c for c in chunks if c.chunkID in live]
         _db.execute("UPDATE Chunks SET groupID = NULL")
         _db.execute("DELETE FROM Groups")
         _db.executemany("INSERT INTO Groups (groupID, topic) VALUES (?, ?)",
                         [(r["groupID"], r["topic"]) for r in rows])
         _db.executemany("UPDATE Chunks SET groupID = ? WHERE chunkID = ?",
                         [(c.groupID, c.chunkID) for c in chunks if getattr(c, "groupID", None)])
+        _db.execute("DELETE FROM Groups WHERE groupID NOT IN "
+                    "(SELECT groupID FROM Chunks WHERE groupID IS NOT NULL)")
 
 
 def add_vectors(chunk_ids: list[int], vecs: list[list[float]]) -> None:
     """Unit-length vectors from group.embed, one per chunk."""
     with _lock:
-        _vecs.update(zip(chunk_ids, vecs))
+        live = _live(chunk_ids)
+        _vecs.update((cid, v) for cid, v in zip(chunk_ids, vecs) if cid in live)
+
+
+def _live(chunk_ids: list[int]) -> set[int]:
+    """Caller holds _lock. build() embeds for minutes after adding files; a
+    revoke or forget in that window must not get vectors or topics back for
+    the dropped chunks (No copies, §6 data wipe)."""
+    have = {r[0] for r in _db.execute("SELECT chunkID FROM Chunks")}
+    return have.intersection(chunk_ids)
 
 
 def topics() -> list[dict]:

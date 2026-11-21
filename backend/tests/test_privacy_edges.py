@@ -1,5 +1,5 @@
-"""Privacy and trust checks that don't need the index yet (tasks 4b, 4c, 4e).
-Real index checks (forget, revoke) are in test_db.py."""
+"""Privacy and trust checks with stub hooks (tasks 4b, 4c, 4e).
+Real index checks (forget, revoke, model unload) are in test_privacy_index.py."""
 import os
 
 import pytest
@@ -57,7 +57,7 @@ def test_forget_twice_is_safe():
     assert not prefs.path().exists()
 
 
-# 4b: revoke drops chunks (stub until db.py) --------------------------------
+# 4b: revoke hooks ------------------------------------------------------------
 
 def test_revoke_calls_drop_hooks_with_resolved_path(notes):
     calls = []
