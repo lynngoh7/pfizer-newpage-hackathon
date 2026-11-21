@@ -1,5 +1,5 @@
 """Privacy and trust checks that don't need the index yet (tasks 4b, 4c, 4e).
-When db.py lands, add: forget empties the index; revoke drops real chunks."""
+Real index checks (forget, revoke) are in test_db.py."""
 import os
 
 import pytest

@@ -28,15 +28,15 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ Folder list and settings saved to `prefs.json` (`prefs.py`, paths and allowlisted settings only); restored on launch, deleted by "Forget everything". `GET/PUT /api/settings`, `GET /api/trust/saved`
 - ✅ Folder/file picker (`components/FolderAccess.tsx`) on the **Privacy page**, first section. The list is saved, so it is back on the next launch
 - ✅ Folder add/remove/blocked are logged (`permissions.grant_path`/`revoke_path`; launch restore logs "restored" or "missing or blocked on launch")
-- 🟡 Revoke drops chunks: hook ready (`permissions.on_revoke("index", fn)`, fn(path) -> count). **db.py must register it**; tests in `tests/test_privacy_edges.py`
+- ✅ Revoke drops chunks: `db.py` registers `permissions.on_revoke("index", db.drop_under)`; tests in `tests/test_db.py`
 - 🔧 Read PDF (pypdf) and DOCX / TXT / MD (markitdown), split into chunks with path and start/end line (page for PDFs). TXT/MD/PDF chunking on `ingest` branch; skip unreadable files next
-- ⬜ In-memory SQLite (`:memory:`) holding path, mtime, hash and offsets. **No note text on disk, ever**
+- ✅ In-memory SQLite (`db.py`, schema in `docs/DB_DESIGN.md`): path, mtime, hash, noteDate, offsets, groups. No readable note text in any table
 - ✅ Audit log `audit.py` (in memory). **Ingest/permissions must call** `audit.record("read" | "skipped" | "blocked" | "folder_added" | "folder_removed", path=..., outcome="short reason")`. Never pass note text
-- ⬜ **Every module holding session data must register** `session.on_forget("index", fn)` (fn clears it, returns a count). Otherwise "forget everything" misses it
+- ✅ `db.py` registers `session.on_forget("index", db.clear)`. **Every new module holding session data must register too**
 - ✅ `sample_notes/`: fictional notes for the demo moment plus edge cases. Guide and expected answers in `docs/SAMPLE_NOTES.md`. Run `scripts/make_sample_notes.py` after cloning
 
 ## Step 3 — Keyword search ⬜
-- ⬜ FTS5 table in the same in-memory database, `search.py`
+- ✅ FTS5 table (contentless) in `db.py`, `db.keyword(q)`. ⬜ `search.py` (merge keyword + meaning)
 - ⬜ Results page: source cards (file, path, snippet re-read from the file, open-file button)
 
 ## Step 4 — Questions with verified citations ⬜
@@ -86,12 +86,12 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 Tick a box here in the same PR as the code. Sunday evening is for recording the video.
 
 **E: reading notes and search** (step 2c, 3)
-- 🔧 1a. `ingest.py`: text extraction (Sat). TXT/MD/PDF/DOCX chunking works on the `ingest` branch (29 sample files → 954 chunks). Broken files (corrupt, encrypted, wrong encoding) are skipped and logged. Next: read through `resolve_and_check`
-- ⬜ 1b. `db.py`: in-memory DB and chunk metadata (Sat)
+- 🔧 1a. `ingest.py`: text extraction (Sat). TXT/MD/PDF/DOCX chunking works on the `ingest` branch (29 sample files → 954 chunks). Broken files (corrupt, encrypted, wrong encoding) are skipped and logged. Next: read through `resolve_and_check` (found: `edge_cases/escape link.md` symlink is still read by ingest; `db.add_file` refuses it)
+- ✅ 1b. `db.py`: in-memory DB, contentless FTS5, vectors, revoke/forget hooks. Sample notes: 26 files, 950 chunks indexed in 0.4 s (no Ollama). `db.build(chunks)` runs files → FTS → vectors → groups. Not yet called from an endpoint (1d)
 - ⬜ 1c. FTS5 keyword search, `search.py` (Sat), needs 1a, 1b
 - ⬜ 1d. Ingest and search API endpoints (Sat), needs 1c
 - ⬜ 1e. Tests: parsing, permissions, cleanup (Sun)
-- 🔧 1f. Group chunks by topic: `group.py` done (embeddings + one naming call per group). Next: call it after ingest and store in the `Groups` table once `db.py` lands
+- ✅ 1f. Group chunks by topic: `group.py`; `db.build` stores groups and keeps the vectors for search by meaning
 
 **S: answers and decisions** (step 4, 6)
 - ⬜ 2a. Check local Ollama model and inference (Fri)

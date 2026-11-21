@@ -91,12 +91,13 @@ def name(chunks) -> str:
     return topic.strip()[:MAX_TOPIC]
 
 
-def group(chunks, threshold: float = THRESHOLD) -> list[dict]:
-    """Set chunk.groupID on every chunk and return [{groupID, topic}]."""
+def group(chunks, threshold: float = THRESHOLD, vecs=None) -> list[dict]:
+    """Set chunk.groupID on every chunk and return [{groupID, topic}].
+    Pass `vecs` from embed() to reuse them (db.build keeps them for search)."""
     if not chunks:
         return []
     rows = []
-    for gid, members in enumerate(cluster(embed(chunks), threshold), start=1):
+    for gid, members in enumerate(cluster(vecs or embed(chunks), threshold), start=1):
         for i in members:
             chunks[i].groupID = gid
         rows.append({"groupID": gid, "topic": name([chunks[i] for i in members])})
