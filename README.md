@@ -4,6 +4,7 @@ A desktop app that finds the note you mean. Everything runs on your own computer
 
 ## Contents
 
+- [Built with](#built-with)
 - [Installation](#installation)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
@@ -12,6 +13,18 @@ A desktop app that finds the note you mean. Everything runs on your own computer
   - [Project structure](#project-structure)
   - [Documentation](#documentation)
 - [Team](#team)
+
+## Built with
+
+| Part | Used for |
+|---|---|
+| Tauri v2 + React | Desktop window and UI |
+| Python + FastAPI | Backend, localhost only |
+| Ollama (`llama3.2:3b`, `nomic-embed-text`) | Local AI answers and search by meaning |
+| SQLite in memory (FTS5 + sqlite-vec) | Search index, cleared when the app quits |
+| markitdown + pypdf | Reading PDF, Word, text and Markdown files |
+
+Why each was chosen: [docs/BRIEF.md](docs/BRIEF.md).
 
 ## Installation
 
@@ -112,5 +125,6 @@ This is for development only. It still runs only on your computer, but it is not
 | Name | GitHub |
 |---|---|
 | Cathy | [@cathyc-c](https://github.com/cathyc-c) |
-| Eoin Rodrigues | [@ARandomGuyTH](https://github.com/ARandomGuyTH) |
-| Lynn Goh | [@lynngoh7](https://github.com/lynngoh7) |
+| Eoin | [@ARandomGuyTH](https://github.com/ARandomGuyTH) |
+| Lynn | [@lynngoh7](https://github.com/lynngoh7) |
+| Shek | [@Reverie-974](https://github.com/Reverie-974)  |
