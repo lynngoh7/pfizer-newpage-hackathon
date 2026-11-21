@@ -150,11 +150,12 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 If E falls behind, L takes "Display decision changes and error states" (it sits on the results page).
 
 ### Dependencies
-- **Critical path:** 1a/1b → 1c → 1d → 3c → 2d → 3d → demo. E's Saturday work blocks the most people, so land 1b first.
-- **Agree two shapes on Friday** so nobody waits: the chunk record from `db.py` (id, path, page/heading, start, end) and the JSON for search and answer responses. Then 2b, 3a, 3b and 4b can start against stubs.
-- `db.py` must register `session.on_forget("index", ...)` and offer "drop chunks for folder"; 4b and 4c depend on it.
-- 2e must register the model unload in `session.py`; 4c re-checks it.
-- No dependencies: 2a, 3a, 4a, so start those first.
+- **Critical path:** C's merges → S's ask route with citations → L connects search and questions → E's decision changes on the results page → S runs it on the demo device → C rehearses and records. Everything up to L's connection should land on Saturday.
+- **Merges first (C, S, Sat morning):** L can't connect to the backend and E can't build on `search.py` until `feat/search`, `db`, `ingest` and `feature/ai-qa` are on `main`.
+- **Ask route (S) blocks** L's "Connect question/search flow" and the ask-route test in C's network checks.
+- **Decision extraction (E) blocks** "Compare old decisions" and "Display decision changes". Agree the decision JSON with L on Saturday so the page can be built against a stub.
+- **Demo device (S, Sun am)** needs everything merged. C's rehearsal and the video run on that device.
+- No dependencies: L's mock results page, E's decision extraction, C's privacy tests. Start those first.
 
 Rules: work on a branch, never push to `main`; conventional commit messages; open a PR and fill in the template; merge only when CI is green. Run the backend tests, `npm run build` and `sh scripts/privacy-guard.sh` before pushing (README §3). Add a row to `docs/FILES.md` for every new file. Every file read goes through `resolve_and_check`. Comments: one short line saying *why*, where a newcomer would get stuck; safety checks name the rule they enforce.
 
