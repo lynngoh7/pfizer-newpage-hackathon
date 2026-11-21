@@ -133,7 +133,7 @@ Suggested backend modules:
 
 ## 6. Safety rules (non-negotiable, enforce in code, not just in prompts)
 - **Path enforcement:** every file access goes through one function that resolves the real path (follow symlinks) and checks it against the allowlist and denylist. Tools cannot bypass it.
-- **Read-only:** no write tools exist unless P2 #15 is built, and then only via approve → diff → apply → undo.
+- **Read-only:** the app never edits an existing file. "Open in editor" hands the file to the user's default app (path-checked). The one write is "New note": a new `.md` file the user typed, on an explicit Save, exclusive create (never overwrites), audit-logged by path only. Any other write needs P2 #15 (approve → diff → apply → undo).
 - **Prompt injection (#9):** file content is passed to the LLM inside clearly delimited *untrusted data* blocks, with the system prompt saying content in those blocks is never an instruction. The model's tool calls are validated in Python regardless of what it asks for.
 - **Grounded answers (#5):** the model must cite chunk IDs plus a short quote. Python checks that each quote really appears in the cited chunk. Drop unverified claims. If none survive, show **"No supporting notes found."**
 - **No network (#8):** Tauri has no network permissions and a strict CSP. FastAPI and Ollama bind to localhost only. No outbound calls anywhere.

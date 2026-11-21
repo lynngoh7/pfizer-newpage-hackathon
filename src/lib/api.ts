@@ -144,3 +144,16 @@ export interface SavedSettings {
 export const getSettings = () => apiFetch<SavedSettings>("/api/settings");
 export const saveSettings = (s: SavedSettings) =>
   apiFetch<SavedSettings>("/api/settings", { method: "PUT", body: JSON.stringify(s) });
+
+// Capture (backend/app/notes.py). The app never edits a note: "open" hands it
+// to the user's default app; createNote only ever writes a new file.
+export const openFile = (path: string) =>
+  apiFetch<{ opened: string }>("/api/files/open", { method: "POST", body: JSON.stringify({ path }) });
+
+export interface NewNoteResult {
+  path: string;
+  tracked: boolean;
+}
+
+export const createNote = (folder: string, title: string, body: string) =>
+  apiFetch<NewNoteResult>("/api/notes", { method: "POST", body: JSON.stringify({ folder, title, body }) });

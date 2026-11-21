@@ -18,6 +18,7 @@ import Settings from "./pages/Settings";
 
 // Lazy: this page's code downloads only when first opened, keeping startup fast.
 const Privacy = lazy(() => import("./pages/Privacy"));
+const NewNote = lazy(() => import("./pages/NewNote"));
 
 export default function App() {
   const [view, setView] = useState<View>("home");
@@ -36,6 +37,13 @@ export default function App() {
       break;
     case "search":
       main = <SearchResults query={query} />;
+      break;
+    case "newnote":
+      main = (
+        <Suspense fallback={null}>
+          <NewNote />
+        </Suspense>
+      );
       break;
     case "decisions":
       main = <Placeholder title="Decisions & To-dos" note="Extraction arrives in build step 6." />;

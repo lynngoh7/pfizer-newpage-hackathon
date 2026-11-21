@@ -42,6 +42,7 @@ Add a row whenever you create a file.
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
 | `components/FolderAccess.tsx` | add/remove folders and files the app may read this session (Tauri dialog); re-indexes after adding locations | step 2c: show indexing progress |
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
+| `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
 | `pages/SearchResults.tsx` | calls the local index/search API; shows answers, source excerpts, loading, empty and error states | step 4: connect question answers |
@@ -87,7 +88,9 @@ Add a row whenever you create a file.
 | `tests/test_privacy_edges.py` | forget clears everything, revoke hook, symlink/deny/missing-folder edge cases, no note text in log or prefs | — |
 | `tests/test_privacy_index.py` | revoke and forget through the API on the real index, revoke/forget during a rebuild leave no vectors or topics, model unload | — |
 | `tests/test_ingest.py` | TXT/MD/DOCX chunk boundaries; broken files skipped and logged with no content, no half-read chunks left + blocked paths and symlink escapes | — |
+| `app/notes.py` | Capture: `open_file` (path-checked, opens in the default app, never edits) and `create_note` (new `.md` only, never overwrites, denylist-checked) | — |
 | `app/search.py` | build the index from allowed folders (`reindex`: keyword at once, vectors + groups in a background thread, `status()` for progress), hybrid search (keyword + meaning, RRF), source cards re-read from files; keyword only without Ollama | 2b: `qa.py` uses `rank()` + `source()` |
+| `tests/test_notes.py` | open: allowlist/denylist enforced; new note: tracked/untracked, never overwrites, no text in audit | — |
 | `tests/test_search.py` | folder walk, search shape, Ollama fallback, stale files, revoke/forget, `/api/index` + `/api/search` | — |
 | `tests/test_db.py` | keyword search, no text stored, FTS syntax safe, revoke/forget empty the index, changed file not shown, groups and meaning search | — |
 | `tests/test_group.py` | clustering, one naming call per group, injected/bad topics fall back, Ollama local only (Ollama faked) | — |

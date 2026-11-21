@@ -7,7 +7,7 @@ import { apiFetch } from "./api";
 export interface AuditEntry {
   seq: number;
   time: number; // unix seconds
-  action: "read" | "skipped" | "blocked" | "folder_added" | "folder_removed" | "search" | "ask" | "forget";
+  action: "read" | "skipped" | "blocked" | "folder_added" | "folder_removed" | "search" | "ask" | "forget" | "open_in_editor" | "note_created";
   path: string | null;
   query: string | null;
   outcome: string;

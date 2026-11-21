@@ -65,6 +65,11 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ⬜ Step 2c: indexing card (files read, passages, skipped, re-index)
 - ⬜ Check in the real app with VoiceOver (⌘F5) and with Increase contrast on
 
+## Capture: open in editor + new note ✅
+- Source cards have **Open in editor**: the file opens in its default app (path-checked with `resolve_and_check`). The app never edits it. When the window regains focus after an Open, it re-indexes and re-runs the search, so edits show up.
+- Sidebar **New note**: saves a new `.md` file (`YYYY-MM-DD Title.md`). In an allowed folder it is searchable straight away; in another folder it is not tracked. Never overwrites. The audit log shows `open_in_editor` / `note_created` with paths only.
+- Code: `backend/app/notes.py`, `POST /api/files/open`, `POST /api/notes`, `src/pages/NewNote.tsx`. Tests: `backend/tests/test_notes.py`.
+
 ## Step 6 — Decisions, to-dos, conflicts ⬜
 - ⬜ Pull decisions and to-dos out of notes
 - ⬜ Flag notes that disagree, and newer notes that replace older ones ("superseded" badge)
