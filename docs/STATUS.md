@@ -86,11 +86,11 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 Tick a box here in the same PR as the code. Sunday evening is for recording the video.
 
 **E: reading notes and search** (step 2c, 3)
-- 🔧 1a. `ingest.py`: text extraction (Sat). TXT/MD/PDF/DOCX chunking works on the `ingest` branch (29 sample files → 954 chunks). Broken files (corrupt, encrypted, wrong encoding) are skipped and logged. Next: read through `resolve_and_check` (found: `edge_cases/escape link.md` symlink is still read by ingest; `db.add_file` refuses it)
+- ✅ 1a. `ingest.py`: TXT/MD/PDF/DOCX chunking; every read goes through `resolve_and_check` (symlinks out of the folder are blocked and logged); broken files skipped. `ingestAllowed()` walks the allowed folders, skipping hidden files
 - ✅ 1b. `db.py`: in-memory DB, contentless FTS5, vectors, revoke/forget hooks. Sample notes: 26 files, 950 chunks indexed in 0.4 s (no Ollama). `db.build(chunks)` runs files → FTS → vectors → groups. Not yet called from an endpoint (1d)
-- ⬜ 1c. FTS5 keyword search, `search.py` (Sat), needs 1a, 1b
-- ⬜ 1d. Ingest and search API endpoints (Sat), needs 1c
-- ⬜ 1e. Tests: parsing, permissions, cleanup (Sun)
+- ✅ 1c. `search.py`: keyword (FTS5) + meaning (vectors) merged by reciprocal rank fusion; snippets re-read from the file. Without Ollama it falls back to keyword only
+- ✅ 1d. `POST /api/index` (rebuild, about 3.5 min on all sample notes, mostly topic naming; keyword search works as soon as files are added), `GET /api/index` (counts), `GET /api/search?q=` (shape in `API_SHAPES.md`)
+- ✅ 1e. Tests: `test_ingest.py` (blocked paths, symlink escape), `test_search.py` (walk, search, fallback, stale file, revoke, forget, API)
 - ✅ 1f. Group chunks by topic: `group.py`; `db.build` stores groups and keeps the vectors for search by meaning. Groups are named lazily by `db.topics()` (placeholder "Group N" until a view asks), so indexing makes no LLM calls
 - ✅ Models warmed at startup and kept loaded (`models.py`); unloaded on quit and Forget everything (registered in `session.py`). Warm-up takes about 6 s in the background
 

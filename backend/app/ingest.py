@@ -106,3 +106,23 @@ def chunkFile(filePath:str):
         return False
     audit.record("read", filePath)
     return True
+
+SUPPORTED = {".txt", ".md", ".pdf", ".docx"}
+
+
+def ingestAllowed() -> int:
+    """Chunk every supported file in the allowed folders into `chunks`.
+    Hidden files/folders are skipped (editor and OS clutter). Returns files read."""
+    chunks.clear()
+    seen = set()
+    read = 0
+    for root in permissions.list_allowed_paths():
+        files = [root] if root.is_file() else sorted(root.rglob("*"))
+        for f in files:
+            rel = f.relative_to(root) if f != root else Path(f.name)
+            if f in seen or not f.is_file() or any(p.startswith(".") for p in rel.parts):
+                continue
+            seen.add(f)
+            if f.suffix.lower() in SUPPORTED:
+                read += chunkFile(str(f))
+    return read
