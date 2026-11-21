@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from . import __version__
 from . import permissions
+from . import models
 from . import prefs
 from . import search as search_mod
 
@@ -88,7 +89,7 @@ def put_settings(request: SavedSettings) -> SavedSettings:
 @router.post("/engine/unload")
 def unload_model() -> dict:
     """Launcher calls this on quit, before stopping the backend."""
-    return {"unloaded": search_mod.group.unload()}
+    return {"unloaded": models.unload()}
 
 
 @router.post("/index")

@@ -11,8 +11,10 @@ Rules (brief §1a, §6):
     means the model holds nothing from the notes after we are done.
   * Warming sends no note text, only an empty request that loads the model.
 
-Called by: main.main() via start(). Not imported by create_app, so tests never
-talk to Ollama.
+Called by: main.main() via start() (warm + unload at exit). api.py imports it
+for POST /api/engine/unload, which the launcher calls on quit. The forget hook
+is registered on import. This is the one place that unloads models: any new
+model (e.g. qa.py's) must be listed in _ours().
 """
 from __future__ import annotations
 
@@ -21,7 +23,7 @@ import json
 import threading
 import urllib.request
 
-from . import prefs, session
+from . import group, prefs, session
 
 OLLAMA = "http://127.0.0.1:11434"  # never configurable: local only
 EMBED_MODEL = "nomic-embed-text"
@@ -39,26 +41,51 @@ def _post(path: str, body: dict) -> None:
         r.read()
 
 
-def _set(keep_alive) -> None:
-    """keep_alive -1 loads and keeps a model; 0 unloads it. Errors are
-    ignored: Ollama being off must never break startup, quit or forget."""
+def _ours() -> list[str]:
+    return list(dict.fromkeys((EMBED_MODEL, group.NAME_MODEL, answer_model())))
+
+
+def _warm() -> None:
+    """keep_alive -1 loads and keeps a model. Errors are ignored: Ollama being
+    off must never break startup."""
     for path, body in (("/api/embed", {"model": EMBED_MODEL, "input": ""}),
                        ("/api/generate", {"model": answer_model()})):
         try:
-            _post(path, {**body, "keep_alive": keep_alive})
+            _post(path, {**body, "keep_alive": -1})
         except (OSError, ValueError):
             pass
 
 
 def warm() -> None:
-    threading.Thread(target=_set, args=(-1,), daemon=True, name="warm-models").start()
+    threading.Thread(target=_warm, daemon=True, name="warm-models").start()
 
 
-def unload() -> None:
-    _set(0)
+def unload() -> int:
+    """Tell Ollama to drop our models now (keep_alive 0), so it holds no
+    context once the session ends (One Rule: no copies). Asks /api/ps first so
+    it never loads a model just to unload it. Returns how many it unloaded."""
+    try:
+        with urllib.request.urlopen(OLLAMA + "/api/ps", timeout=2) as r:
+            loaded = {m["name"] for m in json.loads(r.read()).get("models", [])}
+    except (OSError, ValueError):
+        return 0  # Ollama not running: nothing is loaded
+    n = 0
+    for model in _ours():
+        if not any(name.split(":")[0] == model.split(":")[0] and
+                   (":" not in model or name == model) for name in loaded):
+            continue
+        path = "/api/embed" if model == EMBED_MODEL else "/api/generate"
+        try:
+            _post(path, {"model": model, "keep_alive": 0})
+            n += 1
+        except (OSError, ValueError):
+            pass
+    return n
 
 
 def start() -> None:
     warm()
-    atexit.register(unload)       # quit
-    session.on_forget("models", unload)  # Forget everything
+    atexit.register(unload)  # quit, if the launcher's unload call was missed
+
+
+session.on_forget("model", unload)  # Forget everything

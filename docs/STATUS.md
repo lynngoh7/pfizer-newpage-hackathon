@@ -42,7 +42,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 ## Step 4 — Questions with verified citations 🔧
 - 🔧 Ollama client `qa.py` (localhost only, on `feature/ai-qa`, not merged). System prompt treats note excerpts as untrusted data and asks for chunk ID + exact quote per claim. ⬜ Not yet called from an API route
 - ✅ Citation checker `citations.py`: every quote must appear in the chunk it cites (exact after folding case, spacing, smart quotes, accents, Markdown, `...` gaps; no fuzzy matching). Unbacked claims are dropped; none left → "No supporting notes found." qa.py calls `check_answer` with the chunks it put in the prompt
-- ✅ Unload on quit and "forget everything" (`group.unload`, keep_alive 0, only models that are loaded). ⬜ Keep the model warm during the session: qa.py currently sends `keep_alive: "0"`, change to warm + add its model to `group.unload`
+- ✅ Unload on quit and "forget everything" (`models.unload`, keep_alive 0, only models that are loaded). ⬜ qa.py currently sends `keep_alive: "0"`: use `models.answer_model()` and drop that, `models.py` keeps it warm and unloads it
 
 ## Step 5 — Trust panel 🔧
 Covers 20 of the 50 judging points. Sidebar → **Privacy**.
@@ -52,7 +52,7 @@ Covers 20 of the 50 judging points. Sidebar → **Privacy**.
 - ✅ Forget everything: confirm step, then shows what was cleared and re-checks the disk (`DELETE /api/session`). Same button in Settings
 - ✅ Webview runs `incognito` and every API response is `Cache-Control: no-store`. Before this, WebKit kept an HTTP cache in `~/Library/Caches/local-notes-assistant`, which would have kept copies of note passages
 - ⬜ Test in the real app (`npm run tauri dev`): confirm "Saved to disk: Folder list and settings only" after a session with incognito on. Delete old dev leftovers first: `rm -rf ~/Library/Caches/local-notes-assistant ~/Library/WebKit/local-notes-assistant`
-- ✅ Unload the Ollama models on forget (`session.on_forget("model", group.unload)`) and on quit (launcher calls `POST /api/engine/unload` before stopping the backend). qa.py must add its model to `group.unload`
+- ✅ Unload the Ollama models on forget (`session.on_forget("model", models.unload)`) and on quit (launcher calls `POST /api/engine/unload` before stopping the backend, `atexit` as backup). Any new model must be listed in `models._ours()`
 - ⬜ Rehearse the "turn Wi-Fi off" demo
 
 ## Settings + accessibility ✅
@@ -103,7 +103,7 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 - ✅ 2b. `qa.py` with source-aware prompts (Sat), on `feature/ai-qa`, not merged yet
 - 🔧 2c. Wire in `citations.py` and "No supporting notes found." (Sat). qa.py calls `check_answer`; ⬜ needs an ask route fed by `search.py` chunks
 - ⬜ 2d. Compare old decisions with newer notes (Sun), needs 1c, 2c
-- ✅ 2e. Unload the model on quit and forget (`models.py` at exit; `group.unload` on forget and via `POST /api/engine/unload` from the launcher; tests in `test_privacy_index.py`). qa.py's answer model must be added to it
+- ✅ 2e. Unload the model on quit and forget (`models.unload` on forget, via `POST /api/engine/unload` from the launcher, and at exit; tests in `test_privacy_index.py`). qa.py should use `models.answer_model()`
 
 **L: results UI** (step 3, 4, 6)
 - ⬜ 3a. Results page with mock data (Sat)

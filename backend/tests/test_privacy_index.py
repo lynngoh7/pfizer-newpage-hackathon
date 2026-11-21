@@ -7,7 +7,7 @@ import urllib.request
 import pytest
 from fastapi.testclient import TestClient
 
-from app import audit, db, group, ingest, permissions, session
+from app import audit, db, group, ingest, models, permissions, session
 from app.config import Settings
 from app.main import create_app
 
@@ -19,7 +19,7 @@ AUTH = {"Authorization": f"Bearer {TOKEN}"}
 def notes(tmp_path):
     permissions.on_revoke("index", db.drop_under)  # test_privacy_edges clears hooks
     session.on_forget("index", db.clear)
-    session.on_forget("model", group.unload)
+    session.on_forget("model", models.unload)
     d = tmp_path / "notes"
     d.mkdir()
     (d / "vendor.md").write_text("# Decision\nWe chose Acme as the vendor.\n")
@@ -47,6 +47,7 @@ def fake_ollama(monkeypatch, loaded):
         return io.BytesIO(json.dumps({"models": [{"name": n} for n in loaded]}).encode())
 
     monkeypatch.setattr(group, "_post", post)
+    monkeypatch.setattr(models, "_post", post)
     monkeypatch.setattr(urllib.request, "urlopen", urlopen)
     return calls
 
@@ -119,11 +120,11 @@ def test_forget_during_build_keeps_no_vectors_or_topics(notes, monkeypatch):
 
 def test_unload_skips_models_that_are_not_loaded(monkeypatch):
     calls = fake_ollama(monkeypatch, ["some-other-model:7b"])
-    assert group.unload() == 0 and calls == []
+    assert models.unload() == 0 and calls == []
 
 
 def test_unload_with_ollama_off_is_safe():
-    assert group.unload() == 0  # conftest points Ollama at a closed port
+    assert models.unload() == 0  # conftest points Ollama at a closed port
 
 
 def test_unload_route_needs_token(monkeypatch):

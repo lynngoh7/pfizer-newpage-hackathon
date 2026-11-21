@@ -10,5 +10,6 @@ def prefs_in_tmp(tmp_path, monkeypatch):
 @pytest.fixture(autouse=True)
 def no_real_ollama(monkeypatch):
     """Forget now unloads the model; never touch a developer's running Ollama."""
-    from app import group
+    from app import group, models
     monkeypatch.setattr(group, "OLLAMA", "http://127.0.0.1:9")
+    monkeypatch.setattr(models, "OLLAMA", "http://127.0.0.1:9")

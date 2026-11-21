@@ -21,8 +21,6 @@ import json
 import math
 import urllib.request
 
-from . import session
-
 OLLAMA = "http://127.0.0.1:11434"  # never configurable: local only
 EMBED_MODEL = "nomic-embed-text"
 NAME_MODEL = "llama3.2:3b"
@@ -40,30 +38,6 @@ def _post(path: str, body: dict) -> dict:
                                  {"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=300) as r:
         return json.loads(r.read())
-
-
-def unload() -> int:
-    """Tell Ollama to drop our models from memory now (keep_alive 0), so the
-    model holds no context once the session ends. Called on forget (session
-    hook below) and on quit (POST /api/engine/unload from the launcher).
-    Asks /api/ps first so it never loads a model just to unload it."""
-    try:
-        with urllib.request.urlopen(OLLAMA + "/api/ps", timeout=2) as r:
-            loaded = {m["name"] for m in json.loads(r.read()).get("models", [])}
-    except OSError:
-        return 0  # Ollama not running: nothing is loaded
-    n = 0
-    for model in (EMBED_MODEL, NAME_MODEL):
-        if not any(name.split(":")[0] == model.split(":")[0] and
-                   (":" not in model or name == model) for name in loaded):
-            continue
-        path = "/api/embed" if model == EMBED_MODEL else "/api/generate"
-        try:
-            _post(path, {"model": model, "keep_alive": 0})
-            n += 1
-        except OSError:
-            pass
-    return n
 
 
 def embed(chunks) -> list[list[float]]:
@@ -137,5 +111,3 @@ def group(chunks, threshold: float = THRESHOLD, vecs=None) -> list[dict]:
 def placeholder(gid: int) -> str:
     return f"Group {gid}"
 
-
-session.on_forget("model", unload)
