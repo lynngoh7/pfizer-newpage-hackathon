@@ -70,7 +70,8 @@ Add a row whenever you create a file.
 | `app/audit.py` | in-memory activity log: fixed action list, path, query, short outcome. Never note text | step 2: ingest/permissions call `record` |
 | `app/ingest.py` | split TXT (blank lines), MD and DOCX (headings; DOCX via markitdown), PDF (pages, pypdf) into `Chunk`s with path + start/end line or page; broken files skipped and logged | step 2c: read via `resolve_and_check` |
 | `app/group.py` | group chunks by topic: `nomic-embed-text` vectors → similarity groups (≥ 0.75) → one `llama3.2:3b` call names each group. Memory only, Ollama on 127.0.0.1 | — (`db.build` calls it) |
-| `app/db.py` | in-memory SQLite index: Files/Chunks/Groups, contentless FTS5 keyword search, vectors (Python dict until sqlite-vec loads), `passage()` re-reads text and refuses changed files; revoke + forget hooks | 1c/1d: `search.py` and ingest endpoint call it |
+| `app/models.py` | warm `nomic-embed-text` + answer model at startup (keep_alive -1), unload on quit and Forget everything. Ollama on 127.0.0.1, no note text sent | step 4: qa uses `answer_model()` |
+| `app/db.py` | in-memory SQLite index: Files/Chunks/Groups, contentless FTS5 keyword search, vectors (Python dict until sqlite-vec loads), `passage()` re-reads text and refuses changed files; revoke + forget hooks; `topics()` names groups lazily | 1c/1d: `search.py` and ingest endpoint call it |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
 | `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders (`prefs.json` is expected, anything else is flagged) | — |
 | `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/saved`, `/api/trust/storage`, `DELETE /api/session` | — |

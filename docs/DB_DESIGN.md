@@ -31,6 +31,7 @@ erDiagram
     Groups {
         int groupID PK
         str topic "short label from the LLM"
+        int named "0 = placeholder, named on first topics()"
     }
     chunks_fts {
         int rowid "= chunkID"
@@ -62,7 +63,8 @@ erDiagram
 | Column | Type | Notes |
 |---|---|---|
 | groupID | int, PK | |
-| topic | str | e.g. "Q3 budget" |
+| topic | str | e.g. "Q3 budget". "Group N" until named |
+| named | int | 0 until `db.topics()` names the group. Naming is one LLM call per group, so it runs when the Topics/Summary view asks, never during indexing |
 
 **chunks_fts**: keyword search (FTS5, `content=''`).
 Works like the index at the back of a book: which words appear in which chunk. Contentless means the text itself is not kept, so it can't be read back out.

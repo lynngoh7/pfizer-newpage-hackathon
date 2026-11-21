@@ -91,14 +91,15 @@ Tick a box here in the same PR as the code. Sunday evening is for recording the 
 - ⬜ 1c. FTS5 keyword search, `search.py` (Sat), needs 1a, 1b
 - ⬜ 1d. Ingest and search API endpoints (Sat), needs 1c
 - ⬜ 1e. Tests: parsing, permissions, cleanup (Sun)
-- ✅ 1f. Group chunks by topic: `group.py`; `db.build` stores groups and keeps the vectors for search by meaning
+- ✅ 1f. Group chunks by topic: `group.py`; `db.build` stores groups and keeps the vectors for search by meaning. Groups are named lazily by `db.topics()` (placeholder "Group N" until a view asks), so indexing makes no LLM calls
+- ✅ Models warmed at startup and kept loaded (`models.py`); unloaded on quit and Forget everything (registered in `session.py`). Warm-up takes about 6 s in the background
 
 **S: answers and decisions** (step 4, 6)
 - ⬜ 2a. Check local Ollama model and inference (Fri)
 - ⬜ 2b. `qa.py` with source-aware prompts (Sat), needs 2a; real chunks from 1c
 - ⬜ 2c. Wire in `citations.py` and "No supporting notes found." (Sat), needs 2b
 - ⬜ 2d. Compare old decisions with newer notes (Sun), needs 1c, 2c
-- ⬜ 2e. Unload the model on quit and forget; AI tests (Sun), needs 2a
+- 🔧 2e. Unload the model on quit and forget: done in `models.py`. ⬜ AI tests (Sun), needs 2a
 
 **L: results UI** (step 3, 4, 6)
 - ⬜ 3a. Results page with mock data (Sat)

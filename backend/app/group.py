@@ -12,7 +12,8 @@ Rules (brief §6):
     fallback), so a note cannot make the model do anything but name a group.
 
 Called by: ingest pipeline after chunkFile (step 2c). Reads ingest.Chunk.
-Sets chunk.groupID; returns the Groups rows (see docs/DB_DESIGN.md).
+Sets chunk.groupID; returns the Groups rows (see docs/DB_DESIGN.md). Groups are
+named lazily: db.topics() calls name() when a view first asks for topics.
 """
 from __future__ import annotations
 
@@ -92,7 +93,8 @@ def name(chunks) -> str:
 
 
 def group(chunks, threshold: float = THRESHOLD, vecs=None) -> list[dict]:
-    """Set chunk.groupID on every chunk and return [{groupID, topic}].
+    """Set chunk.groupID on every chunk and return [{groupID, topic}], topic a
+    placeholder ("Group N") until db.topics() names it.
     Pass `vecs` from embed() to reuse them (db.build keeps them for search)."""
     if not chunks:
         return []
@@ -100,5 +102,11 @@ def group(chunks, threshold: float = THRESHOLD, vecs=None) -> list[dict]:
     for gid, members in enumerate(cluster(vecs or embed(chunks), threshold), start=1):
         for i in members:
             chunks[i].groupID = gid
-        rows.append({"groupID": gid, "topic": name([chunks[i] for i in members])})
+        # Named later, only when a view asks (db.topics): one LLM call per
+        # group took most of the index build time.
+        rows.append({"groupID": gid, "topic": placeholder(gid)})
     return rows
+
+
+def placeholder(gid: int) -> str:
+    return f"Group {gid}"

@@ -95,3 +95,25 @@ def test_date_from_name_else_mtime(tmp_path):
     p = tmp_path / "Copy of 2026-10-20 rethink.md"
     assert db.note_date(p, 0) == "2026-10-20"
     assert db.note_date(tmp_path / "no date.txt", 1_790_000_000) == "2026-09-21"
+
+
+def test_groups_are_named_lazily_from_reread_text(tmp_path, monkeypatch):
+    from app import group
+    index(tmp_path / "n", {"a.txt": "alpha\n\nbeta\n"})
+    for c in ingest.chunks:
+        c.groupID = 1
+    db.set_groups([{"groupID": 1, "topic": group.placeholder(1)}], ingest.chunks)
+    seen = []
+    monkeypatch.setattr(group, "name", lambda cs: seen.append([c.text for c in cs]) or "Greek letters")
+    assert db.topics() == [{"groupID": 1, "topic": "Greek letters", "named": 1, "chunks": 2}]
+    db.topics()  # already named: no second LLM call
+    assert seen == [["alpha\n", "beta\n"]]
+
+
+def test_topics_keep_placeholder_when_ollama_is_down(tmp_path, monkeypatch):
+    from app import group
+    index(tmp_path / "n", {"a.txt": "alpha\n"})
+    ingest.chunks[0].groupID = 1
+    db.set_groups([{"groupID": 1, "topic": "Group 1"}], ingest.chunks)
+    monkeypatch.setattr(group, "name", lambda cs: (_ for _ in ()).throw(OSError()))
+    assert db.topics()[0]["topic"] == "Group 1"

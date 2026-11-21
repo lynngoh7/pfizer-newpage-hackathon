@@ -14,7 +14,7 @@ def test_cluster_joins_similar_and_splits_different():
     assert group.cluster([a, b, a2]) == [[0, 2], [1]]
 
 
-def test_group_sets_ids_and_names_each_group_once(monkeypatch):
+def test_group_sets_ids_and_leaves_naming_for_later(monkeypatch):
     calls = []
 
     def fake_post(path, body):
@@ -28,8 +28,8 @@ def test_group_sets_ids_and_names_each_group_once(monkeypatch):
     cs = _chunks("pick Kestrel", "Kestrel chosen", "hiring plan")
     rows = group.group(cs)
     assert [c.groupID for c in cs] == [1, 1, 2]
-    assert rows == [{"groupID": 1, "topic": "Vendor decision"}, {"groupID": 2, "topic": "Vendor decision"}]
-    assert calls == ["/api/embed", "/api/generate", "/api/generate"]
+    assert rows == [{"groupID": 1, "topic": "Group 1"}, {"groupID": 2, "topic": "Group 2"}]
+    assert calls == ["/api/embed"]  # no LLM call while indexing; db.topics() names groups
 
 
 def test_bad_or_injected_topic_falls_back(monkeypatch):

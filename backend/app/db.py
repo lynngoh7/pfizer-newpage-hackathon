@@ -36,7 +36,8 @@ CREATE TABLE Files (
 );
 CREATE TABLE Groups (
     groupID INTEGER PRIMARY KEY,
-    topic   TEXT NOT NULL
+    topic   TEXT NOT NULL,
+    named   INTEGER NOT NULL DEFAULT 0   -- 0 = placeholder "Group N", named on first topics() call
 );
 CREATE TABLE Chunks (
     chunkID INTEGER PRIMARY KEY,
@@ -126,9 +127,46 @@ def add_vectors(chunk_ids: list[int], vecs: list[list[float]]) -> None:
         _vecs.update(zip(chunk_ids, vecs))
 
 
+def topics() -> list[dict]:
+    """Groups with their topics, naming any still unnamed (one LLM call
+    each). Called by the Topics/Summary view, not during indexing, so the
+    index build never waits on the LLM. Text for naming is re-read from the
+    files (No copies), up to 4 chunks per group."""
+    from types import SimpleNamespace
+
+    from . import group
+
+    with _lock:
+        todo = [r[0] for r in _db.execute("SELECT groupID FROM Groups WHERE named = 0")]
+    for gid in todo:
+        with _lock:
+            cids = [r[0] for r in _db.execute(
+                "SELECT chunkID FROM Chunks WHERE groupID = ? ORDER BY chunkID LIMIT 4", (gid,))]
+        texts = []
+        for cid in cids:
+            try:
+                t = passage(cid)
+            except (OSError, PermissionError):
+                t = None
+            if t:
+                texts.append(SimpleNamespace(text=t))
+        if not texts:
+            continue
+        try:
+            topic = group.name(texts)
+        except OSError:  # Ollama down: keep the placeholder, try again next time
+            break
+        with _lock, _db:  # the group may have been dropped meanwhile; UPDATE is then a no-op
+            _db.execute("UPDATE Groups SET topic = ?, named = 1 WHERE groupID = ?", (topic, gid))
+    with _lock:
+        return [dict(zip(("groupID", "topic", "named", "chunks"), r)) for r in _db.execute(
+            "SELECT g.groupID, g.topic, g.named, count(c.chunkID) FROM Groups g "
+            "LEFT JOIN Chunks c USING (groupID) GROUP BY g.groupID ORDER BY g.groupID")]
+
+
 def build(chunks) -> dict:
     """Index a whole ingest run: files, keyword search, vectors, groups.
-    Needs Ollama for the vectors and group names."""
+    Needs Ollama for the vectors. Groups get placeholder names until topics()."""
     from . import group  # imported here so keyword search works without Ollama code loaded
 
     by_file: dict[str, list] = {}
