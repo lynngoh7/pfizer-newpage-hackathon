@@ -79,7 +79,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - Topic grouping, 37 chunks from the main sample notes, Intel Mac, 32 GB:
   - One `llama3.2:3b` call per chunk: about 100 s, poor labels. Too slow: `long standup log.md` alone is 901 chunks
   - `nomic-embed-text` for all chunks in one call (about 5 s), group by similarity ≥ 0.75, then one LLM call to name each group: about 25 s, 6 sensible groups. 0.6 and 0.7 merge too much
-  - Merging small chunks first would cut the count further
+  - `group.py` on all 953 sample chunks (incl. edge cases): about 167 s, 12 groups. Most of it is `long standup log.md` (901 chunks). Merging small chunks first would cut this
 
 ## Who does what (Fri 20 – Sun 22 Nov)
 
@@ -91,7 +91,7 @@ Tick a box here in the same PR as the code. Sunday evening is for recording the 
 - ⬜ 1c. FTS5 keyword search, `search.py` (Sat), needs 1a, 1b
 - ⬜ 1d. Ingest and search API endpoints (Sat), needs 1c
 - ⬜ 1e. Tests: parsing, permissions, cleanup (Sun)
-- ⬜ 1f. Group chunks by topic (`Groups` table, see `docs/DB_DESIGN.md`). Use embeddings, not one LLM call per chunk (see Performance notes)
+- 🔧 1f. Group chunks by topic: `group.py` done (embeddings + one naming call per group). Next: call it after ingest and store in the `Groups` table once `db.py` lands
 
 **S: answers and decisions** (step 4, 6)
 - ⬜ 2a. Check local Ollama model and inference (Fri)
