@@ -25,6 +25,7 @@ Add a row whenever you create a file.
 | `scripts/make_sample_notes.py` | generates the .docx/.pdf/.png samples, symlinks and file dates in `sample_notes/` (dev only: needs pymupdf, python-docx) | when sample notes change |
 | `docs/THIRD_PARTY.md` | licence notices for code copied in (Lucide icons) | when copying in third-party code |
 | `docs/SAMPLE_NOTES.md` | sample notes guide: demo story, test questions, edge cases | when sample notes change |
+| `docs/INSTALL.md` | install the app: step by step for Mac, Windows, Linux (installer or build yourself) | when packaging changes |
 | `sample_notes/` | fictional manager notes + `edge_cases/`. Never real notes | add files as needed |
 | `scripts/build-sidecar.sh` | PyInstaller build → `src-tauri/binaries/notes-backend-<target-triple>` (`.exe` on Windows; the name Tauri's `externalBin` needs). Works in Git Bash | step 7 (bundle sqlite-vec) |
 | `scripts/build-app.sh` | Builds backend + app and installs it (Mac /Applications, Windows installer, Linux .deb/.rpm; `--install` = last build only) | — |

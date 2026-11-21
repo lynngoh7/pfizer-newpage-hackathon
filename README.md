@@ -6,7 +6,7 @@ A desktop app that finds the note you mean. Everything runs on your own computer
 
 1. **Node.js 20 or newer** — https://nodejs.org
 2. **Python 3.10 or newer** — https://www.python.org/downloads
-3. **Rust** (builds the desktop window) — run in a terminal:
+3. **Rust** (builds the desktop window). Windows: see [docs/INSTALL.md](docs/INSTALL.md). Mac/Linux: run in a terminal:
    ```sh
    curl https://sh.rustup.rs -sSf | sh
    ```
@@ -77,16 +77,17 @@ This is for development only. It still runs only on your computer, but it is not
 - [docs/STATUS.md](docs/STATUS.md) — what is done, what to pick up next
 - [docs/BRIEF.md](docs/BRIEF.md) — the brief, the One Rule, the safety rules
 - [docs/FILES.md](docs/FILES.md) — every file and what it does
+- [docs/INSTALL.md](docs/INSTALL.md) — install the app on Mac, Windows or Linux
 - [docs/DB_DESIGN.md](docs/DB_DESIGN.md) — in-memory database tables and diagram
 
-## Build the app
+## 6. Install the app
 
-1. `sh scripts/build-app.sh` (on Windows run it in Git Bash). It builds the backend and the app, then installs it:
-   - Mac: into /Applications
-   - Windows: runs the installer (Start menu)
-   - Linux: installs the .deb or .rpm (app menu)
-2. Open **Local Notes Assistant** like any other app. The first time, right-click → Open (the app is unsigned). Ollama must already be running.
+To use it like a normal app (no terminal), follow **[docs/INSTALL.md](docs/INSTALL.md)**. It has separate steps for Mac, Windows and Linux.
 
-Already built? `sh scripts/build-app.sh --install` installs the last build without rebuilding.
+Short version, from the project folder:
 
-Each OS must be built on that OS. To build all of them, run **Build app** in the GitHub Actions tab: the installers are attached to the run.
+```sh
+sh scripts/build-app.sh   # builds the app, then installs it
+```
+
+Windows: run this in Git Bash.
