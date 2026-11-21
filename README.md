@@ -76,10 +76,12 @@ Install these once:
 
 ```sh
 npm install          # first time only
+sh scripts/build-sidecar.sh # required once per machine/target before Tauri dev
 npm run tauri dev    # opens the desktop window
 ```
 
-The first run compiles Rust and can take a few minutes. After that it is fast.
+The first run compiles Rust and can take a few minutes. Rebuild the sidecar after
+changing backend code or Python dependencies. After that, Tauri dev is fast.
 The Python backend sets itself up automatically on first run (it creates `backend/.venv`).
 
 **Sample notes:** some files in `sample_notes/` are generated. Run this once after cloning (see [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md)):

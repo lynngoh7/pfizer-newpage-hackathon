@@ -37,7 +37,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 
 ## Step 3 — Keyword search 🔧
 - ✅ FTS5 table (contentless) in `db.py`, `db.keyword(q)`. `search.py` merges keyword + meaning
-- ⬜ Results page: source cards (file, path, snippet re-read from the file, open-file button)
+- ✅ Results page with source cards and excerpts; search submits to `/api/index` and `/api/search`
 
 ## Step 4 — Questions with verified citations 🔧
 - 🔧 Ollama client `qa.py` (localhost only, on `feature/ai-qa`, not merged). System prompt treats note excerpts as untrusted data and asks for chunk ID + exact quote per claim. ⬜ Not yet called from an API route
@@ -116,9 +116,9 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 - ✅ 2e. Unload the model on quit and forget (`models.unload` on forget, via `POST /api/engine/unload` from the launcher, and at exit; tests in `test_privacy_index.py`). qa.py should use `models.answer_model()`
 
 **L: results UI** (step 3, 4, 6)
-- ⬜ 3a. Results page with mock data (Sat)
-- ⬜ 3b. Source cards and file excerpts (Sat)
-- ⬜ 3c. Connect search and questions to the backend (Sat), needs 1d, 2c
+- ✅ 3a. Results page with mock data (Sat)
+- ✅ 3b. Source cards and file excerpts (Sat)
+- 🔧 3c. Keyword and natural-language search call `/api/index` and `/api/search`; question answers await the QA API from 2c
 - ⬜ 3d. Show decision changes and error states (Sun), needs 2d
 - ⬜ 3e. Demo polish and accessibility check (Sun, P1)
 
