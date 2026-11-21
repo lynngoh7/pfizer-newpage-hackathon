@@ -11,6 +11,7 @@ A desktop app that finds the note you mean. Everything runs on your own computer
 
 ## Contents
 
+- [Demo](#demo)
 - [Installation](#installation)
 - [Development](#development)
   - [Tech stack](#tech-stack)
@@ -20,6 +21,13 @@ A desktop app that finds the note you mean. Everything runs on your own computer
   - [Project structure](#project-structure)
   - [Documentation](#documentation)
 - [Team](#team)
+
+## Demo
+
+<!-- Add the demo video link and a screenshot here, e.g.
+[![Demo video](docs/demo.png)](VIDEO_LINK) -->
+
+_Demo video coming soon._
 
 ## Installation
 
