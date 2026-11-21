@@ -90,7 +90,7 @@ def test_revoke_during_build_keeps_no_vectors_or_topics(notes, monkeypatch):
 # 4c ------------------------------------------------------------------------
 
 def test_forget_through_api_empties_index_and_unloads_model(notes, monkeypatch):
-    calls = fake_ollama(monkeypatch, ["nomic-embed-text:latest", "llama3.2:3b"])
+    calls = fake_ollama(monkeypatch, ["nomic-embed-text:latest", "qwen3:4b-instruct"])
     c = client()
     c.post("/api/folders", json={"path": str(notes)}, headers=AUTH)
     c.post("/api/index", headers=AUTH)
@@ -128,7 +128,7 @@ def test_unload_with_ollama_off_is_safe():
 
 
 def test_unload_route_needs_token(monkeypatch):
-    fake_ollama(monkeypatch, ["llama3.2:3b"])
+    fake_ollama(monkeypatch, ["qwen3:4b-instruct"])
     c = client()
     assert c.post("/api/engine/unload").status_code == 401
     assert c.post("/api/engine/unload", headers=AUTH).json() == {"unloaded": 1}

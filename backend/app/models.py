@@ -27,7 +27,7 @@ from . import group, prefs, session
 
 OLLAMA = "http://127.0.0.1:11434"  # never configurable: local only
 EMBED_MODEL = "nomic-embed-text"
-DEFAULT_ANSWER_MODEL = "llama3.2:3b"
+DEFAULT_ANSWER_MODEL = "qwen3:4b-instruct"
 
 
 def answer_model() -> str:
