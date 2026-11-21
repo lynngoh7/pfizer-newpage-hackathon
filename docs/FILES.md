@@ -26,6 +26,7 @@ Add a row whenever you create a file.
 | `docs/SAMPLE_NOTES.md` | sample notes guide: demo story, test questions, edge cases | when sample notes change |
 | `sample_notes/` | fictional manager notes + `edge_cases/`. Never real notes | add files as needed |
 | `scripts/build-sidecar.sh` | PyInstaller build → `src-tauri/binaries/notes-backend-<target-triple>` (the name Tauri's `externalBin` needs) | step 7 (bundle sqlite-vec) |
+| `scripts/build-app.sh` | Builds backend + app and installs it into /Applications (`--install` = copy last build only) | — |
 
 ## Frontend `src/`
 | File | Purpose | Next edit |

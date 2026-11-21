@@ -76,6 +76,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 ## Packaged app ✅
 - ✅ `sh scripts/build-sidecar.sh` then `npm run tauri build` makes `Local Notes Assistant.app` (about 51 MB): double-click to open, no terminal. The backend is bundled inside and starts and stops with the app
 - ✅ Tested on macOS (Intel): the built backend reads all `sample_notes/` and search works; quitting the app stops the backend
+- ✅ `sh scripts/build-app.sh` builds and installs the app into /Applications (shows in Launchpad/Spotlight); `--install` skips the build
 - ⚠ First launch takes about 15 s before the engine dot goes green (the backend unpacks itself; macOS scans the new binary). Later launches are faster
 - ⚠ Not signed: the first time, right-click the app → Open. Ollama is still installed separately
 - ⬜ Build on an Apple Silicon Mac for the demo machine (builds are per-architecture); sqlite-vec hidden imports when step 7 lands

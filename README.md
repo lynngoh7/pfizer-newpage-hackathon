@@ -81,6 +81,7 @@ This is for development only. It still runs only on your computer, but it is not
 
 ## Build the app
 
-1. `sh scripts/build-sidecar.sh`
-2. `npm run tauri build`
-3. Open `src-tauri/target/release/bundle/macos/Local Notes Assistant.app`. The first time, right-click → Open (the app is unsigned). Ollama must already be running.
+1. `sh scripts/build-app.sh` (builds the backend and the app, then installs it into /Applications)
+2. Open **Local Notes Assistant** from Launchpad, Spotlight or /Applications. The first time, right-click → Open (the app is unsigned). Ollama must already be running.
+
+Already built? `sh scripts/build-app.sh --install` just copies the last build into /Applications.
