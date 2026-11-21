@@ -75,6 +75,40 @@ class SavedSettings(BaseModel):
     answer_model: str | None = None
 
 
+class AskRequest(BaseModel):
+    """Question submitted by the manager."""
+
+    # Only accept the question, not arbitrary note contents.
+    question: str = Field(min_length=1, max_length=500)
+
+
+class AskCitation(BaseModel):
+    """A verified quotation from a retrieved note."""
+
+    chunk_id: int
+    quote: str
+    start: int
+    end: int
+
+
+class AskClaim(BaseModel):
+    """An AI-generated claim with verified citations."""
+
+    text: str
+    citations: list[AskCitation]
+
+
+class AskResponse(BaseModel):
+    """Structured response returned to the frontend."""
+
+    status: str
+    supported: bool
+    answer: str | None
+    message: str | None
+    claims: list[AskClaim]
+    sources: list[dict]
+
+
 @router.get("/settings", response_model=SavedSettings)
 def get_settings() -> SavedSettings:
     return SavedSettings(**prefs.load()["settings"])
