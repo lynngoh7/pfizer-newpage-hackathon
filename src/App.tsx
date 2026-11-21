@@ -13,6 +13,7 @@ import Sidebar, { View } from "./components/Sidebar";
 import SearchBar from "./components/SearchBar";
 import Home from "./pages/Home";
 import Placeholder from "./pages/Placeholder";
+import SearchResults from "./pages/SearchResults";
 import Settings from "./pages/Settings";
 
 // Lazy: this page's code downloads only when first opened, keeping startup fast.
@@ -34,12 +35,7 @@ export default function App() {
       main = <Home />;
       break;
     case "search":
-      main = (
-        <Placeholder
-          title={query ? `Results for “${query}”` : "Search"}
-          note="Keyword search arrives in build step 3; Q&A with verified citations in step 4."
-        />
-      );
+      main = <SearchResults query={query} />;
       break;
     case "decisions":
       main = <Placeholder title="Decisions & To-dos" note="Extraction arrives in build step 6." />;

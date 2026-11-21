@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { allowPath, getAllowedPaths, revokePath } from "../lib/api";
+import { allowPath, getAllowedPaths, reindex, revokePath } from "../lib/api";
 
 function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -30,17 +30,28 @@ export default function FolderAccess() {
     }
 
     setBusy(true);
+    let added = false;
     try {
       const selected = await open({ directory, multiple: true });
       if (!selected) return;
       const paths = Array.isArray(selected) ? selected : [selected];
+      if (paths.length === 0) return;
       for (const path of paths) {
         const result = await allowPath(path);
         setAllowedPaths(result.paths);
+        added = true;
       }
     } catch (e) {
       setAccessError(String(e));
     } finally {
+      // Index whatever was added, even if a later folder failed.
+      if (added) {
+        try {
+          await reindex();
+        } catch (e) {
+          setAccessError(`Folder access was updated, but indexing failed: ${String(e)}`);
+        }
+      }
       setBusy(false);
     }
   }
