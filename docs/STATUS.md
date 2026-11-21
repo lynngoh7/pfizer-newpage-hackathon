@@ -21,7 +21,7 @@ Build one demo moment end to end: the manager asks about a decision made weeks a
 - ✅ Compiled and run on macOS (2026-11-15): window opens, backend starts on a random localhost port, sidebar shows the engine as ready. Only localhost ports open
 - ⬜ Real app icon (`npm run tauri icon <1024px.png>`)
 
-## Step 2 — Folder access + reading notes ⬜
+## Step 2 — Folder access + reading notes ✅
 New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `src/pages/Privacy.tsx` (folder section).
 - ✅ `permissions.py` with `resolve_and_check(path)` (follows symlinks, blocks `.ssh`, `.env`, keychains). Every file read in ingest goes through it
 - ✅ Backend `GET/POST/DELETE /api/folders`
@@ -35,14 +35,14 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ `db.py` registers `session.on_forget("index", db.clear)`. **Every new module holding session data must register too**
 - ✅ `sample_notes/`: fictional notes for the demo moment plus edge cases. Guide and expected answers in `docs/SAMPLE_NOTES.md`. Run `scripts/make_sample_notes.py` after cloning
 
-## Step 3 — Keyword search ⬜
+## Step 3 — Keyword search 🔧
 - ✅ FTS5 table (contentless) in `db.py`, `db.keyword(q)`. `search.py` merges keyword + meaning
 - ⬜ Results page: source cards (file, path, snippet re-read from the file, open-file button)
 
-## Step 4 — Questions with verified citations ⬜
-- ⬜ Ollama client (localhost only). Note text goes in clearly marked "untrusted data" blocks
+## Step 4 — Questions with verified citations 🔧
+- 🔧 Ollama client `qa.py` (localhost only, on `feature/ai-qa`, not merged). System prompt treats note excerpts as untrusted data and asks for chunk ID + exact quote per claim. ⬜ Not yet called from an API route
 - ✅ Citation checker `citations.py`: every quote must appear in the chunk it cites (exact after folding case, spacing, smart quotes, accents, Markdown, `...` gaps; no fuzzy matching). Unbacked claims are dropped; none left → "No supporting notes found." qa.py calls `check_answer` with the chunks it put in the prompt
-- ✅ Unload on quit and "forget everything" (`group.unload`, keep_alive 0, only models that are loaded). ⬜ Keep the model warm during the session (qa.py)
+- ✅ Unload on quit and "forget everything" (`group.unload`, keep_alive 0, only models that are loaded). ⬜ Keep the model warm during the session: qa.py currently sends `keep_alive: "0"`, change to warm + add its model to `group.unload`
 
 ## Step 5 — Trust panel 🔧
 Covers 20 of the 50 judging points. Sidebar → **Privacy**.
@@ -99,9 +99,9 @@ Tick a box here in the same PR as the code. Sunday evening is for recording the 
 - ✅ Models warmed at startup and kept loaded (`models.py`); unloaded on quit and Forget everything (registered in `session.py`). Warm-up takes about 6 s in the background
 
 **S: answers and decisions** (step 4, 6)
-- ⬜ 2a. Check local Ollama model and inference (Fri)
-- ⬜ 2b. `qa.py` with source-aware prompts (Sat), needs 2a; real chunks from 1c
-- ⬜ 2c. Wire in `citations.py` and "No supporting notes found." (Sat), needs 2b
+- ✅ 2a. Check local Ollama model and inference (Fri). `nomic-embed-text` and `llama3.2:3b` run locally (timings under Performance notes); qa.py defaults to `qwen3:4b-instruct`
+- ✅ 2b. `qa.py` with source-aware prompts (Sat), on `feature/ai-qa`, not merged yet
+- 🔧 2c. Wire in `citations.py` and "No supporting notes found." (Sat). qa.py calls `check_answer`; ⬜ needs an ask route fed by `search.py` chunks
 - ⬜ 2d. Compare old decisions with newer notes (Sun), needs 1c, 2c
 - ✅ 2e. Unload the model on quit and forget (`models.py` at exit; `group.unload` on forget and via `POST /api/engine/unload` from the launcher; tests in `test_privacy_index.py`). qa.py's answer model must be added to it
 
@@ -116,7 +116,7 @@ Tick a box here in the same PR as the code. Sunday evening is for recording the 
 - ✅ 4a. Audit events for folder add/remove (Sat)
 - ✅ 4b. Revoking a folder drops its chunks, vectors, topics and search results at once, also mid-rebuild (`tests/test_privacy_index.py`)
 - ✅ 4c. Forget everything clears grants, prefs, log, index and unloads the model, also mid-rebuild. Fixed: a forget or revoke during the minutes-long embedding step used to put vectors and topics back
-- 🔧 4d. Test storage, network and offline claims (Sun). `tests/test_no_network.py` covers every route incl. index, search, model unload; ⬜ add the ask route when 2c lands
+- 🔧 4d. Test storage, network and offline claims (Sun). `tests/test_no_network.py` covers every route incl. index, search, model unload; ⬜ add the ask route when 2c lands (blocked on 2c)
 - ⬜ 4e. Edge-case tests and trust demo (Sun), needs everything above
 
 ### Dependencies
