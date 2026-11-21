@@ -25,7 +25,7 @@ Add a row whenever you create a file.
 | `docs/THIRD_PARTY.md` | licence notices for code copied in (Lucide icons) | when copying in third-party code |
 | `docs/SAMPLE_NOTES.md` | sample notes guide: demo story, test questions, edge cases | when sample notes change |
 | `sample_notes/` | fictional manager notes + `edge_cases/`. Never real notes | add files as needed |
-| `scripts/build-sidecar.sh` | PyInstaller build → `src-tauri/binaries/notes-backend` | step 7 (bundle sqlite-vec) |
+| `scripts/build-sidecar.sh` | PyInstaller build → `src-tauri/binaries/notes-backend-<target-triple>` (the name Tauri's `externalBin` needs) | step 7 (bundle sqlite-vec) |
 
 ## Frontend `src/`
 | File | Purpose | Next edit |
@@ -52,14 +52,15 @@ Add a row whenever you create a file.
 | `Cargo.toml` | Rust deps: tauri, dialog plugin, serde, rand | — |
 | `src/main.rs` | binary entry → `lib::run()` | — |
 | `src/lib.rs` | Tauri builder; registers dialog plugin and `get_session`; stops backend on exit | add commands as needed |
-| `src/sidecar.rs` | token + port generation, spawns backend (packaged binary or Python in debug), sets `NOTES_DEV` in debug builds only, on quit asks the backend to unload the model then kills it | — |
-| `icons/icon.png` | 1×1 placeholder | replace with real icon set |
+| `src/sidecar.rs` | token + port generation, spawns backend (packaged binary or Python in debug), sets `NOTES_DEV` in debug builds only, on quit asks the backend to unload the model, then SIGTERM (SIGKILL after 3 s) so the PyInstaller child isn't orphaned | — |
+| `icons/` | placeholder app icon set (blue circle), made with `npx tauri icon <1024px png>` | replace with real logo |
 
 ## Backend `backend/`
 | File | Purpose | Next edit |
 |---|---|---|
 | `pyproject.toml` | **the one place to add Python deps**: deps (fastapi, uvicorn, psutil, pypdf, markitdown[docx]), dev extras (pytest, httpx), package extra (pyinstaller) | step 2: markitdown; step 7: sqlite-vec |
-| `notes-backend.spec` | PyInstaller spec | step 7: hidden imports for sqlite-vec |
+| `notes-backend.spec` | PyInstaller spec (entry: `run_backend.py`) |
+| `run_backend.py` | PyInstaller entry point; imports `app.main` as a package so relative imports work | — | step 7: hidden imports for sqlite-vec |
 | `app/__init__.py` | version | — |
 | `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (the only saved file is `prefs.json`, see `prefs.py`) |
 | `app/auth.py` | bearer-token middleware, constant-time compare, every request; marks every response `no-store` | — |

@@ -73,6 +73,13 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Search by meaning (`nomic-embed-text` vectors, merged with keyword in `search.py`). ⬜ Embed in the background so keyword search is ready first on launch
 - ⬜ Summary page for managers
 
+## Packaged app ✅
+- ✅ `sh scripts/build-sidecar.sh` then `npm run tauri build` makes `Local Notes Assistant.app` (about 51 MB): double-click to open, no terminal. The backend is bundled inside and starts and stops with the app
+- ✅ Tested on macOS (Intel): the built backend reads all `sample_notes/` and search works; quitting the app stops the backend
+- ⚠ First launch takes about 15 s before the engine dot goes green (the backend unpacks itself; macOS scans the new binary). Later launches are faster
+- ⚠ Not signed: the first time, right-click the app → Open. Ollama is still installed separately
+- ⬜ Build on an Apple Silicon Mac for the demo machine (builds are per-architecture); sqlite-vec hidden imports when step 7 lands
+
 ## Performance notes
 - Index build on all sample notes, Intel Mac (2026-11-21). Neighbouring small chunks are now merged up to 1000 characters (`ingest.mergeSmall`):
   - Before: 950 chunks. Keyword ready 0.8 s, embedding 180 s, grouping + naming 13 s. Total 194 s

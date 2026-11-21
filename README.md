@@ -79,6 +79,8 @@ This is for development only. It still runs only on your computer, but it is not
 - [docs/FILES.md](docs/FILES.md) — every file and what it does
 - [docs/DB_DESIGN.md](docs/DB_DESIGN.md) — in-memory database tables and diagram
 
-## Packaging (later)
+## Build the app
 
-`sh scripts/build-sidecar.sh` then `npm run tauri build`.
+1. `sh scripts/build-sidecar.sh`
+2. `npm run tauri build`
+3. Open `src-tauri/target/release/bundle/macos/Local Notes Assistant.app`. The first time, right-click → Open (the app is unsigned). Ollama must already be running.

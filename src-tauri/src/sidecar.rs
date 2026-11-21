@@ -118,10 +118,30 @@ impl Backend {
     pub fn stop(&self) {
         if let Some(mut c) = self.child.lock().unwrap().take() {
             self.unload_model();
-            let _ = c.kill();
-            let _ = c.wait();
+            terminate(&mut c);
         }
     }
+}
+
+/// Stop the backend and wait for it. The packaged backend is a PyInstaller
+/// one-file binary: a launcher process plus the real Python child. SIGKILL on
+/// the launcher orphans the child (it keeps running after quit), so send
+/// SIGTERM first, which the launcher forwards to the child and then cleans up
+/// its unpacked temp folder. SIGKILL only if it is still alive after 3 s.
+fn terminate(c: &mut Child) {
+    #[cfg(unix)]
+    {
+        // SAFETY: plain kill(2) on our own child's pid.
+        unsafe { libc::kill(c.id() as libc::pid_t, libc::SIGTERM) };
+        for _ in 0..30 {
+            if let Ok(Some(_)) = c.try_wait() {
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(100));
+        }
+    }
+    let _ = c.kill();
+    let _ = c.wait();
 }
 
 // Safety net: if the app exits without the Exit event, still kill the backend.
