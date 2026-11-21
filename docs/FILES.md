@@ -21,12 +21,13 @@ Add a row whenever you create a file.
 | `scripts/dev-backend.sh` | run sidecar alone (creates venv on first run) | — |
 | `scripts/privacy-guard.sh` | fails if `src/` or `backend/app/` contain a URL other than localhost; run by CI | — |
 | `.github/workflows/ci.yml` | CI: backend tests, frontend build, privacy guard on PRs and pushes to main | — |
+| `.github/workflows/build-app.yml` | Builds the app on Apple Silicon Mac, Intel Mac, Windows and Linux, checks the bundled backend starts, attaches installers (manual or packaging PRs) | — |
 | `scripts/make_sample_notes.py` | generates the .docx/.pdf/.png samples, symlinks and file dates in `sample_notes/` (dev only: needs pymupdf, python-docx) | when sample notes change |
 | `docs/THIRD_PARTY.md` | licence notices for code copied in (Lucide icons) | when copying in third-party code |
 | `docs/SAMPLE_NOTES.md` | sample notes guide: demo story, test questions, edge cases | when sample notes change |
 | `sample_notes/` | fictional manager notes + `edge_cases/`. Never real notes | add files as needed |
-| `scripts/build-sidecar.sh` | PyInstaller build → `src-tauri/binaries/notes-backend-<target-triple>` (the name Tauri's `externalBin` needs) | step 7 (bundle sqlite-vec) |
-| `scripts/build-app.sh` | Builds backend + app and installs it into /Applications (`--install` = copy last build only) | — |
+| `scripts/build-sidecar.sh` | PyInstaller build → `src-tauri/binaries/notes-backend-<target-triple>` (`.exe` on Windows; the name Tauri's `externalBin` needs). Works in Git Bash | step 7 (bundle sqlite-vec) |
+| `scripts/build-app.sh` | Builds backend + app and installs it (Mac /Applications, Windows installer, Linux .deb/.rpm; `--install` = last build only) | — |
 
 ## Frontend `src/`
 | File | Purpose | Next edit |
@@ -53,7 +54,7 @@ Add a row whenever you create a file.
 | `Cargo.toml` | Rust deps: tauri, dialog plugin, serde, rand | — |
 | `src/main.rs` | binary entry → `lib::run()` | — |
 | `src/lib.rs` | Tauri builder; registers dialog plugin and `get_session`; stops backend on exit | add commands as needed |
-| `src/sidecar.rs` | token + port generation, spawns backend (packaged binary or Python in debug), sets `NOTES_DEV` in debug builds only, on quit asks the backend to unload the model, then SIGTERM (SIGKILL after 3 s) so the PyInstaller child isn't orphaned | — |
+| `src/sidecar.rs` | token + port generation, spawns backend (packaged binary or Python in debug), sets `NOTES_DEV` in debug builds only, on quit asks the backend to unload the model, then SIGTERM (SIGKILL after 3 s) so the PyInstaller child isn't orphaned (Windows: `taskkill /T`); hides the backend console window on Windows | — |
 | `icons/` | placeholder app icon set (blue circle), made with `npx tauri icon <1024px png>` | replace with real logo |
 
 ## Backend `backend/`

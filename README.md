@@ -81,7 +81,12 @@ This is for development only. It still runs only on your computer, but it is not
 
 ## Build the app
 
-1. `sh scripts/build-app.sh` (builds the backend and the app, then installs it into /Applications)
-2. Open **Local Notes Assistant** from Launchpad, Spotlight or /Applications. The first time, right-click → Open (the app is unsigned). Ollama must already be running.
+1. `sh scripts/build-app.sh` (on Windows run it in Git Bash). It builds the backend and the app, then installs it:
+   - Mac: into /Applications
+   - Windows: runs the installer (Start menu)
+   - Linux: installs the .deb or .rpm (app menu)
+2. Open **Local Notes Assistant** like any other app. The first time, right-click → Open (the app is unsigned). Ollama must already be running.
 
-Already built? `sh scripts/build-app.sh --install` just copies the last build into /Applications.
+Already built? `sh scripts/build-app.sh --install` installs the last build without rebuilding.
+
+Each OS must be built on that OS. To build all of them, run **Build app** in the GitHub Actions tab: the installers are attached to the run.
