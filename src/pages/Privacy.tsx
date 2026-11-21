@@ -10,7 +10,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import FolderAccess from "../components/FolderAccess";
 import ForgetButton from "../components/ForgetButton";
-import { AuditEntry, auditLog, network, NetworkReport, storage, StorageReport } from "../lib/trust";
+import { AuditEntry, auditLog, network, NetworkReport, saved, SavedReport, storage, StorageReport } from "../lib/trust";
 
 // Plain-language names, in the order a user thinks of them.
 const PROGRAMS: { role: "app" | "engine" | "model"; name: string }[] = [
@@ -52,9 +52,12 @@ function fileName(p: string) {
 export default function Privacy() {
   const [net, netError] = usePoll<NetworkReport>(network, 3000);
   const [disk, diskError, refreshDisk] = usePoll<StorageReport>(storage, 10000);
+  const [prefs, , refreshPrefs] = usePoll<SavedReport>(saved, 10000);
   const [log, setLog] = useState<AuditEntry[]>([]);
   // A ref, not state: changing it must not re-render, it only marks how far we have read.
   const lastSeq = useRef(0);
+  // Bumped by "Forget everything" to remount the folder list (it loads on mount).
+  const [forgets, setForgets] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -92,14 +95,14 @@ export default function Privacy() {
         </dd>
         <dt>Saved to disk</dt>
         <dd className={disk?.files ? "error" : ""}>
-          {!disk ? "Checking…" : disk.files ? `${disk.files} files` : "Nothing"}
+          {!disk ? "Checking…" : disk.files ? `${disk.files} unexpected files` : disk.saved.bytes ? "Folder list and settings only. No notes" : "Nothing"}
         </dd>
         <dt>Files read</dt>
         <dd>{filesRead ? `${filesRead} this session` : "None yet"}</dd>
       </dl>
 
-      {/* Grants are session-only, so this list starts empty on every launch. */}
-      <FolderAccess />
+      {/* The folder list is saved (paths only), so it is restored on the next launch. */}
+      <FolderAccess key={forgets} />
 
       <section className="card">
         <h3>Internet</h3>
@@ -146,8 +149,20 @@ export default function Privacy() {
       <section className="card">
         <h3>Saved to disk</h3>
         {diskError && <p className="error">Could not check: {diskError}</p>}
+        <p>
+          Only your folder list and settings are saved, so they are still there next time. Never
+          the text of your notes, the search index, your questions or answers.
+        </p>
+        {prefs && (prefs.exists ? (
+          <dl className="props">
+            <dt>Folders</dt>
+            <dd>{prefs.folders.length ? prefs.folders.map(fileName).join(", ") : "None"}</dd>
+            <dt>Settings</dt>
+            <dd>{Object.keys(prefs.settings).length ? Object.entries(prefs.settings).map(([k, v]) => `${k.replace(/_/g, " ")}: ${v}`).join(", ") : "None"}</dd>
+          </dl>
+        ) : <p className="muted">Nothing saved yet.</p>)}
         {disk && disk.files === 0 && (
-          <p>All {disk.locations.length} places where apps usually keep data are empty. Checked just now.</p>
+          <p className="muted">Apart from that, all {disk.locations.length} places where apps usually keep data are empty. Checked just now.</p>
         )}
         {disk && disk.files > 0 && (
           <>
@@ -169,10 +184,17 @@ export default function Privacy() {
             <ul className="paths">
               {disk.locations.map((l) => (
                 <li key={l.path}>
-                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : l.exists ? "empty" : "not there"}</span>
+                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : disk.saved.path.startsWith(l.path + "/") ? "only prefs.json" : l.exists ? "empty" : "not there"}</span>
                 </li>
               ))}
             </ul>
+          </details>
+        )}
+        {prefs?.exists && (
+          <details className="more">
+            <summary>Technical details</summary>
+            <p>File: <code>{prefs.path}</code></p>
+            <ul className="paths">{prefs.folders.map((f) => <li key={f}><code>{f}</code></li>)}</ul>
           </details>
         )}
       </section>
@@ -188,8 +210,8 @@ export default function Privacy() {
 
       <section className="card">
         <h3>Forget everything</h3>
-        <p className="muted">Ends this session's memory now, instead of waiting until you quit.</p>
-        <ForgetButton onDone={() => { setLog([]); refreshDisk(); }} />
+        <p className="muted">Clears this session's memory and deletes the saved folder list and settings.</p>
+        <ForgetButton onDone={() => { setLog([]); refreshDisk(); refreshPrefs(); setForgets((n) => n + 1); }} />
       </section>
     </div>
   );

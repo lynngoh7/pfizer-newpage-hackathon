@@ -33,6 +33,15 @@ export interface NetworkReport {
 export interface StorageReport {
   files: number;
   locations: { path: string; exists: boolean; files: number; bytes: number; listed: string[] }[];
+  saved: { path: string; bytes: number }; // prefs.json: expected, not counted in `files`
+}
+
+// What prefs.json holds right now: folder paths and settings, nothing else.
+export interface SavedReport {
+  path: string;
+  exists: boolean;
+  folders: string[];
+  settings: Record<string, string>;
 }
 
 export interface ForgetResult {
@@ -43,5 +52,6 @@ export interface ForgetResult {
 // `after` = last seq the page already has; the backend returns only newer entries.
 export const auditLog = (after = 0) => apiFetch<AuditEntry[]>(`/api/audit?after=${after}`);
 export const network = () => apiFetch<NetworkReport>("/api/trust/network");
+export const saved = () => apiFetch<SavedReport>("/api/trust/saved");
 export const storage = () => apiFetch<StorageReport>("/api/trust/storage");
 export const forgetEverything = () => apiFetch<ForgetResult>("/api/session", { method: "DELETE" });

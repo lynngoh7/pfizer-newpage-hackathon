@@ -9,7 +9,7 @@ import { forgetEverything, ForgetResult } from "../lib/trust";
 const LABELS: Record<string, string> = {
   activity_log: "activity log entries",
   index: "indexed passages",
-  folders: "folders",
+  folders: "saved folders",
   model: "loaded models",
 };
 
@@ -40,8 +40,8 @@ export default function ForgetButton({ onDone }: Props) {
     return (
       <div className="confirm">
         <p>
-          This clears everything the app holds from this session: the search index, your folder
-          list and the activity log, and it unloads the AI model. <strong>Your note files are not
+          This clears everything the app holds: the search index, the activity log, your saved
+          folder list and settings, and it unloads the AI model. <strong>Your note files are not
           touched.</strong>
         </p>
         <div className="row">

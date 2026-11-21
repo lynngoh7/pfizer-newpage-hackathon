@@ -11,6 +11,9 @@ from pydantic import BaseModel, Field
 
 from . import __version__
 from . import permissions
+from . import models
+from . import prefs
+from . import search as search_mod
 
 router = APIRouter(prefix="/api")
 
@@ -52,6 +55,7 @@ def add_folder(request: FolderAccessRequest) -> FolderAccess:
         raise HTTPException(status_code=403, detail=str(error)) from error
     except OSError as error: #if the OS doesn't allow it
         raise HTTPException(status_code=400, detail="Could not access the selected path") from error
+    prefs.save_folders()  # paths only, never note content (One Rule)
     return FolderAccess(paths=[str(path) for path in permissions.list_allowed_paths()]) #return new allowed list
 
 
@@ -63,4 +67,43 @@ def remove_folder(path: str = Query(min_length=1)) -> FolderAccess:
         raise HTTPException(status_code=404, detail="File or folder does not exist") from error
     except OSError as error:
         raise HTTPException(status_code=400, detail="Could not access the selected path") from error
+    prefs.save_folders()
     return FolderAccess(paths=[str(allowed) for allowed in permissions.list_allowed_paths()]) #return new allowed list
+
+
+class SavedSettings(BaseModel):
+    answer_model: str | None = None
+
+
+@router.get("/settings", response_model=SavedSettings)
+def get_settings() -> SavedSettings:
+    return SavedSettings(**prefs.load()["settings"])
+
+
+@router.put("/settings", response_model=SavedSettings)
+def put_settings(request: SavedSettings) -> SavedSettings:
+    # prefs drops any key not on its allowlist, so only setting values reach disk.
+    return SavedSettings(**prefs.save_settings(request.model_dump(exclude_none=True)))
+
+
+@router.post("/engine/unload")
+def unload_model() -> dict:
+    """Launcher calls this on quit, before stopping the backend."""
+    return {"unloaded": models.unload()}
+
+
+@router.post("/index")
+def build_index() -> dict:
+    """Re-read the allowed folders into the in-memory index."""
+    return search_mod.reindex()
+
+
+@router.get("/index")
+def index_stats() -> dict:
+    """Counts plus build progress; the UI polls this while meaning search builds."""
+    return {**search_mod.db.stats(), **search_mod.status()}
+
+
+@router.get("/search")
+def search(q: str = Query(min_length=1, max_length=500)) -> dict:
+    return search_mod.search(q)

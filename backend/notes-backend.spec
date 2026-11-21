@@ -1,7 +1,7 @@
 # PyInstaller spec for the sidecar. Build with scripts/build-sidecar.sh.
 # -*- mode: python ; coding: utf-8 -*-
 a = Analysis(
-    ["app/main.py"],
+    ["run_backend.py"],
     pathex=["."],
     # uvicorn picks these modules by name at runtime, so PyInstaller cannot
     # see them being imported. Step 7 adds sqlite-vec here.

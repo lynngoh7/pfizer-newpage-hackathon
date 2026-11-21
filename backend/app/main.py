@@ -44,7 +44,12 @@ def create_app(settings: Settings) -> FastAPI:
 def main() -> None:
     import uvicorn
 
+    from . import prefs
+
     settings = load_settings()
+    prefs.restore_folders()  # saved folder list from last time (paths only)
+    from . import models
+    models.start()  # warm Ollama models now; unload on quit and on forget
     uvicorn.run(create_app(settings), host=HOST, port=settings.port, log_level="info")
 
 
