@@ -218,6 +218,10 @@ body {
 .no-results { margin-top: 24px; }
 .no-results h2 { margin: 0; font-size: 16px; }
 .no-results p { margin: 0; line-height: 1.5; }
+.search-error { margin-top: 24px; }
+.search-error h2 { margin: 0; font-size: 16px; }
+.search-error p { margin: 0; color: var(--danger); overflow-wrap: anywhere; }
+.search-error .btn { align-self: flex-start; }
 
 .card {
   background: var(--card);

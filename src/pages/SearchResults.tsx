@@ -1,48 +1,17 @@
-interface Source {
-  path: string;
-  where: string;
-  snippet: string;
-  flag: "superseded" | "newer" | "conflict" | null;
-  //used to label how notes relate to each other, e.g. if a note supersedes another note, or if there is a conflict between notes
-}
-
-interface SearchResponse {
-  status: "ok" | "no_support";
-  answer: string | null;
-  sources: Source[];
-}
-
-const DEMO_RESPONSE: SearchResponse = {
-  status: "ok",
-  answer:
-    "The team first chose Corvid Analytics, then dropped it and switched to Ledgerly. The beta date moved from 3 November to 17 November [1] [2].",
-  sources: [
-    {
-      path: "sample_notes/meetings/2026-09-22 Lighthouse vendor decision.md",
-      where: "Decision",
-      snippet:
-        "We are going with Corvid Analytics. Cheapest, fastest to integrate, Ollie's team has used it before.",
-      flag: "superseded",
-    },
-    {
-      path: "sample_notes/meetings/2026-10-20 Lighthouse vendor rethink.md",
-      where: "Decision",
-      snippet:
-        "We're dropping Corvid and switching to Ledgerly (UK-hosted, London region). This replaces the 22 Sep decision. Beta moves from 3 Nov to 17 Nov to absorb the longer integration.",
-      flag: "newer",
-    },
-  ],
-};
+import { useEffect, useState } from "react";
+import {
+  ensureSearchIndex,
+  IndexStatus,
+  SearchResponse,
+  SearchSource,
+  searchNotes,
+} from "../lib/api";
 
 function isQuestion(query: string): boolean {
   return (
     query.trim().endsWith("?") ||
     /^(who|what|when|where|why|how|did|does|is|are|can|could|should)\b/i.test(query.trim())
   );
-}
-
-function matchesDemo(query: string): boolean {
-  return /\b(lighthouse|corvid|ledgerly|vendor|beta|decision)\b/i.test(query);
 }
 
 function fileName(path: string): string {
@@ -73,7 +42,7 @@ function Answer({ text }: { text: string }) {
   );
 }
 
-function SourceCard({ source, index }: { source: Source; index: number }) {
+function SourceCard({ source, index }: { source: SearchSource; index: number }) {
   return (
     <li className="source-card card" id={`source-${index + 1}`}>
       <div className="source-heading">
@@ -100,6 +69,49 @@ function SourceCard({ source, index }: { source: Source; index: number }) {
 
 export default function SearchResults({ query }: { query: string }) {
   const trimmedQuery = query.trim();
+  const [response, setResponse] = useState<SearchResponse | null>(null);
+  const [index, setIndex] = useState<IndexStatus | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setResponse(null);
+    setIndex(null);
+    setError(null);
+    if (!trimmedQuery) {
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    setLoading(true);
+    async function runSearch() {
+      try {
+        const status = await ensureSearchIndex();
+        if (!active) return;
+        setIndex(status);
+        if (status.files === 0) {
+          setResponse({ status: "no_support", answer: null, sources: [] });
+          return;
+        }
+        const result = await searchNotes(trimmedQuery);
+        if (active) setResponse(result);
+      } catch (e) {
+        if (active) setError(String(e));
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    void runSearch();
+
+    return () => {
+      active = false;
+    };
+  }, [trimmedQuery, attempt]);
+
   if (!trimmedQuery) {
     return (
       <section className="search-results" aria-labelledby="results-title">
@@ -110,28 +122,50 @@ export default function SearchResults({ query }: { query: string }) {
     );
   }
 
-  const response = matchesDemo(trimmedQuery)
-    ? DEMO_RESPONSE
-    : ({ status: "no_support", answer: null, sources: [] } satisfies SearchResponse);
-  const answer = isQuestion(trimmedQuery) ? response.answer : null;
+  const answer = isQuestion(trimmedQuery) ? response?.answer : null;
+  const noFiles = index?.files === 0;
+  const meaningIndexing = index?.phase === "meaning" || index?.phase === "grouping";
 
   return (
     <section className="search-results" aria-labelledby="results-title">
-      <p className="results-eyebrow">Search results · Mock data</p>
+      <p className="results-eyebrow">Search results</p>
       <h1 id="results-title" aria-live="polite">
         Results for “{trimmedQuery}”
       </h1>
-      <p className="results-note">
-        Demo results use the sample Lighthouse notes. Search is not connected to the backend yet.
-      </p>
+      <p className="results-note">Search runs on this computer and shows excerpts from your allowed files.</p>
 
-      {response.status === "no_support" ? (
-        <div className="card no-results" role="status">
-          <h2>No supporting notes found.</h2>
-          <p className="muted">Try “Lighthouse”, “Corvid”, “Ledgerly”, or “vendor decision”.</p>
+      {loading && <p className="muted" role="status">Searching your notes…</p>}
+      {error && (
+        <div className="card search-error" role="alert">
+          <h2>Couldn’t search your notes</h2>
+          <p>{error}</p>
+          <button className="btn" onClick={() => setAttempt((current) => current + 1)}>
+            Try again
+          </button>
         </div>
-      ) : (
+      )}
+      {!loading && !error && response && response.status === "no_support" && (
+        <div className="card no-results" role="status">
+          <h2>{noFiles ? "No supported files are indexed." : "No supporting notes found."}</h2>
+          <p className="muted">
+            {noFiles
+              ? "Choose folders or files on the Privacy page, then search again."
+              : "Try different words or ask about another topic."}
+          </p>
+        </div>
+      )}
+      {!loading && !error && response?.status === "ok" && (
         <>
+          {meaningIndexing && (
+            <p className="muted" role="status">
+              Keyword results are ready. Meaning-based indexing is continuing in the background.
+            </p>
+          )}
+          {isQuestion(trimmedQuery) && !answer && (
+            <p className="muted">
+              Showing matching notes. AI-generated answers aren’t available yet.
+            </p>
+          )}
           {answer && (
             <section className="card answer-card" aria-labelledby="answer-title">
               <div className="answer-heading">
@@ -149,7 +183,7 @@ export default function SearchResults({ query }: { query: string }) {
             </div>
             <ol className="source-list">
               {response.sources.map((source, index) => (
-                <SourceCard key={source.path} source={source} index={index} />
+                <SourceCard key={source.chunkID} source={source} index={index} />
               ))}
             </ol>
           </section>
