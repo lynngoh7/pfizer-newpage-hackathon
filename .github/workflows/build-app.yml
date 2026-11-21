@@ -1,16 +1,10 @@
 # Builds the desktop app on every OS we ship to and checks the bundled
-# backend starts. Run by hand (Actions tab → Build app → Run workflow) or on
-# pull requests that touch packaging. Installers are attached to the run.
+# backend starts. Manual only (Actions tab → Build app → Run workflow), because
+# Mac runners use Actions minutes fast. Installers are attached to the run.
 name: Build app
 
 on:
   workflow_dispatch:
-  pull_request:
-    paths:
-      - "src-tauri/**"
-      - "backend/**"
-      - "scripts/build-*.sh"
-      - ".github/workflows/build-app.yml"
 
 permissions:
   contents: read

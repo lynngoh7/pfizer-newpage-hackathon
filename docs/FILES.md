@@ -21,7 +21,7 @@ Add a row whenever you create a file.
 | `scripts/dev-backend.sh` | run sidecar alone (creates venv on first run) | — |
 | `scripts/privacy-guard.sh` | fails if `src/` or `backend/app/` contain a URL other than localhost; run by CI | — |
 | `.github/workflows/ci.yml` | CI: backend tests, frontend build, privacy guard on PRs and pushes to main | — |
-| `.github/workflows/build-app.yml` | Builds the app on Apple Silicon Mac, Intel Mac, Windows and Linux, checks the bundled backend starts, attaches installers (manual or packaging PRs) | — |
+| `.github/workflows/build-app.yml` | Builds the app on Apple Silicon Mac, Intel Mac, Windows and Linux, checks the bundled backend starts, attaches installers (manual only, to save Actions minutes) | — |
 | `scripts/make_sample_notes.py` | generates the .docx/.pdf/.png samples, symlinks and file dates in `sample_notes/` (dev only: needs pymupdf, python-docx) | when sample notes change |
 | `docs/THIRD_PARTY.md` | licence notices for code copied in (Lucide icons) | when copying in third-party code |
 | `docs/SAMPLE_NOTES.md` | sample notes guide: demo story, test questions, edge cases | when sample notes change |
