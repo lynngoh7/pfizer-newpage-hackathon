@@ -11,7 +11,9 @@ from pydantic import BaseModel, Field
 
 from . import __version__
 from . import permissions
+from . import models
 from . import prefs
+from . import search as search_mod
 
 router = APIRouter(prefix="/api")
 
@@ -82,3 +84,26 @@ def get_settings() -> SavedSettings:
 def put_settings(request: SavedSettings) -> SavedSettings:
     # prefs drops any key not on its allowlist, so only setting values reach disk.
     return SavedSettings(**prefs.save_settings(request.model_dump(exclude_none=True)))
+
+
+@router.post("/engine/unload")
+def unload_model() -> dict:
+    """Launcher calls this on quit, before stopping the backend."""
+    return {"unloaded": models.unload()}
+
+
+@router.post("/index")
+def build_index() -> dict:
+    """Re-read the allowed folders into the in-memory index."""
+    return search_mod.reindex()
+
+
+@router.get("/index")
+def index_stats() -> dict:
+    """Counts plus build progress; the UI polls this while meaning search builds."""
+    return {**search_mod.db.stats(), **search_mod.status()}
+
+
+@router.get("/search")
+def search(q: str = Query(min_length=1, max_length=500)) -> dict:
+    return search_mod.search(q)

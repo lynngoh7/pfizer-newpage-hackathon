@@ -11,7 +11,11 @@ A desktop app that finds the note you mean. Everything runs on your own computer
    curl https://sh.rustup.rs -sSf | sh
    ```
    then close and reopen the terminal.
-4. **Ollama** (the local AI model) — https://ollama.com/download. Needed from build step 4 onwards.
+4. **Ollama** (the local AI model) — https://ollama.com/download (Intel Mac with Homebrew: `brew install --cask ollama-app`). Then download the two models (about 2.3 GB):
+   ```sh
+   ollama pull llama3.2:3b        # answers and topic names
+   ollama pull nomic-embed-text   # search by meaning, grouping
+   ```
 
 ## 2. Run the app
 
@@ -73,6 +77,7 @@ This is for development only. It still runs only on your computer, but it is not
 - [docs/STATUS.md](docs/STATUS.md) — what is done, what to pick up next
 - [docs/BRIEF.md](docs/BRIEF.md) — the brief, the One Rule, the safety rules
 - [docs/FILES.md](docs/FILES.md) — every file and what it does
+- [docs/DB_DESIGN.md](docs/DB_DESIGN.md) — in-memory database tables and diagram
 
 ## Packaging (later)
 

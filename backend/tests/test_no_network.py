@@ -2,14 +2,14 @@
 
 Every socket connect and DNS lookup to a non-loopback address raises, then a
 whole session runs through the real API. Any outbound call fails the test.
-Add search and ask calls here when 1d and 2c land."""
+Indexing, search and model unload are covered; add the ask call when 2c lands."""
 import ipaddress
 import socket
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app import audit, permissions
+from app import audit, db, group, permissions, session
 from app.config import Settings
 from app.main import create_app
 
@@ -61,7 +61,15 @@ def test_the_guard_catches_outbound_calls(offline):
     offline.clear()  # expected attempt; keep the fixture's final check clean
 
 
+def test_ollama_address_is_loopback_only():
+    # conftest moves the port for tests; the host must stay loopback
+    host = group.OLLAMA.split("//")[1].split(":")[0]
+    assert ipaddress.ip_address(host).is_loopback
+
+
 def test_full_session_stays_on_the_machine(tmp_path):
+    permissions.on_revoke("index", db.drop_under)  # test_privacy_edges clears hooks
+    session.on_forget("index", db.clear)
     notes = tmp_path / "notes"
     notes.mkdir()
     (notes / "a.md").write_text("Link: https://example.com/budget, never fetched")
@@ -70,6 +78,10 @@ def test_full_session_stays_on_the_machine(tmp_path):
         ("get", "/api/health", {}),
         ("post", "/api/folders", {"json": {"path": str(notes)}}),
         ("get", "/api/folders", {}),
+        ("post", "/api/index", {}),
+        ("get", "/api/index", {}),
+        ("get", "/api/search", {"params": {"q": "budget example.com"}}),
+        ("post", "/api/engine/unload", {}),
         ("put", "/api/settings", {"json": {}}),
         ("get", "/api/audit", {}),
         ("get", "/api/trust/network", {}),
@@ -80,3 +92,4 @@ def test_full_session_stays_on_the_machine(tmp_path):
     ]:
         r = getattr(c, method)(url, headers=AUTH, **kw)
         assert r.status_code < 500, (url, r.status_code)
+    db.clear()

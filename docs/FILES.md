@@ -14,7 +14,7 @@ Add a row whenever you create a file.
 | `docs/BRIEF.md` | product brief, feature checklist, stack, safety rules | when a decision changes |
 | `docs/STATUS.md` | progress per build step + where to start | every change |
 | `docs/API_SHAPES.md` | agreed JSON shape for search/answer responses (UI ↔ backend) | when search/qa output changes |
-| `docs/DB_DESIGN.md` | in-memory DB tables (Files, Chunks, Groups) + diagram | when db.py changes the schema |
+| `docs/DB_DESIGN.md` | in-memory DB tables (Files, Chunks, Groups, keyword index, vectors) + diagram | when db.py changes the schema |
 | `docs/FILES.md` | this file | every new file |
 | `.github/pull_request_template.md` | checklist shown when opening a PR (tests, docs, privacy rules) | when team rules change |
 | `scripts/dev.sh` | browser-only dev: shared token for backend + Vite, sets `NOTES_DEV=1` | — |
@@ -52,13 +52,13 @@ Add a row whenever you create a file.
 | `Cargo.toml` | Rust deps: tauri, dialog plugin, serde, rand | — |
 | `src/main.rs` | binary entry → `lib::run()` | — |
 | `src/lib.rs` | Tauri builder; registers dialog plugin and `get_session`; stops backend on exit | add commands as needed |
-| `src/sidecar.rs` | token + port generation, spawns backend (packaged binary or Python in debug), sets `NOTES_DEV` in debug builds only, kill on drop | — |
+| `src/sidecar.rs` | token + port generation, spawns backend (packaged binary or Python in debug), sets `NOTES_DEV` in debug builds only, on quit asks the backend to unload the model then kills it | — |
 | `icons/icon.png` | 1×1 placeholder | replace with real icon set |
 
 ## Backend `backend/`
 | File | Purpose | Next edit |
 |---|---|---|
-| `pyproject.toml` | **the one place to add Python deps**: deps (fastapi, uvicorn, psutil), dev extras (pytest, httpx), package extra (pyinstaller) | step 2: pymupdf, markitdown; step 7: sqlite-vec |
+| `pyproject.toml` | **the one place to add Python deps**: deps (fastapi, uvicorn, psutil, pypdf, markitdown[docx]), dev extras (pytest, httpx), package extra (pyinstaller) | step 2: markitdown; step 7: sqlite-vec |
 | `notes-backend.spec` | PyInstaller spec | step 7: hidden imports for sqlite-vec |
 | `app/__init__.py` | version | — |
 | `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (the only saved file is `prefs.json`, see `prefs.py`) |
@@ -68,6 +68,10 @@ Add a row whenever you create a file.
 | `app/permissions.py` | allowlist (filled from `prefs.json` on launch) + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
 | `app/audit.py` | in-memory activity log: fixed action list, path, query, short outcome. Never note text | step 2: ingest/permissions call `record` |
+| `app/ingest.py` | split TXT (blank lines), MD and DOCX (headings; DOCX via markitdown), PDF (pages, pypdf) into `Chunk`s with path + start/end line or page; broken files skipped and logged; every read via `resolve_and_check`; `ingestAllowed()` walks allowed folders; `mergeSmall()` joins small neighbouring chunks | — |
+| `app/group.py` | group chunks by topic: `nomic-embed-text` vectors → similarity groups (≥ 0.75) → one `llama3.2:3b` call names each group. Memory only, Ollama on 127.0.0.1. | — (`db.build` calls it) |
+| `app/models.py` | warm `nomic-embed-text` + answer model at startup (keep_alive -1), the one place that unloads them (`unload()`: forget hook, `POST /api/engine/unload` on quit, atexit), only models Ollama reports as loaded. Ollama on 127.0.0.1, no note text sent | step 4: qa uses `answer_model()` |
+| `app/db.py` | in-memory SQLite index: Files/Chunks/Groups, contentless FTS5 keyword search, vectors (Python dict until sqlite-vec loads), `passage()` re-reads text and refuses changed files; revoke + forget hooks; `topics()` names groups lazily | — (`search.py` calls it) |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
 | `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders (`prefs.json` is expected, anything else is flagged) | — |
 | `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/saved`, `/api/trust/storage`, `DELETE /api/session` | — |
@@ -75,11 +79,17 @@ Add a row whenever you create a file.
 | `tests/test_citations.py` | quote matching, rejections, claim filtering, one real sample note | — |
 | `tests/test_trust.py` | audit rules, forget, connection kinds, storage report, routes need token | — |
 | `tests/conftest.py` | points `prefs.json` at a temp folder for every test | — |
-| `tests/test_privacy_edges.py` | forget clears everything, revoke hook, symlink/deny/missing-folder edge cases, no note text in log or prefs | 4b/4c: add real index checks when db.py lands |
+| `tests/test_privacy_edges.py` | forget clears everything, revoke hook, symlink/deny/missing-folder edge cases, no note text in log or prefs | — |
+| `tests/test_privacy_index.py` | revoke and forget through the API on the real index, revoke/forget during a rebuild leave no vectors or topics, model unload | — |
+| `tests/test_ingest.py` | TXT/MD/DOCX chunk boundaries; broken files skipped and logged with no content, no half-read chunks left + blocked paths and symlink escapes | — |
+| `app/search.py` | build the index from allowed folders (`reindex`: keyword at once, vectors + groups in a background thread, `status()` for progress), hybrid search (keyword + meaning, RRF), source cards re-read from files; keyword only without Ollama | 2b: `qa.py` uses `rank()` + `source()` |
+| `tests/test_search.py` | folder walk, search shape, Ollama fallback, stale files, revoke/forget, `/api/index` + `/api/search` | — |
+| `tests/test_db.py` | keyword search, no text stored, FTS syntax safe, revoke/forget empty the index, changed file not shown, groups and meaning search | — |
+| `tests/test_group.py` | clustering, one naming call per group, injected/bad topics fall back, Ollama local only (Ollama faked) | — |
 | `tests/test_no_network.py` | blocks non-loopback connects and DNS, runs a whole session through the API; fails on any outbound attempt | 4d: add search and ask calls when 1d and 2c land |
 | `tests/test_prefs.py` | saved folders/settings, paths only, allowlist, restore, forget, disk check | — |
 | `tests/test_permissions.py` | grants, protected paths, symlink escape, revoke | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
 
 ### Planned backend modules (not yet created)
-`ingest.py` · `db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py`
+`db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py`
