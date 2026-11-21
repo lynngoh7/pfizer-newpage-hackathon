@@ -2,7 +2,34 @@
 
 A desktop app that finds the note you mean. Everything runs on your own computer. Nothing leaves it, and the app keeps no copy of your notes.
 
-## 1. Install these once
+## Contents
+
+- [Installation](#installation)
+- [Development](#development)
+  - [Prerequisites](#prerequisites)
+  - [Running locally](#running-locally)
+  - [Contributing](#contributing)
+  - [Project structure](#project-structure)
+  - [Documentation](#documentation)
+- [Team](#team)
+
+## Installation
+
+To use it like a normal app (no terminal), follow **[docs/INSTALL.md](docs/INSTALL.md)**. It has separate steps for Mac, Windows and Linux.
+
+Short version, from the project folder:
+
+```sh
+sh scripts/build-app.sh   # builds the app, then installs it
+```
+
+Windows: run this in Git Bash.
+
+## Development
+
+### Prerequisites
+
+Install these once:
 
 1. **Node.js 20 or newer** — https://nodejs.org
 2. **Python 3.10 or newer** — https://www.python.org/downloads
@@ -17,7 +44,7 @@ A desktop app that finds the note you mean. Everything runs on your own computer
    ollama pull nomic-embed-text   # search by meaning, grouping
    ```
 
-## 2. Run the app
+### Running locally
 
 ```sh
 npm install          # first time only
@@ -49,7 +76,7 @@ npm run dev:all      # then open http://127.0.0.1:1420
 
 This is for development only. It still runs only on your computer, but it is not the real app and must not be used for the demo.
 
-## 3. Making a change
+### Contributing
 
 1. **Branch from main.** Never push to `main`. Name it like `feat/…`, `fix/…`, `docs/…`.
 2. **Commit with a conventional message**, e.g. `feat(search): add keyword results page`.
@@ -62,7 +89,7 @@ This is for development only. It still runs only on your computer, but it is not
 4. **Push your branch and open a pull request.** The PR template fills in a short checklist: tick each item.
 5. **Wait for CI to go green** (GitHub runs the three checks above on every PR, about 30 s), then merge.
 
-## 4. Where things are
+### Project structure
 
 | Folder | What |
 |---|---|
@@ -72,7 +99,7 @@ This is for development only. It still runs only on your computer, but it is not
 | `scripts/` | Helper scripts for running and packaging |
 | `docs/` | Team docs, see below |
 
-## 5. Read next
+### Documentation
 
 - [docs/STATUS.md](docs/STATUS.md) — what is done, what to pick up next
 - [docs/BRIEF.md](docs/BRIEF.md) — the brief, the One Rule, the safety rules
@@ -80,14 +107,10 @@ This is for development only. It still runs only on your computer, but it is not
 - [docs/INSTALL.md](docs/INSTALL.md) — install the app on Mac, Windows or Linux
 - [docs/DB_DESIGN.md](docs/DB_DESIGN.md) — in-memory database tables and diagram
 
-## 6. Install the app
+## Team
 
-To use it like a normal app (no terminal), follow **[docs/INSTALL.md](docs/INSTALL.md)**. It has separate steps for Mac, Windows and Linux.
-
-Short version, from the project folder:
-
-```sh
-sh scripts/build-app.sh   # builds the app, then installs it
-```
-
-Windows: run this in Git Bash.
+| Name | GitHub |
+|---|---|
+| Cathy | [@cathyc-c](https://github.com/cathyc-c) |
+| Eoin Rodrigues | [@ARandomGuyTH](https://github.com/ARandomGuyTH) |
+| Lynn Goh | [@lynngoh7](https://github.com/lynngoh7) |
