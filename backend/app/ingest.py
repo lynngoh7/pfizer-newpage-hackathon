@@ -1,7 +1,7 @@
 from pathlib import Path
 from pypdf import PdfReader
 from markitdown import MarkItDown
-from app import audit
+from app import audit, permissions
 
 chunks = []
 class Chunk: 
@@ -79,6 +79,13 @@ def chunkDOCX(filePath:str):
 def chunkFile(filePath:str):
     """Chunk one file. A broken file (corrupt, encrypted, wrong encoding) is
     skipped and logged, never crashes the whole ingest. Returns True if read."""
+    # Path enforcement (§6): every read goes through resolve_and_check, which
+    # follows symlinks and applies the allowlist and denylist.
+    try:
+        filePath = str(permissions.resolve_and_check(filePath))
+    except (PermissionError, OSError) as e:
+        audit.record("blocked", filePath, outcome=str(e) if isinstance(e, PermissionError) else "not found")
+        return False
     before = len(chunks)
     try:
         if filePath[-3:] == "txt":

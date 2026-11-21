@@ -1,15 +1,17 @@
 """ingest: chunking TXT/MD/PDF, and broken files are skipped, not fatal."""
 import pytest
 
-from app import audit, ingest
+from app import audit, ingest, permissions
 
 
 @pytest.fixture(autouse=True)
-def _clean():
+def _clean(tmp_path):
     ingest.chunks.clear()
     audit.clear()
+    permissions.allowed_folders.add(tmp_path.resolve())
     yield
     ingest.chunks.clear()
+    permissions.allowed_folders.clear()
 
 
 def test_txt_splits_on_blank_lines_and_keeps_last_chunk(tmp_path):
@@ -66,3 +68,20 @@ def test_docx_splits_at_headings(tmp_path):
         z.writestr("word/document.xml", f"<w:document {W}><w:body>{body}</w:body></w:document>")
     assert ingest.chunkFile(str(f))
     assert [c.text.split()[:2] for c in ingest.chunks] == [["#", "One"], ["#", "Two"]]
+
+
+def test_files_outside_allowed_folders_are_blocked(tmp_path_factory):
+    outside = tmp_path_factory.mktemp("outside") / "secret.txt"
+    outside.write_text("private\n")
+    assert not ingest.chunkFile(str(outside))
+    assert ingest.chunks == []
+    assert audit.entries()[-1]["action"] == "blocked"
+
+
+def test_symlink_out_of_allowed_folder_is_blocked(tmp_path, tmp_path_factory):
+    target = tmp_path_factory.mktemp("outside") / "secret.md"
+    target.write_text("# private\n")
+    link = tmp_path / "innocent.md"
+    link.symlink_to(target)
+    assert not ingest.chunkFile(str(link))
+    assert ingest.chunks == []
