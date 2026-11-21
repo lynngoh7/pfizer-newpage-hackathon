@@ -1,5 +1,6 @@
 from pathlib import Path
 from pypdf import PdfReader
+from markitdown import MarkItDown
 from app import audit
 
 chunks = []
@@ -56,6 +57,25 @@ def chunkPDF(filePath:str):
         if text.strip():  # scanned pages have no text layer
             chunks.append(Chunk(filePath, i, text, i))
 
+def chunkDOCX(filePath:str):
+    # Word -> Markdown, then split at headings like chunkMD. start/end are
+    # lines of the converted text, so showing a passage re-converts the file.
+    text = MarkItDown(enable_plugins=False).convert_local(filePath).text_content
+    start = 0
+    end = 0
+    chunk = ""
+    for i, line in enumerate(text.splitlines(keepends=True)):
+        if line[0] == "#":
+            if chunk.strip():
+                chunks.append(Chunk(filePath, start, chunk, end))
+            start = i
+            chunk = line
+        else:
+            chunk += line
+        end = i
+    if chunk.strip():
+        chunks.append(Chunk(filePath, start, chunk, end))
+
 def chunkFile(filePath:str):
     """Chunk one file. A broken file (corrupt, encrypted, wrong encoding) is
     skipped and logged, never crashes the whole ingest. Returns True if read."""
@@ -67,6 +87,8 @@ def chunkFile(filePath:str):
             chunkMD(filePath)
         elif filePath[-3:] == "pdf":
             chunkPDF(filePath)
+        elif filePath[-4:] == "docx":
+            chunkDOCX(filePath)
         else:
             audit.record("skipped", filePath, outcome="unsupported file type")
             return False

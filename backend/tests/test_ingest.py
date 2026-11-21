@@ -45,3 +45,24 @@ def test_broken_files_are_skipped_and_logged(tmp_path):
     assert log[2] == ("read", "ok")
     # the log names the error type only, never file content
     assert all("caf" not in o for _, o in log)
+
+
+def test_docx_splits_at_headings(tmp_path):
+    import zipfile
+    # smallest valid .docx: one Heading1 paragraph and one body paragraph each
+    body = "".join(
+        f'<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>{h}</w:t></w:r></w:p>'
+        f'<w:p><w:r><w:t>{b}</w:t></w:r></w:p>' for h, b in [("One", "first"), ("Two", "second")])
+    W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+    f = tmp_path / "a.docx"
+    with zipfile.ZipFile(f, "w") as z:
+        z.writestr("[Content_Types].xml",
+                   '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+                   '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+                   '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>')
+        z.writestr("_rels/.rels",
+                   '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+                   '<Relationship Id="r1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>')
+        z.writestr("word/document.xml", f"<w:document {W}><w:body>{body}</w:body></w:document>")
+    assert ingest.chunkFile(str(f))
+    assert [c.text.split()[:2] for c in ingest.chunks] == [["#", "One"], ["#", "Two"]]
