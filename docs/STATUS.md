@@ -87,7 +87,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 
 ## Who does what (Fri 20 – Sun 22 Nov)
 
-Tick a box here in the same PR as the code. Sunday evening is for recording the video.
+Tick a box here in the same PR as the code. The list below is what was planned on Friday; the remaining work from Saturday 21 Nov is under **Remaining work**.
 
 **E: reading notes and search** (step 2c, 3)
 - ✅ 1a. `ingest.py`: TXT/MD/PDF/DOCX chunking; every read goes through `resolve_and_check` (symlinks out of the folder are blocked and logged); broken files skipped. `ingestAllowed()` walks the allowed folders, skipping hidden files
@@ -118,6 +118,36 @@ Tick a box here in the same PR as the code. Sunday evening is for recording the 
 - ✅ 4c. Forget everything clears grants, prefs, log, index and unloads the model, also mid-rebuild. Fixed: a forget or revoke during the minutes-long embedding step used to put vectors and topics back
 - 🔧 4d. Test storage, network and offline claims (Sun). `tests/test_no_network.py` covers every route incl. index, search, model unload; ⬜ add the ask route when 2c lands (blocked on 2c)
 - ⬜ 4e. Edge-case tests and trust demo (Sun), needs everything above
+
+### Remaining work (from Sat 21 Nov)
+
+Prototype done by Saturday night, Sunday midday at the latest. The second half of Sunday is for the demo and video.
+
+**E: decisions**
+- ⬜ Pull decisions and to-dos out of notes (P0, Sat)
+- ⬜ Compare old decisions with newer notes (P0, Sat)
+- ⬜ Display decision changes and error states (P0, Sun am)
+- ⬜ Run edge-case tests against answers: injected instructions, empty and broken notes (P0, Sun am)
+
+**S: answers, demo device**
+- ⬜ Merge feature/ai-qa into main (P0, Sat)
+- ⬜ Integrate citation validation and no-evidence handling (P0, Sat)
+- ⬜ Add the ask route and keep the answer model warm (P0, Sat)
+- ⬜ Build and run the app on the demo device with the sample notes (P0, Sun am)
+
+**L: results UI**
+- ⬜ Build functional results page with mock data (P0, Sat)
+- ⬜ Display citation/source cards and file excerpts (P0, Sat)
+- ⬜ Connect question/search flow to backend (P0, Sat)
+- ⬜ Complete demo UI polish and accessibility check (P1, Sun am)
+
+**C: privacy and trust, demo**
+- ⬜ Merge feat/privacy-index, feat/search, db, ingest into main (P0, Sat)
+- ⬜ Test storage, network and offline privacy claims (P0, Sat)
+- ⬜ Prepare trust demo and rehearse it with Wi-Fi off on the demo device (P0, Sun pm)
+- ⬜ Record the demo video and send the submission by 23:59 (P0, Sun pm)
+
+If E falls behind, L takes "Display decision changes and error states" (it sits on the results page).
 
 ### Dependencies
 - **Critical path:** 1a/1b → 1c → 1d → 3c → 2d → 3d → demo. E's Saturday work blocks the most people, so land 1b first.
