@@ -18,14 +18,16 @@ function fileName(path: string): string {
   return path.split(/[\\/]/).pop() || path;
 }
 
-function Answer({ text }: { text: string }) {
+function Answer({ text, sourceCount }: { text: string; sourceCount: number }) {
   const parts = text.split(/(\[\d+\])/g);
 
   return (
     <p className="answer-text">
       {parts.map((part, index) => {
         const citation = /^\[(\d+)\]$/.exec(part);
-        return citation ? (
+        // Only link numbers that match a source card; anything else stays plain text.
+        const n = citation ? Number(citation[1]) : 0;
+        return citation && n >= 1 && n <= sourceCount ? (
           <a
             className="answer-citation"
             href={`#source-${citation[1]}`}
@@ -172,7 +174,7 @@ export default function SearchResults({ query }: { query: string }) {
                 <h2 id="answer-title">Answer</h2>
                 <span className="answer-label">Based on your notes</span>
               </div>
-              <Answer text={answer} />
+              <Answer text={answer} sourceCount={response.sources.length} />
             </section>
           )}
 

@@ -30,6 +30,7 @@ export default function FolderAccess() {
     }
 
     setBusy(true);
+    let added = false;
     try {
       const selected = await open({ directory, multiple: true });
       if (!selected) return;
@@ -38,15 +39,19 @@ export default function FolderAccess() {
       for (const path of paths) {
         const result = await allowPath(path);
         setAllowedPaths(result.paths);
-      }
-      try {
-        await reindex();
-      } catch (e) {
-        setAccessError(`Folder access was updated, but indexing failed: ${String(e)}`);
+        added = true;
       }
     } catch (e) {
       setAccessError(String(e));
     } finally {
+      // Index whatever was added, even if a later folder failed.
+      if (added) {
+        try {
+          await reindex();
+        } catch (e) {
+          setAccessError(`Folder access was updated, but indexing failed: ${String(e)}`);
+        }
+      }
       setBusy(false);
     }
   }
