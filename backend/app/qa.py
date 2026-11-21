@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 import json
-import os
 from typing import Mapping
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from . import models
 
 from .citations import (
     Citation,
@@ -17,7 +17,6 @@ from .citations import (
 )
 
 OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
-MODEL = os.getenv("OLLAMA_MODEL", "qwen3:4b-instruct")
 
 SYSTEM_PROMPT = """
 You are a privacy-focused manager's notes assistant.
@@ -81,10 +80,9 @@ def ask_question(
     )
 
     payload = {
-        "model": MODEL,
+        "model": models.answer_model(),
         "stream": False,
         "format": "json",
-        "keep_alive": "0",
         "options": {
             "temperature": 0,
             "num_predict": 512,
