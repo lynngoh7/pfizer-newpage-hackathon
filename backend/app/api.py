@@ -85,6 +85,12 @@ def put_settings(request: SavedSettings) -> SavedSettings:
     return SavedSettings(**prefs.save_settings(request.model_dump(exclude_none=True)))
 
 
+@router.post("/engine/unload")
+def unload_model() -> dict:
+    """Launcher calls this on quit, before stopping the backend."""
+    return {"unloaded": search_mod.group.unload()}
+
+
 @router.post("/index")
 def build_index() -> dict:
     """Re-read the allowed folders into the in-memory index."""

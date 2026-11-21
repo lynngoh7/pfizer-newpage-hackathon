@@ -7,7 +7,9 @@
 
 use rand::RngCore;
 use serde::Serialize;
-use std::net::TcpListener;
+use std::io::{Read, Write};
+use std::net::{SocketAddr, TcpListener, TcpStream};
+use std::time::Duration;
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::Mutex;
@@ -97,8 +99,25 @@ impl Backend {
         Backend { session, child: Mutex::new(child) }
     }
 
+    /// Ask the backend to unload the Ollama model before it is killed, so the
+    /// model keeps no context after quit (One Rule: no copies). Plain HTTP on
+    /// 127.0.0.1 with the session token; best effort, 5 s at most.
+    fn unload_model(&self) {
+        let addr = SocketAddr::from(([127, 0, 0, 1], self.session.port));
+        let Ok(mut s) = TcpStream::connect_timeout(&addr, Duration::from_secs(1)) else { return };
+        let _ = s.set_read_timeout(Some(Duration::from_secs(5)));
+        let req = format!(
+            "POST /api/engine/unload HTTP/1.1\r\nHost: 127.0.0.1\r\nAuthorization: Bearer {}\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+            self.session.token
+        );
+        if s.write_all(req.as_bytes()).is_ok() {
+            let _ = s.read(&mut [0u8; 256]); // wait for the reply, ignore it
+        }
+    }
+
     pub fn stop(&self) {
         if let Some(mut c) = self.child.lock().unwrap().take() {
+            self.unload_model();
             let _ = c.kill();
             let _ = c.wait();
         }

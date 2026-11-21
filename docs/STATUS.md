@@ -42,7 +42,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 ## Step 4 — Questions with verified citations ⬜
 - ⬜ Ollama client (localhost only). Note text goes in clearly marked "untrusted data" blocks
 - ✅ Citation checker `citations.py`: every quote must appear in the chunk it cites (exact after folding case, spacing, smart quotes, accents, Markdown, `...` gaps; no fuzzy matching). Unbacked claims are dropped; none left → "No supporting notes found." qa.py calls `check_answer` with the chunks it put in the prompt
-- ⬜ Keep the model warm during the session, unload on quit and "forget everything"
+- ✅ Unload on quit and "forget everything" (`group.unload`, keep_alive 0, only models that are loaded). ⬜ Keep the model warm during the session (qa.py)
 
 ## Step 5 — Trust panel 🔧
 Covers 20 of the 50 judging points. Sidebar → **Privacy**.
@@ -52,7 +52,7 @@ Covers 20 of the 50 judging points. Sidebar → **Privacy**.
 - ✅ Forget everything: confirm step, then shows what was cleared and re-checks the disk (`DELETE /api/session`). Same button in Settings
 - ✅ Webview runs `incognito` and every API response is `Cache-Control: no-store`. Before this, WebKit kept an HTTP cache in `~/Library/Caches/local-notes-assistant`, which would have kept copies of note passages
 - ⬜ Test in the real app (`npm run tauri dev`): confirm "Saved to disk: Folder list and settings only" after a session with incognito on. Delete old dev leftovers first: `rm -rf ~/Library/Caches/local-notes-assistant ~/Library/WebKit/local-notes-assistant`
-- ⬜ Unload the Ollama model on forget (register in `session.py` once the Ollama client exists, step 4)
+- ✅ Unload the Ollama models on forget (`session.on_forget("model", group.unload)`) and on quit (launcher calls `POST /api/engine/unload` before stopping the backend). qa.py must add its model to `group.unload`
 - ⬜ Rehearse the "turn Wi-Fi off" demo
 
 ## Settings + accessibility ✅
@@ -103,7 +103,7 @@ Tick a box here in the same PR as the code. Sunday evening is for recording the 
 - ⬜ 2b. `qa.py` with source-aware prompts (Sat), needs 2a; real chunks from 1c
 - ⬜ 2c. Wire in `citations.py` and "No supporting notes found." (Sat), needs 2b
 - ⬜ 2d. Compare old decisions with newer notes (Sun), needs 1c, 2c
-- 🔧 2e. Unload the model on quit and forget: done in `models.py`. ⬜ AI tests (Sun), needs 2a
+- ✅ 2e. Unload the model on quit and forget (`models.py` at exit; `group.unload` on forget and via `POST /api/engine/unload` from the launcher; tests in `test_privacy_index.py`). qa.py's answer model must be added to it
 
 **L: results UI** (step 3, 4, 6)
 - ⬜ 3a. Results page with mock data (Sat)
@@ -114,8 +114,8 @@ Tick a box here in the same PR as the code. Sunday evening is for recording the 
 
 **C: privacy and trust** (step 2, 5)
 - ✅ 4a. Audit events for folder add/remove (Sat)
-- ⬜ 4b. Revoking a folder drops its chunks (Sat), needs 1b. Hook `permissions.on_revoke` ready; db.py registers it
-- ⬜ 4c. Verify Forget everything clears everything (Sat), needs 1b; recheck after 2e. Grants, prefs, log tested; index part waits on 1b
+- ✅ 4b. Revoking a folder drops its chunks, vectors, topics and search results at once, also mid-rebuild (`tests/test_privacy_index.py`)
+- ✅ 4c. Forget everything clears grants, prefs, log, index and unloads the model, also mid-rebuild. Fixed: a forget or revoke during the minutes-long embedding step used to put vectors and topics back
 - ⬜ 4d. Test storage, network and offline claims (Sun), needs 1d, 2c. Started: `tests/test_no_network.py` covers current routes
 - ⬜ 4e. Edge-case tests and trust demo (Sun), needs everything above
 
