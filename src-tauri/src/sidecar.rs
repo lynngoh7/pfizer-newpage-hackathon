@@ -55,15 +55,29 @@ fn packaged_binary() -> Option<PathBuf> {
 /// in debug builds only, run the Python sources directly for development.
 fn backend_command() -> Option<Command> {
     if let Some(bin) = packaged_binary() {
-        return Some(Command::new(bin));
+        #[cfg_attr(not(windows), allow(unused_mut))]
+        let mut cmd = Command::new(bin);
+        // The backend is a console program; without this flag Windows opens
+        // an empty terminal window next to the app.
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+            cmd.creation_flags(CREATE_NO_WINDOW);
+        }
+        return Some(cmd);
     }
     if cfg!(debug_assertions) {
         let backend_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../backend");
-        let venv_python = backend_dir.join(".venv/bin/python");
+        let venv_python = if cfg!(windows) {
+            backend_dir.join(".venv/Scripts/python.exe")
+        } else {
+            backend_dir.join(".venv/bin/python")
+        };
         let python = if venv_python.exists() {
             venv_python
         } else {
-            PathBuf::from("python3")
+            PathBuf::from(if cfg!(windows) { "python" } else { "python3" })
         };
         let mut cmd = Command::new(python);
         cmd.arg("-m").arg("app.main").current_dir(backend_dir);
@@ -118,10 +132,40 @@ impl Backend {
     pub fn stop(&self) {
         if let Some(mut c) = self.child.lock().unwrap().take() {
             self.unload_model();
-            let _ = c.kill();
-            let _ = c.wait();
+            terminate(&mut c);
         }
     }
+}
+
+/// Stop the backend and wait for it. The packaged backend is a PyInstaller
+/// one-file binary: a launcher process plus the real Python child. SIGKILL on
+/// the launcher orphans the child (it keeps running after quit), so send
+/// SIGTERM first, which the launcher forwards to the child and then cleans up
+/// its unpacked temp folder. SIGKILL only if it is still alive after 3 s.
+/// Windows has no SIGTERM, and killing only the launcher orphans the child,
+/// so kill the whole process tree with taskkill /T.
+fn terminate(c: &mut Child) {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        let _ = Command::new("taskkill")
+            .args(["/PID", &c.id().to_string(), "/T", "/F"])
+            .creation_flags(0x0800_0000) // CREATE_NO_WINDOW
+            .status();
+    }
+    #[cfg(unix)]
+    {
+        // SAFETY: plain kill(2) on our own child's pid.
+        unsafe { libc::kill(c.id() as libc::pid_t, libc::SIGTERM) };
+        for _ in 0..30 {
+            if let Ok(Some(_)) = c.try_wait() {
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(100));
+        }
+    }
+    let _ = c.kill();
+    let _ = c.wait();
 }
 
 // Safety net: if the app exits without the Exit event, still kill the backend.
