@@ -74,6 +74,10 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ⬜ Summary page for managers
 
 ## Performance notes
+- Index build on all sample notes, Intel Mac (2026-11-21). Neighbouring small chunks are now merged up to 1000 characters (`ingest.mergeSmall`):
+  - Before: 950 chunks. Keyword ready 0.8 s, embedding 180 s, grouping + naming 13 s. Total 194 s
+  - After: 137 chunks. Keyword ready 0.4 s, embedding 45 s, grouping + naming 27 s. Total 72 s, all after the search is already usable
+  - Plus lazy group naming (`db.topics()`): grouping 0 s. Total 46 s, almost all embedding
 - Frontend bundle after step 1: about 148 kB JS (48 kB gzipped)
 - After Settings + sidebar icons: about 154 kB JS (50 kB gzipped)
 - Topic grouping, 37 chunks from the main sample notes, Intel Mac, 32 GB:
@@ -89,7 +93,7 @@ Tick a box here in the same PR as the code. Sunday evening is for recording the 
 - ✅ 1a. `ingest.py`: TXT/MD/PDF/DOCX chunking; every read goes through `resolve_and_check` (symlinks out of the folder are blocked and logged); broken files skipped. `ingestAllowed()` walks the allowed folders, skipping hidden files
 - ✅ 1b. `db.py`: in-memory DB, contentless FTS5, vectors, revoke/forget hooks. Sample notes: 26 files, 950 chunks indexed in 0.4 s (no Ollama). `db.build(chunks)` runs files → FTS → vectors → groups. Not yet called from an endpoint (1d)
 - ✅ 1c. `search.py`: keyword (FTS5) + meaning (vectors) merged by reciprocal rank fusion; snippets re-read from the file. Without Ollama it falls back to keyword only
-- ✅ 1d. `POST /api/index` (rebuild, about 3.5 min on all sample notes, mostly topic naming; keyword search works as soon as files are added), `GET /api/index` (counts), `GET /api/search?q=` (shape in `API_SHAPES.md`)
+- ✅ 1d. `POST /api/index` returns once keyword search is ready (under 1 s on all sample notes); meaning search and topic groups build in the background. `GET /api/index` gives counts plus `phase` (meaning / grouping / ready / keyword_only) and `done`/`total` for a progress bar. `GET /api/search?q=` (shape in `API_SHAPES.md`)
 - ✅ 1e. Tests: `test_ingest.py` (blocked paths, symlink escape), `test_search.py` (walk, search, fallback, stale file, revoke, forget, API)
 - ✅ 1f. Group chunks by topic: `group.py`; `db.build` stores groups and keeps the vectors for search by meaning. Groups are named lazily by `db.topics()` (placeholder "Group N" until a view asks), so indexing makes no LLM calls
 - ✅ Models warmed at startup and kept loaded (`models.py`); unloaded on quit and Forget everything (registered in `session.py`). Warm-up takes about 6 s in the background

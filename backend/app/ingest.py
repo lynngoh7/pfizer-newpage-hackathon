@@ -108,6 +108,24 @@ def chunkFile(filePath:str):
     return True
 
 SUPPORTED = {".txt", ".md", ".pdf", ".docx"}
+MERGE_CHARS = 1000  # tiny chunks (one-line standup entries) made embedding and grouping slow
+
+
+def mergeSmall(chunkList, limit: int | None = None):
+    """Join neighbouring chunks of the same file while the result stays under
+    `limit` characters. Lines start..end stay contiguous, so citations and
+    passage re-reads still work. A chunk already over the limit is kept whole."""
+    limit = MERGE_CHARS if limit is None else limit
+    out = []
+    for c in chunkList:
+        prev = out[-1] if out else None
+        if (prev and prev.filePath == c.filePath and prev.end < c.start
+                and len(prev.text) + len(c.text) <= limit):
+            gap = "\n" * max(0, c.start - prev.end - 1)  # keep the blank lines between them
+            out[-1] = Chunk(prev.filePath, prev.start, prev.text + gap + c.text, c.end)
+        else:
+            out.append(c)
+    return out
 
 
 def ingestAllowed() -> int:
@@ -125,4 +143,5 @@ def ingestAllowed() -> int:
             seen.add(f)
             if f.suffix.lower() in SUPPORTED:
                 read += chunkFile(str(f))
+    chunks[:] = mergeSmall(chunks)
     return read

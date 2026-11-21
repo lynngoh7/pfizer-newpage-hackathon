@@ -93,7 +93,8 @@ def build_index() -> dict:
 
 @router.get("/index")
 def index_stats() -> dict:
-    return search_mod.db.stats()
+    """Counts plus build progress; the UI polls this while meaning search builds."""
+    return {**search_mod.db.stats(), **search_mod.status()}
 
 
 @router.get("/search")

@@ -85,3 +85,11 @@ def test_symlink_out_of_allowed_folder_is_blocked(tmp_path, tmp_path_factory):
     link.symlink_to(target)
     assert not ingest.chunkFile(str(link))
     assert ingest.chunks == []
+
+
+def test_merge_small_joins_neighbours_of_one_file_only():
+    C = ingest.Chunk
+    merged = ingest.mergeSmall([C("a", 0, "x" * 10, 0), C("a", 2, "y" * 10, 3),
+                                C("a", 4, "z" * 50, 4), C("b", 0, "w", 0)], limit=30)
+    assert [(c.filePath, c.start, c.end) for c in merged] == [("a", 0, 3), ("a", 4, 4), ("b", 0, 0)]
+    assert merged[0].text == "x" * 10 + "\n" + "y" * 10   # blank line 1 kept

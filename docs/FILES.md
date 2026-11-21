@@ -68,7 +68,7 @@ Add a row whenever you create a file.
 | `app/permissions.py` | allowlist (filled from `prefs.json` on launch) + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
 | `app/audit.py` | in-memory activity log: fixed action list, path, query, short outcome. Never note text | step 2: ingest/permissions call `record` |
-| `app/ingest.py` | split TXT (blank lines), MD and DOCX (headings; DOCX via markitdown), PDF (pages, pypdf) into `Chunk`s with path + start/end line or page; broken files skipped and logged; every read via `resolve_and_check`; `ingestAllowed()` walks allowed folders | — |
+| `app/ingest.py` | split TXT (blank lines), MD and DOCX (headings; DOCX via markitdown), PDF (pages, pypdf) into `Chunk`s with path + start/end line or page; broken files skipped and logged; every read via `resolve_and_check`; `ingestAllowed()` walks allowed folders; `mergeSmall()` joins small neighbouring chunks | — |
 | `app/group.py` | group chunks by topic: `nomic-embed-text` vectors → similarity groups (≥ 0.75) → one `llama3.2:3b` call names each group. Memory only, Ollama on 127.0.0.1 | — (`db.build` calls it) |
 | `app/models.py` | warm `nomic-embed-text` + answer model at startup (keep_alive -1), unload on quit and Forget everything. Ollama on 127.0.0.1, no note text sent | step 4: qa uses `answer_model()` |
 | `app/db.py` | in-memory SQLite index: Files/Chunks/Groups, contentless FTS5 keyword search, vectors (Python dict until sqlite-vec loads), `passage()` re-reads text and refuses changed files; revoke + forget hooks; `topics()` names groups lazily | — (`search.py` calls it) |
@@ -81,7 +81,7 @@ Add a row whenever you create a file.
 | `tests/conftest.py` | points `prefs.json` at a temp folder for every test | — |
 | `tests/test_privacy_edges.py` | forget clears everything, revoke hook, symlink/deny/missing-folder edge cases, no note text in log or prefs | 4b/4c: add real index checks when db.py lands |
 | `tests/test_ingest.py` | TXT/MD/DOCX chunk boundaries; broken files skipped and logged with no content, no half-read chunks left + blocked paths and symlink escapes | — |
-| `app/search.py` | build the index from allowed folders (`reindex`), hybrid search (keyword + meaning, RRF), source cards re-read from files; keyword only without Ollama | 2b: `qa.py` uses `rank()` + `source()` |
+| `app/search.py` | build the index from allowed folders (`reindex`: keyword at once, vectors + groups in a background thread, `status()` for progress), hybrid search (keyword + meaning, RRF), source cards re-read from files; keyword only without Ollama | 2b: `qa.py` uses `rank()` + `source()` |
 | `tests/test_search.py` | folder walk, search shape, Ollama fallback, stale files, revoke/forget, `/api/index` + `/api/search` | — |
 | `tests/test_db.py` | keyword search, no text stored, FTS syntax safe, revoke/forget empty the index, changed file not shown, groups and meaning search | — |
 | `tests/test_group.py` | clustering, one naming call per group, injected/bad topics fall back, Ollama local only (Ollama faked) | — |
