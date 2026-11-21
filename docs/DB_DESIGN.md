@@ -46,7 +46,7 @@ erDiagram
 |---|---|---|
 | chunkID | int, PK | |
 | fileID | int, FK → Files | revoke a folder = delete its files' chunks |
-| start | int | first line of the chunk, counted from 0 (PDF: page number) |
+| start | int | first line of the chunk, counted from 0 (PDF: page number; DOCX: line of the converted Markdown) |
 | end | int | last line of the chunk (PDF: page number) |
 | groupID | int, FK → Groups | one group per chunk (demo) |
 

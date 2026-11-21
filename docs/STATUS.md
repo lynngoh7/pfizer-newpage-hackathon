@@ -86,7 +86,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 Tick a box here in the same PR as the code. Sunday evening is for recording the video.
 
 **E: reading notes and search** (step 2c, 3)
-- 🔧 1a. `ingest.py`: text extraction (Sat). TXT/MD/PDF chunking works on the `ingest` branch (29 sample files → 954 chunks). Broken files (corrupt, encrypted, wrong encoding) are skipped and logged. Next: read through `resolve_and_check`
+- 🔧 1a. `ingest.py`: text extraction (Sat). TXT/MD/PDF/DOCX chunking works on the `ingest` branch (29 sample files → 954 chunks). Broken files (corrupt, encrypted, wrong encoding) are skipped and logged. Next: read through `resolve_and_check`
 - ⬜ 1b. `db.py`: in-memory DB and chunk metadata (Sat)
 - ⬜ 1c. FTS5 keyword search, `search.py` (Sat), needs 1a, 1b
 - ⬜ 1d. Ingest and search API endpoints (Sat), needs 1c
