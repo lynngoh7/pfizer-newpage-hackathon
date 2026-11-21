@@ -2,29 +2,24 @@
 
 A desktop app that finds the note you mean. Everything runs on your own computer. Nothing leaves it, and the app keeps no copy of your notes.
 
+![Tauri](https://img.shields.io/badge/Tauri-v2-24C8DB?logo=tauri&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-local-000000?logo=ollama&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-in--memory-003B57?logo=sqlite&logoColor=white)
+
 ## Contents
 
-- [Built with](#built-with)
 - [Installation](#installation)
 - [Development](#development)
+  - [Tech stack](#tech-stack)
   - [Prerequisites](#prerequisites)
   - [Running locally](#running-locally)
   - [Contributing](#contributing)
   - [Project structure](#project-structure)
   - [Documentation](#documentation)
 - [Team](#team)
-
-## Built with
-
-| Part | Used for |
-|---|---|
-| Tauri v2 + React | Desktop window and UI |
-| Python + FastAPI | Backend, localhost only |
-| Ollama (`llama3.2:3b`, `nomic-embed-text`) | Local AI answers and search by meaning |
-| SQLite in memory (FTS5 + sqlite-vec) | Search index, cleared when the app quits |
-| markitdown + pypdf | Reading PDF, Word, text and Markdown files |
-
-Why each was chosen: [docs/BRIEF.md](docs/BRIEF.md).
 
 ## Installation
 
@@ -39,6 +34,18 @@ sh scripts/build-app.sh   # builds the app, then installs it
 Windows: run this in Git Bash.
 
 ## Development
+
+### Tech stack
+
+| Part | Used for | Why we chose it |
+|---|---|---|
+| Tauri v2 + React | Desktop window and UI | Small app with a strict security policy and no network permissions, so the window can't reach the internet |
+| Python + FastAPI | Backend | Bound to `127.0.0.1` with a session token, so only the app can talk to it |
+| Ollama (`llama3.2:3b`, `nomic-embed-text`) | AI answers and search by meaning | Runs the models on the computer itself. No cloud AI, so notes never leave the device |
+| SQLite in memory (FTS5 + sqlite-vec) | Keyword + meaning search index | Lives in memory only and is gone when the app quits, so the app keeps no copy of your notes |
+| markitdown + pypdf | Reading PDF, Word, text and Markdown | Parse files locally, with no conversion service |
+
+More detail: [docs/BRIEF.md](docs/BRIEF.md).
 
 ### Prerequisites
 
