@@ -35,9 +35,10 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ `db.py` registers `session.on_forget("index", db.clear)`. **Every new module holding session data must register too**
 - ✅ `sample_notes/`: fictional notes for the demo moment plus edge cases. Guide and expected answers in `docs/SAMPLE_NOTES.md`. Run `scripts/make_sample_notes.py` after cloning
 
-## Step 3 — Keyword search 🔧
+## Step 3 — Keyword search ✅
 - ✅ FTS5 table (contentless) in `db.py`, `db.keyword(q)`. `search.py` merges keyword + meaning
-- ✅ Results page with source cards and excerpts; search submits to `/api/index` and `/api/search`
+- ✅ Results page with source cards and excerpts; search submits to `/api/index` and `/api/search` (PR #23). Citations link only to source cards that exist
+- ✅ Requests wait for the backend at launch (up to 20 s) instead of showing "TypeError: Load failed"
 
 ## Step 4 — Questions with verified citations 🔧
 - 🔧 Ollama client `qa.py` (localhost only, on `feature/ai-qa`, not merged). System prompt treats note excerpts as untrusted data and asks for chunk ID + exact quote per claim. ⬜ Not yet called from an API route
@@ -147,18 +148,20 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 **S: answers, demo device**
 - ⬜ Merge feature/ai-qa into main (P0, Sat)
 - ⬜ Integrate citation validation and no-evidence handling (P0, Sat)
-- ⬜ Add the ask route and keep the answer model warm (P0, Sat)
+- 🔧 Add the ask route and keep the answer model warm (P0, Sat). Model kept warm and switched to `qwen3:4b-instruct` (PR #22); ⬜ ask route
 - ⬜ Build and run the app on the demo device with the sample notes (P0, Sun am)
 
 **L: results UI**
-- ⬜ Build functional results page with mock data (P0, Sat)
-- ⬜ Display citation/source cards and file excerpts (P0, Sat)
-- ⬜ Connect question/search flow to backend (P0, Sat)
+- ✅ Build functional results page with mock data (P0, Sat)
+- ✅ Display citation/source cards and file excerpts (P0, Sat)
+- 🔧 Connect question/search flow to backend (P0, Sat). Search done (PR #23); questions wait for the ask route
 - ⬜ Complete demo UI polish and accessibility check (P1, Sun am)
 
 **C: privacy and trust, demo**
-- ⬜ Merge feat/privacy-index, feat/search, db, ingest into main (P0, Sat)
-- ⬜ Test storage, network and offline privacy claims (P0, Sat)
+- ✅ Merge feat/privacy-index, feat/search, db, ingest into main (P0, Sat). PRs #15–#17
+- 🔧 Test storage, network and offline privacy claims (P0, Sat). Network test covers every route; ⬜ ask route (blocked on S), ⬜ real-app storage check (Step 5)
+- ✅ Capture: Open in editor + New note (PR #24). See **Capture** above
+- ✅ Packaged desktop app for Mac, Windows and Linux (PR #19)
 - ⬜ Prepare trust demo and rehearse it with Wi-Fi off on the demo device (P0, Sun pm)
 - ⬜ Record the demo video and send the submission by 23:59 (P0, Sun pm)
 
