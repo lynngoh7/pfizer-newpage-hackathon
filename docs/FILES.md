@@ -41,7 +41,6 @@ One row per source file: what it does, and when it would need changing.
 | `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `public/haystack-logo.svg` | same logo cropped to the tile (no macOS icon margin) so it reads at sidebar size | — |
-| `public/haystack-icon.svg` | Haystack app icon: source for the app icons in `src-tauri/icons/` (in `public/` because its `xmlns` line would trip the privacy guard; it is never fetched) | — |
 | `pages/Home.tsx` | manager summary: Upcoming dates, Changes, Decisions and open To-dos (counts the session ticks via `todoKey`), each linking to its full page; built from the in-memory index, nothing saved | — |
 | `pages/SearchResults.tsx` | routes keyword queries to `/api/search` and questions to `/api/ask`; links verified answer claims to their source cards | demo polish and accessibility checks |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
