@@ -105,6 +105,7 @@ export function getTodos(): Promise<{ todos: ExtractedTodo[] }> {
     });
   }
   return todosPromise;
+}
 export interface SearchSource {
   chunkID: number;
   path: string;
