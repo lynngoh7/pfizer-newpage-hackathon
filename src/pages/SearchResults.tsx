@@ -46,7 +46,7 @@ function Answer({ text, sourceCount }: { text: string; sourceCount: number }) {
 
 function SourceCard({ source, index }: { source: SearchSource; index: number }) {
   return (
-    <li className="source-card card" id={`source-${index + 1}`}>
+    <li className="source-card card" id={`source-${index + 1}`} tabIndex={-1}>
       <div className="source-heading">
         <div className="source-file">
           <span className="source-number" aria-hidden="true">
@@ -129,7 +129,7 @@ export default function SearchResults({ query }: { query: string }) {
   const meaningIndexing = index?.phase === "meaning" || index?.phase === "grouping";
 
   return (
-    <section className="search-results" aria-labelledby="results-title">
+    <section className="search-results" aria-labelledby="results-title" aria-busy={loading}>
       <p className="results-eyebrow">Search results</p>
       <h1 id="results-title" aria-live="polite">
         Results for “{trimmedQuery}”
@@ -181,7 +181,9 @@ export default function SearchResults({ query }: { query: string }) {
           <section aria-labelledby="sources-title">
             <div className="sources-heading">
               <h2 id="sources-title">Sources</h2>
-              <span className="muted">{response.sources.length} notes</span>
+              <span className="muted" role="status" aria-atomic="true">
+                {response.sources.length} {response.sources.length === 1 ? "source" : "sources"}
+              </span>
             </div>
             <ol className="source-list">
               {response.sources.map((source, index) => (

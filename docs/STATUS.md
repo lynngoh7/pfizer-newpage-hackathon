@@ -120,7 +120,7 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 - ✅ 3b. Source cards and file excerpts (Sat)
 - 🔧 3c. Keyword and natural-language search call `/api/index` and `/api/search`; question answers await the QA API from 2c
 - ⬜ 3d. Show decision changes and error states (Sun), needs 2d
-- ⬜ 3e. Demo polish and accessibility check (Sun, P1)
+- 🔧 3e. Results-page polish adds visible citation targets, announced source counts, and higher text contrast; real-app keyboard and VoiceOver checks remain
 
 **C: privacy and trust** (step 2, 5)
 - ✅ 4a. Audit events for folder add/remove (Sat)
@@ -149,7 +149,7 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 - ⬜ Build functional results page with mock data (P0, Sat)
 - ⬜ Display citation/source cards and file excerpts (P0, Sat)
 - ⬜ Connect question/search flow to backend (P0, Sat)
-- ⬜ Complete demo UI polish and accessibility check (P1, Sun am)
+- 🔧 Complete demo UI polish and accessibility check (P1, Sun am); page fixes are in, real-app keyboard and VoiceOver checks remain
 
 **C: privacy and trust, demo**
 - ⬜ Merge feat/privacy-index, feat/search, db, ingest into main (P0, Sat)
