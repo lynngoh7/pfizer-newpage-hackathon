@@ -151,10 +151,17 @@ def ask(request: AskRequest) -> AskResponse:
     # Search notes that the user has permitted the app to access.
     search_result = search_mod.search(request.question)
 
-    # Convert search results into the structure expected by qa.py.
+    # The AI receives the full passage
+    full_sources = [
+        search_mod.source(source["chunkID"], full=True)
+        for source in search_result["sources"]
+    ]
+
+    # Search results still display short previews.
     chunks = {
         str(source["chunkID"]): source["snippet"]
-        for source in search_result["sources"]
+        for source in full_sources
+        if source is not None
     }
 
     try:
