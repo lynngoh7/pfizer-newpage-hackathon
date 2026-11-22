@@ -69,7 +69,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Sidebar icons (Lucide paths inlined, no icon package; decorative, hidden from VoiceOver). Decisions and To-dos have their own icons (list-checks, square-check). Licence in `docs/THIRD_PARTY.md`
 - ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (`qwen3:4b-instruct`, chosen 2026-11-21)
 - ⬜ Step 2c: indexing card (files read, passages, skipped, re-index)
-- ⬜ Check in the real app with VoiceOver (⌘F5) and with Increase contrast on
+- ✅ Checked in the real app with VoiceOver (⌘F5)
 
 ## Capture: open in editor + new note ✅
 - Source cards have **Open in editor**: the file opens in its default app (path-checked with `resolve_and_check`). The app never edits it. When the window regains focus after an Open, it re-indexes and re-runs the search, so edits show up.
@@ -86,7 +86,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 
 ## Step 7 — Later ⬜
 - ✅ Search by meaning (`nomic-embed-text` vectors, merged with keyword in `search.py`). ⬜ Embed in the background so keyword search is ready first on launch
-- ⬜ Summary page for managers
+- ✅ Summary page for managers: on Home, three cards (Changes, Decisions, open To-dos) linking to the full pages. Nothing saved; built from the in-memory index
 
 ## Packaged app ✅
 - ✅ `sh scripts/build-sidecar.sh` then `npm run tauri build` makes `Local Notes Assistant.app` (about 51 MB): double-click to open, no terminal. The backend is bundled inside and starts and stops with the app

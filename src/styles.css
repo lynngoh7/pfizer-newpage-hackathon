@@ -141,16 +141,23 @@ body {
 
 .content { flex: 1; overflow: auto; padding: 24px; display: flex; flex-direction: column; }
 
-.home { width: 100%; max-width: 720px; margin: 10vh auto 0; text-align: center; }
+.home { width: 100%; max-width: 960px; margin: 10vh auto 0; text-align: center; }
 .home h1 { font-size: 24px; font-weight: 600; margin: 0 0 8px; }
 
 .widget-grid {
-  margin-top: 48px;
-  min-height: 200px;
+  margin-top: 40px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
+  text-align: left;
 }
+.widget { margin: 0; }
+.widget-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.widget-head h2 { font-size: 15px; font-weight: 600; margin: 0; }
+.widget-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.widget-list li { line-height: 1.4; overflow-wrap: anywhere; }
+.widget-src { font-size: 12px; }
+.widget-more { align-self: flex-start; margin-top: auto; }
 
 .page { max-width: 820px; display: flex; flex-direction: column; }
 .page h2 { font-size: 20px; font-weight: 600; margin: 0 0 12px; }
