@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  AskClaim,
+  AskResponse,
   ensureSearchIndex,
   IndexStatus,
+  askNotes,
   openFile,
   reindex,
   SearchResponse,
@@ -9,6 +12,8 @@ import {
   searchNotes,
 } from "../lib/api";
 import MarkdownExcerpt from "../components/MarkdownExcerpt";
+
+type ResultsResponse = SearchResponse | AskResponse;
 
 function isQuestion(query: string): boolean {
   return (
@@ -29,36 +34,82 @@ function isMarkdownHeadingLocation(location: string): boolean {
   return /^\s{0,3}#{1,6}\s+/.test(location);
 }
 
-function Answer({ text, sourceCount }: { text: string; sourceCount: number }) {
-  const parts = text.split(/(\[\d+\])/g);
+function Answer({ claims, sources }: { claims: AskClaim[]; sources: SearchSource[] }) {
+  const resolvedClaims = claims.map((claim) => ({
+    claim,
+    citedSources: [...new Set(claim.citations.map((citation) => citation.chunk_id))]
+      .map((chunkID) => ({
+        chunkID,
+        sourceIndex: sources.findIndex((source) => source.chunkID === chunkID),
+      }))
+      .filter((citation) => citation.sourceIndex !== -1),
+  }));
+  const hiddenClaimCount = resolvedClaims.filter(({ citedSources }) => citedSources.length === 0).length;
+  const hiddenClaimMessage =
+    hiddenClaimCount === 1
+      ? "One answer claim was hidden because its verified source card was missing."
+      : `${hiddenClaimCount} answer claims were hidden because their verified source cards were missing.`;
 
   return (
-    <p className="answer-text">
-      {parts.map((part, index) => {
-        const citation = /^\[(\d+)\]$/.exec(part);
-        // Only link numbers that match a source card; anything else stays plain text.
-        const n = citation ? Number(citation[1]) : 0;
-        return citation && n >= 1 && n <= sourceCount ? (
-          <a
-            className="answer-citation"
-            href={`#source-${citation[1]}`}
-            key={`${part}-${index}`}
-            aria-label={`Jump to source ${citation[1]}`}
-          >
-            {part}
-          </a>
-        ) : (
-          part
+    <div className="answer-text">
+      {hiddenClaimCount > 0 && (
+        <p className="muted" role="status">{hiddenClaimMessage}</p>
+      )}
+      {resolvedClaims.map(({ claim, citedSources }, claimIndex) => {
+        if (citedSources.length === 0) return null;
+        return (
+          <p className="answer-claim" key={`claim-${claimIndex}`}>
+            {claim.text}
+            {citedSources.map(({ chunkID, sourceIndex }) => {
+              const sourceId = `source-${sourceIndex + 1}`;
+              return (
+                <a
+                  className="answer-citation"
+                  href={`#${sourceId}`}
+                  key={`${claimIndex}-${chunkID}`}
+                  aria-label={`Jump to source ${sourceIndex + 1}`}
+                  onClick={() => document.getElementById(sourceId)?.focus()}
+                >
+                  {" "}[{sourceIndex + 1}]
+                </a>
+              );
+            })}
+          </p>
         );
       })}
-    </p>
+    </div>
   );
 }
 
-function SourceCard({ source, index, onOpen }: { source: SearchSource; index: number; onOpen: () => void }) {
+function citationQuotesByChunk(response: ResultsResponse | null): Map<number, string[]> {
+  const quotesByChunk = new Map<number, string[]>();
+  if (!response || !("claims" in response)) return quotesByChunk;
+
+  for (const claim of response.claims) {
+    for (const citation of claim.citations) {
+      const quotes = quotesByChunk.get(citation.chunk_id) ?? [];
+      if (!quotes.includes(citation.quote)) quotes.push(citation.quote);
+      quotesByChunk.set(citation.chunk_id, quotes);
+    }
+  }
+  return quotesByChunk;
+}
+
+function SourceCard({
+  source,
+  index,
+  onOpen,
+  citationQuotes,
+}: {
+  source: SearchSource;
+  index: number;
+  onOpen: () => void;
+  citationQuotes: string[];
+}) {
   const [openError, setOpenError] = useState<string | null>(null);
   const markdown = isMarkdownFile(source.path);
   const showLocation = !markdown || !isMarkdownHeadingLocation(source.where);
+  const extraEvidence = citationQuotes.filter((quote) => !source.snippet.includes(quote));
 
   // Opens in the user's own editor; this app never edits the file itself.
   async function open() {
@@ -90,6 +141,12 @@ function SourceCard({ source, index, onOpen }: { source: SearchSource; index: nu
         )}
       </div>
       {showLocation && <p className="source-location">{source.where}</p>}
+      {extraEvidence.map((quote, quoteIndex) => (
+        <blockquote className="source-evidence" key={`${source.chunkID}-${quoteIndex}`}>
+          <p className="source-evidence-label">Verified evidence</p>
+          {markdown ? <MarkdownExcerpt text={quote} /> : <p>{quote}</p>}
+        </blockquote>
+      ))}
       <blockquote className="source-excerpt">
         {markdown ? <MarkdownExcerpt text={source.snippet} /> : source.snippet}
       </blockquote>
@@ -105,7 +162,8 @@ function SourceCard({ source, index, onOpen }: { source: SearchSource; index: nu
 
 export default function SearchResults({ query }: { query: string }) {
   const trimmedQuery = query.trim();
-  const [response, setResponse] = useState<SearchResponse | null>(null);
+  const question = isQuestion(trimmedQuery);
+  const [response, setResponse] = useState<ResultsResponse | null>(null);
   const [index, setIndex] = useState<IndexStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,7 +210,7 @@ export default function SearchResults({ query }: { query: string }) {
           setResponse({ status: "no_support", answer: null, sources: [] });
           return;
         }
-        const result = await searchNotes(trimmedQuery);
+        const result = question ? await askNotes(trimmedQuery) : await searchNotes(trimmedQuery);
         if (active) setResponse(result);
       } catch (e) {
         if (active) setError(String(e));
@@ -165,7 +223,7 @@ export default function SearchResults({ query }: { query: string }) {
     return () => {
       active = false;
     };
-  }, [trimmedQuery, attempt]);
+  }, [trimmedQuery, question, attempt]);
 
   if (!trimmedQuery) {
     return (
@@ -177,11 +235,13 @@ export default function SearchResults({ query }: { query: string }) {
     );
   }
 
-  const answer = isQuestion(trimmedQuery) ? response?.answer : null;
+  const answerClaims =
+    question && response && "claims" in response ? response.claims : [];
   const noFiles = index?.files === 0;
   const meaningIndexing = index?.phase === "meaning" || index?.phase === "grouping";
   const sourceCount = response?.sources.length ?? 0;
   const sourceCountLabel = `${sourceCount} ${sourceCount === 1 ? "source" : "sources"}`;
+  const citationQuotes = citationQuotesByChunk(response);
 
   return (
     <section className="search-results" aria-labelledby="results-title" aria-busy={loading}>
@@ -191,10 +251,14 @@ export default function SearchResults({ query }: { query: string }) {
       </h1>
       <p className="results-note">Search runs on this computer and shows excerpts from your allowed files.</p>
 
-      {loading && <p className="muted" role="status">Searching your notes…</p>}
+      {loading && (
+        <p className="muted" role="status">
+          {question ? "Searching your notes and verifying an answer…" : "Searching your notes…"}
+        </p>
+      )}
       {error && (
         <div className="card search-error" role="alert">
-          <h2>Couldn’t search your notes</h2>
+          <h2>{question ? "Couldn’t answer your question" : "Couldn’t search your notes"}</h2>
           <p>{error}</p>
           <button className="btn" onClick={() => setAttempt((current) => current + 1)}>
             Try again
@@ -218,19 +282,17 @@ export default function SearchResults({ query }: { query: string }) {
               Keyword results are ready. Meaning-based indexing is continuing in the background.
             </p>
           )}
-          {isQuestion(trimmedQuery) && !answer && (
-            <p className="muted">
-              Showing matching notes. AI-generated answers aren’t available yet.
-            </p>
-          )}
-          {answer && (
+          {answerClaims.length > 0 && (
             <section className="card answer-card" aria-labelledby="answer-title">
               <div className="answer-heading">
                 <h2 id="answer-title">Answer</h2>
                 <span className="answer-label">Based on your notes</span>
               </div>
-              <Answer text={answer} sourceCount={response.sources.length} />
+              <Answer claims={answerClaims} sources={response.sources} />
             </section>
+          )}
+          {question && response.status === "ok" && answerClaims.length === 0 && (
+            <p className="muted" role="status">No verified answer claims were returned.</p>
           )}
 
           <section aria-labelledby="sources-title">
@@ -247,6 +309,7 @@ export default function SearchResults({ query }: { query: string }) {
                   source={source}
                   index={index}
                   onOpen={() => (editing.current = true)}
+                  citationQuotes={citationQuotes.get(source.chunkID) ?? []}
                 />
               ))}
             </ol>
