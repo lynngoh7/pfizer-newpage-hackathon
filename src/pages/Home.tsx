@@ -1,7 +1,8 @@
 /**
  * Home: the manager summary (P1 #11). Up to four quiet lists: upcoming dates
  * (next 14 days, plus overdue open to-dos), notes that changed, latest
- * decisions, open to-dos. Clicking an upcoming row opens its source note. One line per item, newest first;
+ * decisions, open to-dos. Clicking an upcoming row opens its source note.
+ * Upcoming is loaded once by App.tsx so it survives switching pages. One line per item, newest first;
  * date and source file on hover. A list with nothing in it (or still loading)
  * is hidden, so the page stays calm. Each list is a card with its sidebar
  * icon; clicking a row opens the full page. Everything comes from the in-memory
@@ -12,7 +13,7 @@
  */
 import { useEffect, useState } from "react";
 import { NavIcon, type View } from "../components/Sidebar";
-import { ChangeReport, DatedLine, ExtractedDecision, ExtractedTodo, ensureSearchIndex, getChanges, getUpcoming, openFile } from "../lib/api";
+import { ChangeReport, DatedLine, ExtractedDecision, ExtractedTodo, ensureSearchIndex, getChanges, openFile } from "../lib/api";
 import { ticked, todoKey } from "./Todos";
 
 const SHOW = 3;
@@ -80,7 +81,7 @@ const shortDate = (iso: string) =>
   new Date(`${iso}T00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 
 /** Dates found in notes: what's due soon, plus open to-dos whose date has passed. */
-function Upcoming({ items }: { items: DatedLine[] | null }) {
+function Upcoming({ items, onNavigate }: { items: DatedLine[] | null; onNavigate: (v: View) => void }) {
   if (!items) return null;
   const now = new Date();
   const today = isoDay(now);
@@ -91,12 +92,12 @@ function Upcoming({ items }: { items: DatedLine[] | null }) {
     <section className="card home-section" aria-labelledby="home-upcoming">
       <div className="home-section-head">
         <h2 id="home-upcoming">
-          <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-            strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" />
-          </svg>
+          <NavIcon id="upcoming" />
           Upcoming
         </h2>
+        <button className="link" onClick={() => onNavigate("upcoming")} aria-label="See all upcoming">
+          See all
+        </button>
       </div>
       <ul className="home-list">
         {rows.slice(0, 5).map((d, i) => {
@@ -120,25 +121,13 @@ function Upcoming({ items }: { items: DatedLine[] | null }) {
 interface Props {
   decisions: ExtractedDecision[] | null;
   todos: ExtractedTodo[] | null;
+  upcoming: DatedLine[] | null;
   onNavigate: (v: View) => void;
 }
 
-export default function Home({ decisions, todos, onNavigate }: Props) {
+export default function Home({ decisions, todos, upcoming, onNavigate }: Props) {
   const [changes, setChanges] = useState<ChangeReport | null>(null);
   const [tick, setTick] = useState(0);
-  const [upcoming, setUpcoming] = useState<DatedLine[] | null>(null);
-
-  // Once per visit: the list is rebuilt from the notes, never stored.
-  useEffect(() => {
-    let active = true;
-    ensureSearchIndex()
-      .then(getUpcoming)
-      .then((r) => active && setUpcoming(r.items))
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -195,7 +184,7 @@ export default function Home({ decisions, todos, onNavigate }: Props) {
     <div className="home">
       <h1>What are you looking for?</h1>
       <div className="home-summary">
-        <Upcoming items={upcoming} />
+        <Upcoming items={upcoming} onNavigate={onNavigate} />
         <Section title="Changes" to="changes" rows={changeRows} onNavigate={onNavigate} />
         <Section title="Decisions" to="decisions" rows={decisionRows} onNavigate={onNavigate} />
         <Section title="Open to-dos" to="todos" rows={todoRows} onNavigate={onNavigate} />

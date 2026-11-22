@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import { health } from "../lib/api";
 
-export type View = "home" | "search" | "newnote" | "decisions" | "todos" | "changes" | "privacy" | "settings";
+export type View = "home" | "search" | "newnote" | "decisions" | "todos" | "upcoming" | "changes" | "privacy" | "settings";
 
 interface Props {
   view: View;
@@ -22,6 +22,7 @@ const ICONS: Record<Exclude<View, "home">, JSX.Element> = {
   decisions: <><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></>,
   // decisions = list with ticks; to-dos = a single ticked box, so the two read apart
   todos: <><path d="M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5" /><path d="m9 11 3 3L22 4" /></>,
+  upcoming: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>,
   // "history": a calm clock, not a warning sign; most findings are just updates
   changes: <><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></>,
   privacy: <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />,
@@ -43,6 +44,7 @@ const NAV: { id: Exclude<View, "home">; label: string }[] = [
   { id: "newnote", label: "New note" },
   { id: "decisions", label: "Decisions" },
   { id: "todos", label: "To-dos" },
+  { id: "upcoming", label: "Upcoming" },
   { id: "changes", label: "Changes" },
   { id: "privacy", label: "Privacy" },
 ];
