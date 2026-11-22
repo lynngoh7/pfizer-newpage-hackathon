@@ -23,7 +23,7 @@ import urllib.request
 
 OLLAMA = "http://127.0.0.1:11434"  # never configurable: local only
 EMBED_MODEL = "nomic-embed-text"
-NAME_MODEL = "llama3.2:3b"
+NAME_MODEL = "qwen3:4b-instruct"
 THRESHOLD = 0.75   # cosine similarity to join a group; 0.6-0.7 merged unrelated notes
 BATCH = 64         # chunks per embed call, keeps each request small
 MAX_TEXT = 1500    # chars per chunk sent to the model; keeps context tight
