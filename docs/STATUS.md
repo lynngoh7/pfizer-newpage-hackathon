@@ -41,14 +41,15 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ Results page with source cards and excerpts; search submits to `/api/index` and `/api/search` (PR #23). Citations link only to source cards that exist
 - ✅ Requests wait for the backend at launch (up to 20 s) instead of showing "TypeError: Load failed"
 
-## Step 4 — Questions with verified citations 🔧
+## Step 4 — Questions with verified citations ✅
 - ✅ `qa.py`: local Ollama question answering using `models.answer_model()`. Source-aware prompts treat notes as untrusted data and require exact quotations.
 - ✅ `citations.py`: validates model-generated quotations against retrieved excerpts. Unsupported claims are rejected; no valid evidence → "No supporting notes found."
 - ✅ `POST /api/ask`: connects search results to `qa.py` and returns structured answers, verified citations and source metadata.
 - ✅ Tests: `test_qa.py` covers valid evidence, missing evidence and fabricated citations. `test_ask.py` verifies API integration.
 - ✅ Live Qwen3 4B Instruct tests: valid citation accepted; unsupported question returns no evidence.
 - ✅ Model lifecycle delegated to `models.py`: models remain warm during the session and are unloaded on quit or "Forget everything".
-- 🔧 Verify the full question-answering workflow through the desktop UI, including citation navigation and no-evidence handling.
+- ✅ Search page sends questions to `/api/ask` and links verified claims to source cards
+- ⬜ Verify the full question-answering workflow in the desktop app (citation jump, no-evidence message)
 
 ## Step 5 — Trust panel 🔧
 Covers 20 of the 50 judging points. Sidebar → **Privacy**.
@@ -76,16 +77,16 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - Sidebar **New note**: saves a new `.md` file (`YYYY-MM-DD Title.md`). In an allowed folder it is searchable straight away; in another folder it is not tracked. Never overwrites. The audit log shows `open_in_editor` / `note_created` with paths only.
 - Code: `backend/app/notes.py`, `POST /api/files/open`, `POST /api/notes`, `src/pages/NewNote.tsx`. Tests: `backend/tests/test_notes.py`.
 
-## Step 6 — Decisions, to-dos, conflicts 🔧
-- ⬜ Pull decisions and to-dos out of notes
-- ✅ To-dos can be ticked on the To-dos page. Ticks are in memory for the session only: never written to the note or to disk A clear notice says so; "Edit in note" opens the file in the user's own editor (path-checked, audit-logged)
+## Step 6 — Decisions, to-dos, changes ✅
+- ✅ Pull decisions and to-dos out of notes (`extractions.py`, `GET /api/decisions`, `GET /api/todos`; pages **Decisions** and **To-dos**). Tests: `test_extractions.py`
+- ✅ To-dos can be ticked on the To-dos page. Ticks are in memory for the session only: never written to the note or to disk. A clear notice says so; "Edit in note" opens the file in the user's own editor (path-checked, audit-logged)
 - ✅ Flag notes that disagree, and newer notes that replace older ones. Sidebar page **Changes** (gentle wording and icon: a changed note is normal, not an error; Markdown symbols stripped from quotes and titles so they read as plain text). Search cards get the "Superseded" / "Newer note" / "Conflict" badge once the scan is done
   - How: after meaning search is ready, a background scan pairs passages from different notes dated in their file name (most similar first, at most 8 pairs; findings show as they arrive). The answer model says replaces / contradicts / none and quotes both; Python keeps a finding only if both quotes are really in the files. Memory only; cleared on reindex and forget
   - Undated files (e.g. `todo.md`) are left out: their date comes from mtime, which changes on copy
   - Speed: pairs are judged 4 at a time (`WORKERS`). Pair finding is O(n²) in passages (not n!); `map(operator.mul)` makes it ~2.5x faster (200 passages: 0.9s → 0.36s). The model calls are still most of the time. Findings appear on the page as they come in
   - Code: `backend/app/changes.py`, `GET/POST /api/changes`, `src/pages/Changes.tsx`. Tests: `backend/tests/test_changes.py`
 
-## Step 7 — Later ⬜
+## Step 7 — Later 🔧
 - ✅ Search by meaning (`nomic-embed-text` vectors, merged with keyword in `search.py`). ⬜ Embed in the background so keyword search is ready first on launch
 - ✅ Upcoming on Home: dates found in notes (next 14 days, plus overdue open to-dos in red), resolved against the note's own date; click opens the note. Sidebar tab **Upcoming** shows the full list. `/api/upcoming`, `app/dates.py`, `pages/Upcoming.tsx`
 - ✅ Summary page for managers: on Home, three short lists (Changes, Decisions, open To-dos) linking to the full pages. Nothing saved; built from the in-memory index
@@ -128,16 +129,16 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 
 **S: answers and decisions** (step 4, 6)
 - ✅ 2a. Verified local Ollama inference and GPU acceleration. Tested `llama3.2:3b` and `qwen3:4b-instruct`; selected Qwen3 Instruct for more reliable citations and concise responses.
-- ✅ 2b. Implemented `qa.py` with source-aware prompts and structured JSON responses. Uses `models.answer_model()` for model selection. On `feature/ai-qa`, awaiting merge.
+- ✅ 2b. Implemented `qa.py` with source-aware prompts and structured JSON responses. Uses `models.answer_model()` for model selection. Merged (PR #9).
 - ✅ 2c. Integrated `citations.py` and no-evidence handling. Added `POST /api/ask` to connect `search.py` with `qa.py`. Live citation and no-evidence tests passed.
-- ⬜ 2d. Compare old decisions with newer notes (reassigned to Eoin).
+- ✅ 2d. Compare old decisions with newer notes: the Changes page (`changes.py`)
 - ✅ 2e. Model lifecycle managed by `models.py`: kept warm during the session and unloaded on quit or "Forget everything". Removed per-request unloading from `qa.py`.
 
 **L: results UI** (step 3, 4, 6)
 - ✅ 3a. Results page with mock data (Sat)
 - ✅ 3b. Source cards and file excerpts (Sat)
 - ✅ 3c. Keyword and natural-language search call `/api/index` and `/api/search`; questions call `/api/ask` and link verified claims to their source cards
-- ⬜ 3d. Show decision changes and error states (Sun), needs 2d
+- ✅ 3d. Decision changes on the Changes page, Home summary and search-card badges
 - 🔧 3e. Results-page polish adds visible citation targets, announced source counts, higher text contrast and formatted Markdown excerpts; verify citation navigation and question flow in the desktop app
 
 **C: privacy and trust** (step 2, 5)
@@ -152,14 +153,14 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 Prototype done by Saturday night, Sunday midday at the latest. The second half of Sunday is for the demo and video.
 
 **E: decisions**
-- ⬜ Pull decisions and to-dos out of notes (P0, Sat)
-- ⬜ Compare old decisions with newer notes (P0, Sat)
-- ⬜ Display decision changes and error states (P0, Sun am)
+- ✅ Pull decisions and to-dos out of notes (P0)
+- ✅ Compare old decisions with newer notes (P0). Changes page
+- ✅ Display decision changes (P0). Changes page, Home summary, search badges; to-dos tickable for the session
 - ⬜ Run edge-case tests against answers: injected instructions, empty and broken notes (P0, Sun am)
 
 **S: answers, demo device**
 
-- 🔧 Merge `feature/ai-qa` into `main` (PR awaiting approval).
+- ✅ Merge `feature/ai-qa` into `main` (PR #9).
 - ✅ Integrate citation validation and no-evidence handling.
 - ✅ Implement `POST /api/ask` and integrate with existing search.
 - ✅ Verify local Qwen3 4B Instruct inference with valid and missing evidence.
@@ -181,7 +182,14 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 - ⬜ Prepare trust demo and rehearse it with Wi-Fi off on the demo device (P0, Sun pm)
 - ⬜ Record the demo video and send the submission by 23:59 (P0, Sun pm)
 
-If E falls behind, L takes "Display decision changes and error states" (it sits on the results page).
+### Left to do before 23:59 Sun 22 Nov (priority order)
+1. 🔧 Build + install the app on the demo device with Ollama models pulled (`qwen3:4b-instruct`, `nomic-embed-text`); run the demo question end to end, incl. citation jump and "No supporting notes found"
+2. 🔧 Real-app storage check: Privacy page shows "Folder list and settings only" after a session (Step 5)
+3. ⬜ Edge-case run on answers: injected-instruction note, empty/broken notes, a question with no answer
+4. ⬜ Rehearse trust demo with Wi-Fi off on the demo device
+5. ⬜ Record the video; email prototype + video to careers-uobinterns@bristol.ac.uk, subject "Pfizer Hackathon Submission"
+
+Drop if short of time: background embedding, Settings model list and indexing card, app icon, Windows/Linux/Apple Silicon builds.
 
 ### Dependencies
 - **Critical path:** C's merges → S's ask route with citations → L connects search and questions → E's decision changes on the results page → S runs it on the demo device → C rehearses and records. Everything up to L's connection should land on Saturday.
