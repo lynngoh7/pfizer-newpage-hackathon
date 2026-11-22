@@ -5,7 +5,8 @@
   --fg: #1c1c1e;
   --muted: #6b6b70;
   --border: #e2e2e6;
-  --accent: #3b6ef5;
+  --accent: #2457cc;
+  --ok-text: #166534;
   --hover: rgba(0, 0, 0, 0.05);
   --card: #ffffff;
   --danger: #c0392b;
@@ -22,9 +23,10 @@
     --muted: #9a9aa3;
     --border: #2a2a30;
     --accent: #6f93ff;
+    --ok-text: #86efac;
     --hover: rgba(255, 255, 255, 0.06);
     --card: #222227;
-    --danger: #e06555;
+    --danger: #ff8a80;
   }
 }
 
@@ -181,6 +183,7 @@ body {
 .sources-heading { margin: 28px 0 12px; }
 .source-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
 .source-card.card { margin: 0; scroll-margin-top: 16px; }
+.source-card:target { outline: 2px solid var(--accent); outline-offset: 2px; }
 .source-file { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
 .source-number {
   display: inline-grid;
@@ -206,7 +209,7 @@ body {
   font-weight: 600;
 }
 .source-flag-superseded { color: var(--danger); }
-.source-flag-newer { color: var(--ok); }
+.source-flag-newer { color: var(--ok-text); }
 .source-location { margin: 4px 0 0 34px; color: var(--muted); font-size: 12px; }
 .source-excerpt {
   margin: 0 0 0 34px;
@@ -235,6 +238,11 @@ body {
 }
 .card > * { margin: 0; }
 
+.todo-card { gap: 6px; }
+.todo-task { display: flex; align-items: baseline; gap: 10px; }
+.todo-state { flex: 0 0 1em; color: var(--accent); }
+.todo-completed { color: var(--muted); text-decoration: line-through; }
+.todo-source { overflow-wrap: anywhere; font-size: 12px; }
 @media (max-width: 640px) {
   .searchbar { padding: 12px 16px; }
   .content { padding: 20px 16px; }
