@@ -99,6 +99,78 @@ def test_todos_parses_markdown_checkboxes_with_source_metadata(monkeypatch):
     ]}
 
 
+def test_decisions_extracts_heading_and_explicit_labels(monkeypatch):
+    monkeypatch.setattr(extractions, "read_chunks", lambda: [{
+        "chunkID": 23,
+        "path": "/notes/decision.md",
+        "date": "2026-10-20",
+        "start": 2,
+        "end": 12,
+        "text": (
+            "# Meeting\n"
+            "Context, not a decision.\n\n"
+            "## Decision\n"
+            "**We chose Ledgerly.** This replaces the earlier choice.\n"
+            "The launch moves to 17 November.\n\n"
+            "## Actions\n"
+            "- [ ] Sign the contract\n"
+            "## Other\n"
+            "No more decisions here.\n"
+            "- DECISION: The launch name is Lighthouse Preview.\n"
+            "**Decision: The staffing plan is approved.**\n"
+            "```md\n"
+            "## Decision\n"
+            "This is only an example.\n"
+            "```\n"
+        ),
+    }])
+
+    assert extractions.decisions() == {"decisions": [
+        {
+            "text": "**We chose Ledgerly.** This replaces the earlier choice. The launch moves to 17 November.",
+            "chunkID": 23,
+            "path": "/notes/decision.md",
+            "date": "2026-10-20",
+            "start": 2,
+            "end": 12,
+        },
+        {
+            "text": "The launch name is Lighthouse Preview.",
+            "chunkID": 23,
+            "path": "/notes/decision.md",
+            "date": "2026-10-20",
+            "start": 2,
+            "end": 12,
+        },
+        {
+            "text": "The staffing plan is approved.",
+            "chunkID": 23,
+            "path": "/notes/decision.md",
+            "date": "2026-10-20",
+            "start": 2,
+            "end": 12,
+        },
+    ]}
+
+
+def test_decisions_api_returns_extracted_items(indexed_note):
+    note, chunk_id = indexed_note
+    response = TestClient(create_app(Settings(port=0, session_token=TOKEN))).get(
+        "/api/decisions",
+        headers={"Authorization": f"Bearer {TOKEN}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"decisions": [{
+        "text": "We chose Acme.",
+        "chunkID": chunk_id,
+        "path": str(note.resolve()),
+        "date": "2026-09-22",
+        "start": 0,
+        "end": 4,
+    }]}
+
+
 def test_todos_api_route_returns_extracted_items(indexed_note):
     note, chunk_id = indexed_note
     response = TestClient(create_app(Settings(port=0, session_token=TOKEN))).get(

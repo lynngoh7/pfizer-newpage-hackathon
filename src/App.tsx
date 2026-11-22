@@ -17,10 +17,12 @@ import Todos from "./pages/Todos";
 import Placeholder from "./pages/Placeholder";
 import SearchResults from "./pages/SearchResults";
 import Settings from "./pages/Settings";
-import { ExtractedTodo, getTodos } from "./lib/api";
+import { ExtractedDecision, ExtractedTodo, getDecisions, getTodos } from "./lib/api";
 
 const TODO_RETRY_DELAY_MS = 1000;
 const TODO_MAX_ATTEMPTS = 60;
+const DECISION_RETRY_DELAY_MS = 1000;
+const DECISION_MAX_ATTEMPTS = 60;
 
 // Lazy: this page's code downloads only when first opened, keeping startup fast.
 const Privacy = lazy(() => import("./pages/Privacy"));
@@ -31,6 +33,9 @@ export default function App() {
   const [todos, setTodos] = useState<ExtractedTodo[] | null>(null);
   const [todosError, setTodosError] = useState<string | null>(null);
   const [todoLoadAttempt, setTodoLoadAttempt] = useState(0);
+  const [decisions, setDecisions] = useState<ExtractedDecision[] | null>(null);
+  const [decisionsError, setDecisionsError] = useState<string | null>(null);
+  const [decisionLoadAttempt, setDecisionLoadAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -61,6 +66,35 @@ export default function App() {
     };
   }, [todoLoadAttempt]);
 
+  useEffect(() => {
+    let active = true;
+    async function loadDecisions() {
+      for (let attempt = 1; attempt <= DECISION_MAX_ATTEMPTS && active; attempt += 1) {
+        try {
+          const { decisions: extracted } = await getDecisions();
+          if (active) {
+            setDecisions(extracted);
+            setDecisionsError(null);
+          }
+          return;
+        } catch (reason: unknown) {
+          if (attempt === DECISION_MAX_ATTEMPTS) {
+            if (active) {
+              setDecisionsError(reason instanceof Error ? reason.message : String(reason));
+            }
+            return;
+          }
+          await new Promise((resolve) => setTimeout(resolve, DECISION_RETRY_DELAY_MS));
+        }
+      }
+    }
+
+    void loadDecisions();
+    return () => {
+      active = false;
+    };
+  }, [decisionLoadAttempt]);
+
   function onSearch(q: string) {
     setQuery(q);
     setView("search");
@@ -88,7 +122,16 @@ export default function App() {
       );
       break;
     case "decisions":
-      main = <Decisions />;
+      main = (
+        <Decisions
+          decisions={decisions}
+          error={decisionsError}
+          onRetry={() => {
+            setDecisionsError(null);
+            setDecisionLoadAttempt((attempt) => attempt + 1);
+          }}
+        />
+      );
       break;
     case "conflicts":
       main = <Placeholder title="Conflicts" note="Contradiction and superseded-note detection arrives in build step 6." />;

@@ -36,6 +36,28 @@ What `search.py` and `qa.py` return to the UI. Build against this shape with fak
 
 Keep it lean: sources are top-k only (5 at most), snippets are 300 characters at most, and nothing else goes in.
 
+# Decision extraction response
+
+`GET /api/decisions` returns explicit decision sections and `DECISION:` labels
+from currently indexed notes. Each entry preserves the original wording and
+includes its source passage metadata; the text is re-read from the original
+file and is not stored separately.
+
+```json
+{
+  "decisions": [
+    {
+      "text": "We are going with Corvid Analytics.",
+      "chunkID": 12,
+      "path": "/Users/me/Notes/vendor-decision.md",
+      "date": "2026-09-22",
+      "start": 10,
+      "end": 14
+    }
+  ]
+}
+```
+
 # Hooks `db.py` must register
 
 Without these, "remove folder" and "Forget everything" leave chunks in memory.

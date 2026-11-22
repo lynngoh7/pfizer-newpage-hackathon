@@ -106,6 +106,30 @@ export function getTodos(): Promise<{ todos: ExtractedTodo[] }> {
   }
   return todosPromise;
 }
+
+export interface ExtractedDecision {
+  text: string;
+  chunkID: number;
+  path: string;
+  date: string;
+  start: number;
+  end: number;
+}
+
+let decisionsPromise: Promise<{ decisions: ExtractedDecision[] }> | null = null;
+
+export function getDecisions(): Promise<{ decisions: ExtractedDecision[] }> {
+  if (!decisionsPromise) {
+    decisionsPromise = apiFetch<{ decisions: ExtractedDecision[] }>("/api/decisions").catch(
+      (error: unknown) => {
+        decisionsPromise = null;
+        throw error;
+      },
+    );
+  }
+  return decisionsPromise;
+}
+
 export interface SearchSource {
   chunkID: number;
   path: string;
