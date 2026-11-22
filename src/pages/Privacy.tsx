@@ -11,6 +11,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import FolderAccess from "../components/FolderAccess";
 import ForgetButton from "../components/ForgetButton";
 import { AuditEntry, auditLog, network, NetworkReport, saved, SavedReport, storage, StorageReport } from "../lib/trust";
+import { isStarting } from "../lib/api";
 
 // Plain-language names, in the order a user thinks of them.
 const PROGRAMS: { role: "app" | "engine" | "model"; name: string }[] = [
@@ -37,7 +38,8 @@ function usePoll<T>(fn: () => Promise<T>, ms: number): [T | null, string | null,
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const refresh = useCallback(() => {
-    fn().then((d) => { setData(d); setError(null); }).catch((e) => setError(String(e)));
+    // Engine still starting: keep showing "Checking…", not a red error.
+    fn().then((d) => { setData(d); setError(null); }).catch((e) => { if (!isStarting(e)) setError(String(e)); });
   }, [fn]);
   useEffect(() => {
     refresh();
@@ -186,7 +188,7 @@ export default function Privacy() {
             <ul className="paths">
               {disk.locations.map((l) => (
                 <li key={l.path}>
-                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : disk.saved.path.startsWith(l.path + "/") ? "only prefs.json" : l.exists ? "empty" : "not there"}</span>
+                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : /^[\\/]/.test(disk.saved.path.slice(l.path.length)) && disk.saved.path.startsWith(l.path) ? "only prefs.json" : l.exists ? "empty" : "not there"}</span>
                 </li>
               ))}
             </ul>

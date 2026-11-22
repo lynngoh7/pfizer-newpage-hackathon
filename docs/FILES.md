@@ -40,7 +40,9 @@ One row per source file: what it does, and when it would need changing.
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
 | `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
-| `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
+| `public/haystack-logo.svg` | same logo cropped to the tile (no macOS icon margin) so it reads at sidebar size | — |
+| `public/haystack-icon.svg` | Haystack app icon: source for the app icons in `src-tauri/icons/` (in `public/` because its `xmlns` line would trip the privacy guard; it is never fetched) | — |
+| `pages/Home.tsx` | manager summary: Upcoming dates, Changes, Decisions and open To-dos (counts the session ticks via `todoKey`), each linking to its full page; built from the in-memory index, nothing saved | — |
 | `pages/SearchResults.tsx` | routes keyword queries to `/api/search` and questions to `/api/ask`; links verified answer claims to their source cards | demo polish and accessibility checks |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
 | `pages/Decisions.tsx` | lists decisions from `/api/decisions` with source file | — |
@@ -103,6 +105,7 @@ One row per source file: what it does, and when it would need changing.
 | `tests/test_permissions.py` | grants, protected paths, symlink escape, revoke | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
 | `app/qa.py` | Local Ollama Q&A using retrieved excerpts; generates claims and validates citations through `citations.py`. Uses `models.answer_model()` | Test full desktop workflow |
+| `tests/test_extractions.py` | to-do and decision extraction; full passage sent to the model | — |
 | `tests/test_qa.py` | Tests valid citations, missing evidence and fabricated quotations using mocked Ollama responses | Add further edge cases |
 | `tests/test_ask.py` | Tests `POST /api/ask` integration with mocked search and Q&A results | Test real authenticated workflow |
 

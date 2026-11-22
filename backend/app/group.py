@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import math
 import urllib.request
+from pathlib import Path
 
 OLLAMA = "http://127.0.0.1:11434"  # never configurable: local only
 EMBED_MODEL = "nomic-embed-text"
@@ -44,7 +45,7 @@ def embed(chunks) -> list[list[float]]:
     """One unit-length vector per chunk. The file name is included because it
     often says what the note is about ("Lighthouse vendor decision")."""
     # nomic-embed-text expects a task prefix; "clustering:" suits grouping
-    texts = ["clustering: " + c.filePath.split("/")[-1] + "\n" + c.text[:MAX_TEXT] for c in chunks]
+    texts = ["clustering: " + Path(c.filePath).name + "\n" + c.text[:MAX_TEXT] for c in chunks]
     vecs = []
     for i in range(0, len(texts), BATCH):
         vecs += _post("/api/embed", {"model": EMBED_MODEL, "input": texts[i:i + BATCH]})["embeddings"]
