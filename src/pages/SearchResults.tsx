@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ensureSearchIndex,
   IndexStatus,
+  openFile,
+  reindex,
   SearchResponse,
   SearchSource,
   searchNotes,
@@ -44,7 +46,20 @@ function Answer({ text, sourceCount }: { text: string; sourceCount: number }) {
   );
 }
 
-function SourceCard({ source, index }: { source: SearchSource; index: number }) {
+function SourceCard({ source, index, onOpen }: { source: SearchSource; index: number; onOpen: () => void }) {
+  const [openError, setOpenError] = useState<string | null>(null);
+
+  // Opens in the user's own editor; this app never edits the file itself.
+  async function open() {
+    setOpenError(null);
+    try {
+      await openFile(source.path);
+      onOpen();
+    } catch (e) {
+      setOpenError(String(e));
+    }
+  }
+
   return (
     <li className="source-card card" id={`source-${index + 1}`} tabIndex={-1}>
       <div className="source-heading">
@@ -65,6 +80,12 @@ function SourceCard({ source, index }: { source: SearchSource; index: number }) 
       </div>
       <p className="source-location">{source.where}</p>
       <blockquote className="source-excerpt">{source.snippet}</blockquote>
+      <div className="source-actions">
+        <button className="btn btn-small" onClick={open} aria-label={`Open ${fileName(source.path)} in your editor`}>
+          Open in editor
+        </button>
+        {openError && <span className="error">{openError}</span>}
+      </div>
     </li>
   );
 }
@@ -76,6 +97,25 @@ export default function SearchResults({ query }: { query: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const editing = useRef(false);
+
+  // After "Open in editor", the user edits elsewhere. When they come back to
+  // this window, re-read the allowed folders and re-run the search so their
+  // changes show up. Only after an Open, so normal focus changes cost nothing.
+  useEffect(() => {
+    async function onFocus() {
+      if (!editing.current) return;
+      editing.current = false;
+      try {
+        await reindex();
+      } catch {
+        // Search below shows its own error if the backend is down.
+      }
+      setAttempt((current) => current + 1);
+    }
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -189,7 +229,12 @@ export default function SearchResults({ query }: { query: string }) {
             </div>
             <ol className="source-list">
               {response.sources.map((source, index) => (
-                <SourceCard key={source.chunkID} source={source} index={index} />
+                <SourceCard
+                  key={source.chunkID}
+                  source={source}
+                  index={index}
+                  onOpen={() => (editing.current = true)}
+                />
               ))}
             </ol>
           </section>

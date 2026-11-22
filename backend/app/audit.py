@@ -27,6 +27,8 @@ ACTIONS = frozenset({
     "search",
     "ask",
     "forget",          # the user cleared the session
+    "open_in_editor",  # handed a file to the user's default app (the app never edits it)
+    "note_created",    # the user saved a new note (the app's only write; never overwrites)
 })
 MAX_ENTRIES = 5000     # bounded so a huge folder cannot grow memory without limit
 MAX_OUTCOME = 80       # a reason like "corrupt PDF", never a passage

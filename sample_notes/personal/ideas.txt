@@ -4,3 +4,4 @@ random ideas
 - onboarding: could we skip step 3 entirely for invited users
 - ask hattie about a design crit rotation
 - lighthouse name clashes w/ the meeting room, rename beta? 
+- hi

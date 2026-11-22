@@ -344,3 +344,15 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1
   -webkit-user-select: text; user-select: text;
 }
 ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+/* Capture: Open button on source cards, New note page */
+.source-actions { display: flex; align-items: center; gap: 10px; margin-left: 34px; }
+.btn-small { padding: 4px 10px; font-size: 12px; }
+.new-note > h1 { margin: 0 0 8px; font-size: 24px; font-weight: 600; }
+.note-title, .note-body {
+  font: inherit; color: var(--fg); background: var(--card);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+}
+.note-title { font-size: 16px; font-weight: 600; }
+.note-body { resize: vertical; line-height: 1.55; min-height: 160px; }
+.note-title:focus, .note-body:focus { outline: none; border-color: var(--accent); }

@@ -26,6 +26,7 @@ const DECISION_MAX_ATTEMPTS = 60;
 
 // Lazy: this page's code downloads only when first opened, keeping startup fast.
 const Privacy = lazy(() => import("./pages/Privacy"));
+const NewNote = lazy(() => import("./pages/NewNote"));
 
 export default function App() {
   const [view, setView] = useState<View>("home");
@@ -108,6 +109,13 @@ export default function App() {
       break;
     case "search":
       main = <SearchResults query={query} />;
+      break;
+    case "newnote":
+      main = (
+        <Suspense fallback={null}>
+          <NewNote />
+        </Suspense>
+      );
       break;
     case "todos":
       main = (

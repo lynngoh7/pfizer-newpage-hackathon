@@ -82,6 +82,7 @@ npm run tauri dev    # opens the desktop window
 
 The first run compiles Rust and can take a few minutes. Rebuild the sidecar after
 changing backend code or Python dependencies. After that, Tauri dev is fast.
+If a new feature answers `404 Not Found`, the sidecar is out of date: rebuild it and restart.
 The Python backend sets itself up automatically on first run (it creates `backend/.venv`).
 
 **Sample notes:** some files in `sample_notes/` are generated. Run this once after cloning (see [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md)):
