@@ -65,7 +65,22 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
     }
   }
   if (!res.ok) {
-    throw new Error(`${res.status} ${res.statusText}`);
+    const body = await res.text();
+    let message = body.trim() || `${res.status} ${res.statusText}`.trim();
+    try {
+      const payload: unknown = JSON.parse(body);
+      if (
+        payload !== null &&
+        typeof payload === "object" &&
+        "detail" in payload &&
+        typeof payload.detail === "string"
+      ) {
+        message = payload.detail;
+      }
+    } catch {
+      // Keep the response body as the error when the server does not return JSON.
+    }
+    throw new Error(message);
   }
   return (await res.json()) as T;
 }
@@ -162,6 +177,27 @@ export interface SearchResponse {
   sources: SearchSource[];
 }
 
+export interface AskCitation {
+  chunk_id: number;
+  quote: string;
+  start: number;
+  end: number;
+}
+
+export interface AskClaim {
+  text: string;
+  citations: AskCitation[];
+}
+
+export interface AskResponse {
+  status: "ok" | "no_support";
+  supported: boolean;
+  answer: string | null;
+  message: string | null;
+  claims: AskClaim[];
+  sources: SearchSource[];
+}
+
 export interface IndexStatus {
   files: number;
   chunks: number;
@@ -196,6 +232,13 @@ export function ensureSearchIndex(): Promise<IndexStatus> {
 
 export function searchNotes(query: string): Promise<SearchResponse> {
   return apiFetch<SearchResponse>(`/api/search?q=${encodeURIComponent(query)}`);
+}
+
+export function askNotes(question: string): Promise<AskResponse> {
+  return apiFetch<AskResponse>("/api/ask", {
+    method: "POST",
+    body: JSON.stringify({ question }),
+  });
 }
 
 // Saved settings (backend/app/prefs.py). Only allowlisted values, never note text.

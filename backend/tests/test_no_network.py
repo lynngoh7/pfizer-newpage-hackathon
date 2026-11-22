@@ -2,14 +2,16 @@
 
 Every socket connect and DNS lookup to a non-loopback address raises, then a
 whole session runs through the real API. Any outbound call fails the test.
-Indexing, search and model unload are covered; add the ask call when 2c lands."""
+Indexing, search, ask and model unload are covered. Inference is mocked here
+so the test exercises the route without contacting Ollama."""
 import ipaddress
 import socket
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app import audit, db, group, permissions, session
+from app import audit, db, group, permissions, qa, session
+from app.citations import check_answer
 from app.config import Settings
 from app.main import create_app
 
@@ -67,9 +69,10 @@ def test_ollama_address_is_loopback_only():
     assert ipaddress.ip_address(host).is_loopback
 
 
-def test_full_session_stays_on_the_machine(tmp_path):
+def test_full_session_stays_on_the_machine(tmp_path, monkeypatch):
     permissions.on_revoke("index", db.drop_under)  # test_privacy_edges clears hooks
     session.on_forget("index", db.clear)
+    monkeypatch.setattr(qa, "ask_question", lambda question, chunks: check_answer([], {}))
     notes = tmp_path / "notes"
     notes.mkdir()
     (notes / "a.md").write_text("Link: https://example.com/budget, never fetched")
@@ -92,4 +95,11 @@ def test_full_session_stays_on_the_machine(tmp_path):
     ]:
         r = getattr(c, method)(url, headers=AUTH, **kw)
         assert r.status_code < 500, (url, r.status_code)
+    answer = c.post(
+        "/api/ask",
+        headers=AUTH,
+        json={"question": "What is in the budget note?"},
+    )
+    assert answer.status_code == 200
+    assert answer.json()["status"] == "no_support"
     db.clear()

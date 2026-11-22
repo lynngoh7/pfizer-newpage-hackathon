@@ -177,7 +177,8 @@ body {
 .answer-heading h2, .sources-heading h2 { margin: 0; font-size: 16px; font-weight: 600; }
 .answer-label, .muted { color: var(--muted); }
 .answer-label { font-size: 12px; }
-.answer-text { margin: 0; font-size: 16px; line-height: 1.65; }
+.answer-text { display: flex; flex-direction: column; gap: 8px; margin: 0; font-size: 16px; line-height: 1.65; }
+.answer-claim { margin: 0; }
 .answer-citation { color: var(--accent); font-weight: 600; text-decoration: none; }
 .answer-citation:hover { text-decoration: underline; }
 .sources-heading { margin: 28px 0 12px; }
@@ -211,6 +212,21 @@ body {
 .source-flag-superseded { color: var(--danger); }
 .source-flag-newer { color: var(--ok-text); }
 .source-location { margin: 4px 0 0 34px; color: var(--muted); font-size: 12px; }
+.source-card > .source-evidence {
+  margin: 8px 0 0 34px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--accent);
+  background: var(--hover);
+  overflow-wrap: anywhere;
+}
+.source-evidence p { margin: 0; }
+.source-evidence .source-evidence-label {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
 .source-excerpt {
   margin: 0 0 0 34px;
   padding-left: 12px;

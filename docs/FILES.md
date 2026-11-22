@@ -45,7 +45,7 @@ Add a row whenever you create a file.
 | `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
-| `pages/SearchResults.tsx` | calls the local index/search API; shows answers, formatted Markdown excerpts, loading, empty and error states | step 4: connect question answers |
+| `pages/SearchResults.tsx` | routes keyword queries to `/api/search` and questions to `/api/ask`; links verified answer claims to their source cards | demo polish and accessibility checks |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
 | `pages/Changes.tsx` | "Changes" page (view id `changes`, lazy-loaded): polls `/api/changes`, earlier vs latest note side by side with verified quotes (Markdown symbols stripped for display), gentle "Updated"/"Differs" tags | — |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
@@ -99,7 +99,7 @@ Add a row whenever you create a file.
 | `tests/test_search.py` | folder walk, search shape, Ollama fallback, stale files, revoke/forget, `/api/index` + `/api/search` | — |
 | `tests/test_db.py` | keyword search, no text stored, FTS syntax safe, revoke/forget empty the index, changed file not shown, groups and meaning search | — |
 | `tests/test_group.py` | clustering, one naming call per group, injected/bad topics fall back, Ollama local only (Ollama faked) | — |
-| `tests/test_no_network.py` | blocks non-loopback connects and DNS, runs a whole session through the API; fails on any outbound attempt | 4d: add search and ask calls when 1d and 2c land |
+| `tests/test_no_network.py` | blocks non-loopback connects and DNS, runs a whole session through the API; includes `/api/ask` with inference mocked | step 5: real-app storage and offline demo checks |
 | `tests/test_prefs.py` | saved folders/settings, paths only, allowlist, restore, forget, disk check | — |
 | `tests/test_permissions.py` | grants, protected paths, symlink escape, revoke | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
