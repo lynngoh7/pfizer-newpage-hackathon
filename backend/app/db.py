@@ -301,6 +301,12 @@ def chunk_info(chunk_id: int) -> dict | None:
     return dict(zip(("chunkID", "filePath", "noteDate", "start", "end", "groupID", "topic"), row))
 
 
+def chunk_ids() -> list[int]:
+    """IDs of all currently indexed chunks, in stable index order."""
+    with _lock:
+        return [r[0] for r in _db.execute("SELECT chunkID FROM Chunks ORDER BY chunkID")]
+
+
 def keyword(query: str, k: int = 10) -> list[int]:
     """Chunk IDs for the best keyword matches (bm25). Each word is quoted, so
     user input can never be read as FTS5 syntax."""
