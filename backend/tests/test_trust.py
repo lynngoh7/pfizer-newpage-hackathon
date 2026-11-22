@@ -73,7 +73,7 @@ def test_storage_reports_files_in_app_dirs(tmp_path, monkeypatch):
     monkeypatch.setattr(trust, "_app_dirs", lambda: [empty, used])
     report = trust.storage()
     assert report["files"] == 1
-    assert report["locations"][0] == {"path": str(empty), "exists": False, "files": 0, "bytes": 0, "listed": []}
+    assert report["locations"][0] == {"path": str(empty), "exists": False, "files": 0, "engine": 0, "bytes": 0, "listed": []}
     assert report["locations"][1]["listed"] == ["sub/cache.db"]
     assert report["locations"][1]["bytes"] == 4
 
@@ -89,3 +89,14 @@ def test_routes_need_token_and_forget_works(tmp_path, monkeypatch):
     body = c.delete("/api/session", headers=AUTH).json()
     assert body["cleared"]["activity_log"] == 1
     assert body["storage"]["files"] == 0
+
+
+def test_storage_does_not_flag_webview2_profile(tmp_path, monkeypatch):
+    # Windows: WebView2's own EBWebView profile is expected, not an "unexpected file".
+    d = tmp_path / "local.notes.assistant"
+    (d / "EBWebView" / "Default").mkdir(parents=True)
+    (d / "EBWebView" / "Default" / "Preferences").write_text("{}")
+    monkeypatch.setattr(trust, "_app_dirs", lambda: [d])
+    report = trust.storage()
+    assert report["files"] == 0
+    assert report["locations"][0]["engine"] == 1

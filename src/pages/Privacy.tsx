@@ -166,7 +166,10 @@ export default function Privacy() {
           </dl>
         ) : <p className="muted">Nothing saved yet.</p>)}
         {disk && disk.files === 0 && (
-          <p className="muted">Apart from that, all {disk.locations.length} places where apps usually keep data are empty. Checked just now.</p>
+          <p className="muted">
+            Apart from that, the {disk.locations.length} places where apps usually keep data hold
+            {disk.locations.some((l) => l.engine) ? " only the window's own browser files (no notes)" : " nothing"}. Checked just now.
+          </p>
         )}
         {disk && disk.files > 0 && (
           <>
@@ -188,7 +191,7 @@ export default function Privacy() {
             <ul className="paths">
               {disk.locations.map((l) => (
                 <li key={l.path}>
-                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : /^[\\/]/.test(disk.saved.path.slice(l.path.length)) && disk.saved.path.startsWith(l.path) ? "only prefs.json" : l.exists ? "empty" : "not there"}</span>
+                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : l.engine ? `window's own browser files (${l.engine}), no notes` : /^[\\/]/.test(disk.saved.path.slice(l.path.length)) && disk.saved.path.startsWith(l.path) ? "only prefs.json" : l.exists ? "empty" : "not there"}</span>
                 </li>
               ))}
             </ul>
