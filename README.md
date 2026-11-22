@@ -17,7 +17,7 @@ A desktop app that finds the note you mean. Everything runs on your own computer
   - [Tech stack](#tech-stack)
   - [Prerequisites](#prerequisites)
   - [Running locally](#running-locally)
-  - [Contributing](#contributing)
+  - [Tests](#tests)
   - [Project structure](#project-structure)
   - [Documentation](#documentation)
 - [Team](#team)
@@ -107,18 +107,15 @@ npm run dev:all      # then open http://127.0.0.1:1420
 
 This is for development only. It still runs only on your computer, but it is not the real app and must not be used for the demo.
 
-### Contributing
+### Tests
 
-1. **Branch from main.** Never push to `main`. Name it like `feat/…`, `fix/…`, `docs/…`.
-2. **Commit with a conventional message**, e.g. `feat(search): add keyword results page`.
-3. **Run the same checks CI runs:**
-   ```sh
-   cd backend && .venv/bin/pytest && cd ..   # backend tests
-   npm run build                              # frontend compiles
-   sh scripts/privacy-guard.sh                # no outside URLs in the code
-   ```
-4. **Push your branch and open a pull request.** The PR template fills in a short checklist: tick each item.
-5. **Wait for CI to go green** (GitHub runs the three checks above on every PR, about 30 s), then merge.
+```sh
+cd backend && .venv/bin/pytest && cd ..   # backend tests
+npm run build                              # frontend compiles
+sh scripts/privacy-guard.sh                # no outside URLs in the code
+```
+
+CI runs the same three checks on every push.
 
 ### Project structure
 
@@ -128,13 +125,13 @@ This is for development only. It still runs only on your computer, but it is not
 | `src-tauri/` | The desktop window (Rust). Starts the backend, no network access |
 | `backend/` | The engine (Python). Reads notes, searches, talks to Ollama. Localhost only |
 | `scripts/` | Helper scripts for running and packaging |
-| `docs/` | Team docs, see below |
+| `docs/` | Docs, see below |
 
 ### Documentation
 
-- [docs/STATUS.md](docs/STATUS.md) — what is done, what to pick up next
 - [docs/BRIEF.md](docs/BRIEF.md) — the brief, the One Rule, the safety rules
 - [docs/FILES.md](docs/FILES.md) — every file and what it does
+- [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md) — the sample notes, demo questions and edge cases
 - [docs/INSTALL.md](docs/INSTALL.md) — install the app on Mac, Windows or Linux
 - [docs/DB_DESIGN.md](docs/DB_DESIGN.md) — in-memory database tables and diagram
 

@@ -4,7 +4,7 @@ reindex() reads the allowed folders (ingest) into db. search() merges
 keyword (FTS5 bm25) and meaning (vector) results by reciprocal rank fusion,
 then re-reads each passage from its file (No copies, §6).
 Keyword search is ready in seconds; meaning search follows in the background. Response shape:
-docs/API_SHAPES.md.
+search() below.
 
 Meaning search needs Ollama. If it is not running, search falls back to
 keyword only instead of failing.
@@ -18,7 +18,7 @@ import threading
 
 from . import audit, changes, db, group, ingest, session
 
-K = 5            # sources returned (API_SHAPES: 5 at most)
+K = 5            # sources returned (5 at most)
 POOL = 20        # candidates taken from each ranker before merging
 RRF_K = 60       # standard reciprocal-rank-fusion constant
 MAX_SNIPPET = 300

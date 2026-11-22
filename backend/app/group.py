@@ -2,7 +2,7 @@
 
 Why not one LLM call per chunk: about 3 s per call, so 900 chunks takes most of
 an hour and the labels drift. Embedding is one batched call (about 5 s for 37
-chunks); the LLM then runs once per group. Timings in docs/STATUS.md.
+chunks); the LLM then runs once per group.
 
 Rules (brief §6):
   * No network: Ollama on 127.0.0.1 only.
