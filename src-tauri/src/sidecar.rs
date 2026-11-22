@@ -57,7 +57,13 @@ fn backend_command() -> Option<Command> {
     if cfg!(debug_assertions) {
         // Always run the working-tree source in `tauri dev`. A packaged
         // sidecar can be stale and would otherwise mask backend edits.
-        let backend_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../backend");
+        // Find backend/ from where the exe runs (src-tauri/target/debug/),
+        // not CARGO_MANIFEST_DIR: that is baked in at compile time and points
+        // at the build machine's folder when the binary is run elsewhere.
+        let backend_dir = std::env::current_exe()
+            .ok()
+            .and_then(|exe| exe.ancestors().map(|d| d.join("backend")).find(|d| d.join("app").is_dir()))
+            .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../backend"));
         let venv_python = if cfg!(windows) {
             backend_dir.join(".venv/Scripts/python.exe")
         } else {
