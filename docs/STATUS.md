@@ -131,7 +131,7 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 - ✅ 3b. Source cards and file excerpts (Sat)
 - 🔧 3c. Keyword and natural-language search call `/api/index` and `/api/search`; question answers await the QA API from 2c
 - ⬜ 3d. Show decision changes and error states (Sun), needs 2d
-- 🔧 3e. Results-page polish adds visible citation targets, announced source counts, and higher text contrast; VoiceOver announces the source count, while citation-jump testing awaits an answer with citations
+- 🔧 3e. Results-page polish adds visible citation targets, announced source counts, higher text contrast and formatted Markdown excerpts; VoiceOver announces the source count, while citation-jump testing awaits an answer with citations
 
 **C: privacy and trust** (step 2, 5)
 - ✅ 4a. Audit events for folder add/remove (Sat)

@@ -8,6 +8,7 @@ import {
   SearchSource,
   searchNotes,
 } from "../lib/api";
+import MarkdownExcerpt from "../components/MarkdownExcerpt";
 
 function isQuestion(query: string): boolean {
   return (
@@ -18,6 +19,10 @@ function isQuestion(query: string): boolean {
 
 function fileName(path: string): string {
   return path.split(/[\\/]/).pop() || path;
+}
+
+function isMarkdownFile(path: string): boolean {
+  return /\.(md|markdown|mkd|mdown)$/i.test(path);
 }
 
 function Answer({ text, sourceCount }: { text: string; sourceCount: number }) {
@@ -48,6 +53,7 @@ function Answer({ text, sourceCount }: { text: string; sourceCount: number }) {
 
 function SourceCard({ source, index, onOpen }: { source: SearchSource; index: number; onOpen: () => void }) {
   const [openError, setOpenError] = useState<string | null>(null);
+  const markdown = isMarkdownFile(source.path);
 
   // Opens in the user's own editor; this app never edits the file itself.
   async function open() {
@@ -79,7 +85,9 @@ function SourceCard({ source, index, onOpen }: { source: SearchSource; index: nu
         )}
       </div>
       <p className="source-location">{source.where}</p>
-      <blockquote className="source-excerpt">{source.snippet}</blockquote>
+      <blockquote className="source-excerpt">
+        {markdown ? <MarkdownExcerpt text={source.snippet} /> : source.snippet}
+      </blockquote>
       <div className="source-actions">
         <button className="btn btn-small" onClick={open} aria-label={`Open ${fileName(source.path)} in your editor`}>
           Open in editor
