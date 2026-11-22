@@ -82,6 +82,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Flag notes that disagree, and newer notes that replace older ones. Sidebar page **Changes** (gentle wording and icon: a changed note is normal, not an error; Markdown symbols stripped from quotes and titles so they read as plain text). Search cards get the "Superseded" / "Newer note" / "Conflict" badge once the scan is done
   - How: after meaning search is ready, a background scan pairs passages from different notes dated in their file name (most similar first, at most 12 pairs; findings show as they arrive). The answer model says replaces / contradicts / none and quotes both; Python keeps a finding only if both quotes are really in the files. Memory only; cleared on reindex and forget
   - Undated files (e.g. `todo.md`) are left out: their date comes from mtime, which changes on copy
+  - Speed: pairs are judged 4 at a time (`WORKERS`), so the scan takes about a quarter of the time. Findings appear on the page as they come in
   - Code: `backend/app/changes.py`, `GET/POST /api/changes`, `src/pages/Changes.tsx`. Tests: `backend/tests/test_changes.py`
 
 ## Step 7 — Later ⬜
