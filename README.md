@@ -11,23 +11,44 @@ A desktop app that finds the note you mean. Everything runs on your own computer
 
 ## Contents
 
+- [The problem](#the-problem)
+- [What it does](#what-it-does)
+- [Your knowledge stays yours](#your-knowledge-stays-yours)
 - [Demo](#demo)
 - [Installation](#installation)
 - [Development](#development)
-  - [Tech stack](#tech-stack)
-  - [Prerequisites](#prerequisites)
-  - [Running locally](#running-locally)
-  - [Contributing](#contributing)
-  - [Project structure](#project-structure)
-  - [Documentation](#documentation)
 - [Team](#team)
+
+## The problem
+
+A manager knows they decided something weeks ago, but not where they wrote it or in what words. The decision sits in one note and the reason it later changed sits in another. And the notes are too personal to hand to a cloud AI.
+
+## What it does
+
+Ask *"What did we decide about the analytics vendor, and has it changed?"* and Haystack:
+
+- **Finds it by meaning**, not just exact words ("budget cut" finds "funding reduced").
+- **Answers with sources.** Every claim cites the file and passage it came from, and each quote is checked against the file. If nothing backs an answer, it says so.
+- **Flags what changed.** A newer note that replaces or contradicts an older one is shown alongside it.
+- **Pulls out the useful bits**: decisions, open to-dos and upcoming dates found in your notes.
+- **Reads messy notes**: Markdown, text, Word and PDF, including half-written drafts and duplicates.
+
+## Your knowledge stays yours
+
+- **On device.** The app has no network permission. The engine and the AI model (Ollama) only listen on this computer.
+- **No copies.** The search index lives in memory and is gone when the app quits. Passages are re-read from your files when shown. The only file the app saves is a short settings file listing which folders it may read.
+- **You can check.** The Privacy page shows network activity, everything the app has stored on disk, and a log of every file it read.
+- **You're in control.** Choose which folders it sees, remove one at any time, or press "Forget everything".
+- **Instructions in notes are ignored.** Only you give instructions; text inside files is treated as data.
 
 ## Demo
 
-<!-- Add the demo video link and a screenshot here, e.g.
-[![Demo video](docs/demo.png)](VIDEO_LINK) -->
+<!-- Add screenshots to docs/screenshots/ and list them here, e.g.
+![Asking about the vendor decision](docs/screenshots/answer.png) -->
 
-_Demo video coming soon._
+_Screenshots coming soon._
+
+Try it with the fictional notes in `sample_notes/`. [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md) lists questions to ask and the answers to expect.
 
 ## Installation
 
@@ -68,22 +89,19 @@ Install these once:
    then close and reopen the terminal.
 4. **Ollama** (the local AI model) — https://ollama.com/download (Intel Mac with Homebrew: `brew install --cask ollama-app`). Then download the two models (about 2.3 GB):
    ```sh
-   ollama pull qwen3:4b-instruct      # answers and topic names
+   ollama pull qwen3:4b-instruct   # answers and topic names
    ollama pull nomic-embed-text   # search by meaning, grouping
    ```
 
 ### Running locally
 
 ```sh
-npm install          # first time only
-sh scripts/build-sidecar.sh # required once per machine/target before Tauri dev
-npm run tauri dev    # opens the desktop window
+npm install                   # first time only
+sh scripts/build-sidecar.sh   # builds the Python engine (repeat after backend changes)
+npm run tauri dev             # opens the desktop window
 ```
 
-The first run compiles Rust and can take a few minutes. Rebuild the sidecar after
-changing backend code or Python dependencies. After that, Tauri dev is fast.
-If a new feature answers `404 Not Found`, the sidecar is out of date: rebuild it and restart.
-The Python backend sets itself up automatically on first run (it creates `backend/.venv`).
+The first run compiles Rust and can take a few minutes; after that it is fast. The Python engine sets itself up on first run (it creates `backend/.venv`).
 
 **Sample notes:** some files in `sample_notes/` are generated. Run this once after cloning (see [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md)):
 
@@ -92,33 +110,15 @@ python3 -m venv /tmp/gen && /tmp/gen/bin/pip install pymupdf python-docx
 /tmp/gen/bin/python scripts/make_sample_notes.py
 ```
 
-**Backend dependencies changed?** (e.g. after a pull) Reinstall:
+### Tests
 
 ```sh
-backend/.venv/bin/pip install -U pip            # old pip can't do the next line
-backend/.venv/bin/pip install -e "backend[dev]"
+cd backend && .venv/bin/pytest && cd ..   # backend tests
+npm run build                              # frontend compiles
+sh scripts/privacy-guard.sh                # no outside URLs in the code
 ```
 
-**No Rust yet?** You can still work on the UI in a browser:
-
-```sh
-npm run dev:all      # then open http://127.0.0.1:1420
-```
-
-This is for development only. It still runs only on your computer, but it is not the real app and must not be used for the demo.
-
-### Contributing
-
-1. **Branch from main.** Never push to `main`. Name it like `feat/…`, `fix/…`, `docs/…`.
-2. **Commit with a conventional message**, e.g. `feat(search): add keyword results page`.
-3. **Run the same checks CI runs:**
-   ```sh
-   cd backend && .venv/bin/pytest && cd ..   # backend tests
-   npm run build                              # frontend compiles
-   sh scripts/privacy-guard.sh                # no outside URLs in the code
-   ```
-4. **Push your branch and open a pull request.** The PR template fills in a short checklist: tick each item.
-5. **Wait for CI to go green** (GitHub runs the three checks above on every PR, about 30 s), then merge.
+CI runs the same three checks on every push.
 
 ### Project structure
 
@@ -128,13 +128,13 @@ This is for development only. It still runs only on your computer, but it is not
 | `src-tauri/` | The desktop window (Rust). Starts the backend, no network access |
 | `backend/` | The engine (Python). Reads notes, searches, talks to Ollama. Localhost only |
 | `scripts/` | Helper scripts for running and packaging |
-| `docs/` | Team docs, see below |
+| `docs/` | Docs, see below |
 
 ### Documentation
 
-- [docs/STATUS.md](docs/STATUS.md) — what is done, what to pick up next
 - [docs/BRIEF.md](docs/BRIEF.md) — the brief, the One Rule, the safety rules
 - [docs/FILES.md](docs/FILES.md) — every file and what it does
+- [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md) — the sample notes, demo questions and edge cases
 - [docs/INSTALL.md](docs/INSTALL.md) — install the app on Mac, Windows or Linux
 - [docs/DB_DESIGN.md](docs/DB_DESIGN.md) — in-memory database tables and diagram
 
@@ -145,4 +145,4 @@ This is for development only. It still runs only on your computer, but it is not
 | Cathy | [@cathyc-c](https://github.com/cathyc-c) |
 | Eoin | [@ARandomGuyTH](https://github.com/ARandomGuyTH) |
 | Lynn | [@lynngoh7](https://github.com/lynngoh7) |
-| Shek | [@Reverie-974](https://github.com/Reverie-974)  |
+| Shek | [@Reverie-974](https://github.com/Reverie-974) |

@@ -1,7 +1,6 @@
 # File map
 
-One row per source file: what it does, and which build step touches it next.
-Add a row whenever you create a file.
+One row per source file: what it does, and when it would need changing.
 
 ## Root
 | File | Purpose | Next edit |
@@ -12,11 +11,8 @@ Add a row whenever you create a file.
 | `index.html` | single HTML entry; no external assets | — |
 | `README.md` | install and run steps; pointers to docs/ | keep short |
 | `docs/BRIEF.md` | product brief, feature checklist, stack, safety rules | when a decision changes |
-| `docs/STATUS.md` | progress per build step + where to start | every change |
-| `docs/API_SHAPES.md` | agreed JSON shape for search/answer responses (UI ↔ backend) | when search/qa output changes |
 | `docs/DB_DESIGN.md` | in-memory DB tables (Files, Chunks, Groups, keyword index, vectors) + diagram | when db.py changes the schema |
 | `docs/FILES.md` | this file | every new file |
-| `.github/pull_request_template.md` | checklist shown when opening a PR (tests, docs, privacy rules) | when team rules change |
 | `scripts/dev.sh` | browser-only dev: shared token for backend + Vite, sets `NOTES_DEV=1` | — |
 | `scripts/dev-backend.sh` | run sidecar alone (creates venv on first run) | — |
 | `scripts/privacy-guard.sh` | fails if `src/` or `backend/app/` contain a URL other than localhost; run by CI | — |
@@ -45,7 +41,6 @@ Add a row whenever you create a file.
 | `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `public/haystack-logo.svg` | same logo cropped to the tile (no macOS icon margin) so it reads at sidebar size | — |
-| `public/haystack-icon.svg` | Haystack app icon: source for the app icons in `src-tauri/icons/` (in `public/` because its `xmlns` line would trip the privacy guard; it is never fetched) | — |
 | `pages/Home.tsx` | manager summary: Upcoming dates, Changes, Decisions and open To-dos (counts the session ticks via `todoKey`), each linking to its full page; built from the in-memory index, nothing saved | — |
 | `pages/SearchResults.tsx` | routes keyword queries to `/api/search` and questions to `/api/ask`; links verified answer claims to their source cards | demo polish and accessibility checks |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
@@ -53,7 +48,6 @@ Add a row whenever you create a file.
 | `pages/Todos.tsx` | lists to-dos from `/api/todos`; ticks are session-only (memory, never written), exported with `todoKey` so Home counts the same ticks; "Edit in note" opens the file in the user's editor | — |
 | `pages/Upcoming.tsx` | full list from `/api/upcoming`: overdue open to-dos, then everything from today on; "Open note" opens the file. Lazy-loaded; data passed in from `App.tsx` | — |
 | `pages/Changes.tsx` | "Changes" page (view id `changes`, lazy-loaded): polls `/api/changes`, earlier vs latest note side by side with verified quotes (Markdown symbols stripped for display), gentle "Updated"/"Differs" tags | — |
-| `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
 | `pages/Settings.tsx` | engine, AI model picker (choice saved to `prefs.json`), indexing, accessibility note, built-in safety facts, forget everything (always last) | step 2c: indexing card; step 4: real model list from Ollama |
 
 ## Tauri `src-tauri/`

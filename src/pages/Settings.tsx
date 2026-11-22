@@ -12,8 +12,7 @@ import { Fragment, useEffect, useState } from "react";
 import { getSettings, health, Health, saveSettings } from "../lib/api";
 import ForgetButton from "../components/ForgetButton";
 
-// Fixed until step 4 lists installed models. The picker stays so the layout is final.
-// Placeholder name: confirm the demo model in step 4.
+// The demo uses one answer model; the picker stays so more can be added.
 const ANSWER_MODELS = ["qwen3:4b-instruct"];
 const SEARCH_MODEL = "nomic-embed-text";
 
