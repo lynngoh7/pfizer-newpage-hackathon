@@ -141,16 +141,24 @@ body {
 
 .content { flex: 1; overflow: auto; padding: 24px; display: flex; flex-direction: column; }
 
-.home { width: 100%; max-width: 720px; margin: 10vh auto 0; text-align: center; }
+.home { width: 100%; max-width: 680px; margin: 10vh auto 0; text-align: center; }
 .home h1 { font-size: 24px; font-weight: 600; margin: 0 0 8px; }
 
-.widget-grid {
-  margin-top: 48px;
-  min-height: 200px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+.home-summary { margin-top: 40px; text-align: left; display: flex; flex-direction: column; gap: 14px; }
+.home-section.card { margin: 0; padding: 14px 16px 10px; gap: 6px; animation: home-in 0.25s ease-out; }
+.home-section-head { display: flex; align-items: center; justify-content: space-between; }
+.home-section-head h2 { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; margin: 0; }
+.home-section-head h2 .nav-icon { opacity: 0.55; }
+.home-section-head .link { font-size: 13px; }
+.home-list { list-style: none; margin: 0 -8px; padding: 0; }
+.home-row {
+  display: block; width: 100%; text-align: left; font: inherit; color: inherit;
+  background: none; border: 0; border-radius: 6px; padding: 6px 8px; cursor: pointer;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+.home-row:hover { background: var(--hover); }
+@keyframes home-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .home-section.card { animation: none; } }
 
 .page { max-width: 820px; display: flex; flex-direction: column; }
 .page h2 { font-size: 20px; font-weight: 600; margin: 0 0 12px; }

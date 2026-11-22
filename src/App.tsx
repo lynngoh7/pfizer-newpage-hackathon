@@ -105,7 +105,7 @@ export default function App() {
   let main;
   switch (view) {
     case "home":
-      main = <Home />;
+      main = <Home decisions={decisions} todos={todos} onNavigate={setView} />;
       break;
     case "search":
       main = <SearchResults query={query} />;

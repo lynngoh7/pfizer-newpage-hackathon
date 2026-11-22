@@ -4,7 +4,10 @@ import { ExtractedTodo, openFile } from "../lib/api";
 // Ticks are session-only: kept in memory, never written back to the note
 // (read-only rule, §6) or to disk (No copies). Module scope so they survive
 // switching pages; they reset when the app quits.
-const ticked = new Map<string, boolean>();
+export const ticked = new Map<string, boolean>();
+
+/** Shared with the Home summary so both count the same ticks. */
+export const todoKey = (todo: ExtractedTodo, index: number) => `${todo.chunkID}-${index}-${todo.task}`;
 
 function fileName(path: string): string {
   return path.split(/[\\/]/).pop() || path;
@@ -55,7 +58,7 @@ export default function Todos({ todos, error, onRetry }: Props) {
           <p className="muted">No checklist items found in the indexed notes.</p>
         )}
         {todos?.map((todo, index) => {
-          const key = `${todo.chunkID}-${index}-${todo.task}`;
+          const key = todoKey(todo, index);
           const done = ticked.get(key) ?? todo.completed;
           return (
             <article className="card todo-card" key={key}>
