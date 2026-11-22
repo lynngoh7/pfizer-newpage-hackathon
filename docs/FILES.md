@@ -8,6 +8,7 @@ One row per source file: what it does, and when it would need changing.
 | `package.json` | npm scripts + frontend deps. `tauri dev`, `dev:all`, `build` | add deps as needed |
 | `vite.config.ts` | Vite on fixed port 1420 (Tauri requirement) | — |
 | `tsconfig.json` | strict TS config | — |
+| `src/vite-env.d.ts` | Vite type declarations for TypeScript | — |
 | `index.html` | single HTML entry; no external assets | — |
 | `README.md` | install and run steps; pointers to docs/ | keep short |
 | `docs/BRIEF.md` | product brief, feature checklist, stack, safety rules | when a decision changes |
@@ -107,7 +108,3 @@ One row per source file: what it does, and when it would need changing.
 | `tests/test_extractions.py` | to-do and decision extraction; full passage sent to the model | — |
 | `tests/test_qa.py` | Tests valid citations, missing evidence and fabricated quotations using mocked Ollama responses | Add further edge cases |
 | `tests/test_ask.py` | Tests `POST /api/ask` integration with mocked search and Q&A results | Test real authenticated workflow |
-
-
-### Planned backend modules (not yet created)
-`extract.py`
