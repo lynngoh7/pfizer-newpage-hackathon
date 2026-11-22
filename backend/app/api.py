@@ -43,10 +43,6 @@ def decisions() -> dict:
 def todos() -> dict:
     return extraction_mod.todos()
 
-@router.get("/conflicts")
-def conflicts() -> dict:
-    return extraction_mod.conflicts()
-
 @router.get("/health", response_model=Health)
 def health() -> Health:
     return Health()
