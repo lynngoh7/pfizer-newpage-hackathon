@@ -7,7 +7,7 @@
 #        sh scripts/build-app.sh --install  (install the last build only)
 set -e
 cd "$(dirname "$0")/.."
-NAME="Local Notes Assistant"
+NAME="Haystack"
 B=src-tauri/target/release/bundle
 if [ "$1" != "--install" ]; then
   sh scripts/build-sidecar.sh

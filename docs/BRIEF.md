@@ -1,4 +1,4 @@
-# Project brief — Local Notes Assistant
+# Project brief — Haystack
 
 > Read this before changing code. Section 6 is non-negotiable.
 

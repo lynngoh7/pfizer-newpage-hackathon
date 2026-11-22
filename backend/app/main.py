@@ -25,7 +25,7 @@ DEV_ORIGINS = [
 
 def create_app(settings: Settings) -> FastAPI:
     # docs/openapi off: no reason to publish an API description, even locally.
-    app = FastAPI(title="Local Notes Assistant", docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(title="Haystack", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.settings = settings
     # Order matters: Starlette applies the last-added middleware first, so CORS
     # wraps auth and can answer preflights before the token check runs.

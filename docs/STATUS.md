@@ -19,7 +19,7 @@ Build one demo moment end to end: the manager asks about a decision made weeks a
 - ✅ Backend: localhost only, refuses to start without a token, rejects requests without it
 - ✅ Browser dev mode is allowed only when `NOTES_DEV=1` (never in packaged builds)
 - ✅ Compiled and run on macOS (2026-11-15): window opens, backend starts on a random localhost port, sidebar shows the engine as ready. Only localhost ports open
-- ⬜ Real app icon (`npm run tauri icon <1024px.png>`)
+- ✅ App name **Haystack** and icon (`public/haystack-icon.svg`; app icons made with `npx tauri icon public/haystack-icon.svg`). Internal id/binary stay `local.notes.assistant` / `local-notes-assistant` because `trust.py` uses them to find the app's folders
 
 ## Step 2 — Folder access + reading notes ✅
 New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `src/pages/Privacy.tsx` (folder section).
@@ -92,7 +92,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Summary page for managers: on Home, three short lists (Changes, Decisions, open To-dos) linking to the full pages. Nothing saved; built from the in-memory index
 
 ## Packaged app ✅
-- ✅ `sh scripts/build-sidecar.sh` then `npm run tauri build` makes `Local Notes Assistant.app` (about 51 MB): double-click to open, no terminal. The backend is bundled inside and starts and stops with the app
+- ✅ `sh scripts/build-sidecar.sh` then `npm run tauri build` makes `Haystack.app` (about 51 MB): double-click to open, no terminal. The backend is bundled inside and starts and stops with the app
 - ✅ Tested on macOS (Intel): the built backend reads all `sample_notes/` and search works; quitting the app stops the backend
 - ✅ `sh scripts/build-app.sh` builds and installs the app: Mac → /Applications, Windows → silent installer (Start menu), Linux → .deb/.rpm (app menu); `--install` skips the build. Re-tested on macOS (Intel): installs, starts, backend stops on quit
 - ✅ Windows fixes: backend `.exe` naming, no console window, whole backend process tree stopped on quit
@@ -185,11 +185,11 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 ### Left to do before 23:59 Sun 22 Nov (priority order)
 1. 🔧 Build + install the app on the demo device with Ollama models pulled (`qwen3:4b-instruct`, `nomic-embed-text`); run the demo question end to end, incl. citation jump and "No supporting notes found"
 2. 🔧 Real-app storage check: Privacy page shows "Folder list and settings only" after a session (Step 5)
-3. ⬜ Live check in the app: injected-instruction note and an unanswerable question give "No supporting notes found"
-4. ⬜ Rehearse trust demo with Wi-Fi off on the demo device
-5. ⬜ Record the video; email prototype + video to careers-uobinterns@bristol.ac.uk, subject "Pfizer Hackathon Submission"
+3. 🔧 Live check in the app: injected-instruction note and an unanswerable question give "No supporting notes found"
+4. 🔧 Rehearse trust demo with Wi-Fi off on the demo device
+5. 🔧 Record the video; email prototype + video to careers-uobinterns@bristol.ac.uk, subject "Pfizer Hackathon Submission"
 
-Drop if short of time: background embedding, Settings model list and indexing card, app icon, Windows/Linux/Apple Silicon builds.
+Dropped (decided 22 Nov): background embedding, Settings model list and indexing card, Windows/Linux/Apple Silicon builds.
 
 ### Dependencies
 - **Critical path:** C's merges → S's ask route with citations → L connects search and questions → E's decision changes on the results page → S runs it on the demo device → C rehearses and records. Everything up to L's connection should land on Saturday.

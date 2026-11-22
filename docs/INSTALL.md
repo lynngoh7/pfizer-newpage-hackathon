@@ -17,7 +17,7 @@ Whichever way you choose, install **Ollama** first and download the models (see 
    - Intel: `app-macos-13`
 
    Not sure which you have? Apple menu → About This Mac → Chip/Processor.
-2. Open the `.dmg` and drag **Local Notes Assistant** into **Applications**.
+2. Open the `.dmg` and drag **Haystack** into **Applications**.
 3. The first time, right-click the app → **Open** → **Open**. The app isn't signed, so a double-click is blocked the first time.
 
 **B. Build it yourself**
@@ -36,7 +36,7 @@ Whichever way you choose, install **Ollama** first and download the models (see 
 **A. From an installer**
 1. Download the artifact `app-windows-latest`, unzip it, and run `…-setup.exe`.
 2. If Windows shows **"Windows protected your PC"**: click **More info** → **Run anyway**. The app isn't signed.
-3. Open **Local Notes Assistant** from the Start menu.
+3. Open **Haystack** from the Start menu.
 
 **B. Build it yourself**
 1. Install:
@@ -48,7 +48,7 @@ Whichever way you choose, install **Ollama** first and download the models (see 
    npm install
    sh scripts/build-app.sh
    ```
-3. Open **Local Notes Assistant** from the Start menu.
+3. Open **Haystack** from the Start menu.
 
 ---
 
@@ -60,7 +60,7 @@ Whichever way you choose, install **Ollama** first and download the models (see 
    - Ubuntu / Debian: `sudo apt install ./Local*.deb`
    - Fedora: `sudo dnf install ./Local*.rpm`
    - Anything else: `chmod +x Local*.AppImage` then run it. An AppImage doesn't appear in the app menu.
-3. Open **Local Notes Assistant** from the app menu.
+3. Open **Haystack** from the app menu.
 
 **B. Build it yourself**
 1. Install the tools in [README](../README.md) step 1, plus the system packages:
@@ -74,7 +74,7 @@ Whichever way you choose, install **Ollama** first and download the models (see 
    sh scripts/build-app.sh
    ```
    It asks for your password to install the app.
-3. Open **Local Notes Assistant** from the app menu.
+3. Open **Haystack** from the app menu.
 
 ---
 
