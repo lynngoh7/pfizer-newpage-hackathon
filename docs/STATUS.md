@@ -40,9 +40,13 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ Results page with source cards and excerpts; search submits to `/api/index` and `/api/search`
 
 ## Step 4 — Questions with verified citations 🔧
-- 🔧 Ollama client `qa.py` (localhost only, on `feature/ai-qa`, not merged). System prompt treats note excerpts as untrusted data and asks for chunk ID + exact quote per claim. ⬜ Not yet called from an API route
-- ✅ Citation checker `citations.py`: every quote must appear in the chunk it cites (exact after folding case, spacing, smart quotes, accents, Markdown, `...` gaps; no fuzzy matching). Unbacked claims are dropped; none left → "No supporting notes found." qa.py calls `check_answer` with the chunks it put in the prompt
-- ✅ Unload on quit and "forget everything" (`models.unload`, keep_alive 0, only models that are loaded). ⬜ qa.py currently sends `keep_alive: "0"`: use `models.answer_model()` and drop that, `models.py` keeps it warm and unloads it
+- ✅ `qa.py`: local Ollama question answering using `models.answer_model()`. Source-aware prompts treat notes as untrusted data and require exact quotations.
+- ✅ `citations.py`: validates model-generated quotations against retrieved excerpts. Unsupported claims are rejected; no valid evidence → "No supporting notes found."
+- ✅ `POST /api/ask`: connects search results to `qa.py` and returns structured answers, verified citations and source metadata.
+- ✅ Tests: `test_qa.py` covers valid evidence, missing evidence and fabricated citations. `test_ask.py` verifies API integration.
+- ✅ Live Qwen3 4B Instruct tests: valid citation accepted; unsupported question returns no evidence.
+- ✅ Model lifecycle delegated to `models.py`: models remain warm during the session and are unloaded on quit or "Forget everything".
+- ⬜ Verify the full question-answering workflow through the desktop UI.
 
 ## Step 5 — Trust panel 🔧
 Covers 20 of the 50 judging points. Sidebar → **Privacy**.
@@ -109,11 +113,11 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 - ✅ Models warmed at startup and kept loaded (`models.py`); unloaded on quit and Forget everything (registered in `session.py`). Warm-up takes about 6 s in the background
 
 **S: answers and decisions** (step 4, 6)
-- ✅ 2a. Check local Ollama model and inference (Fri). `nomic-embed-text` and `llama3.2:3b` run locally (timings under Performance notes); answer model switched to `qwen3:4b-instruct` on 2026-11-21 (no thinking step, faster)
-- ✅ 2b. `qa.py` with source-aware prompts (Sat), on `feature/ai-qa`, not merged yet
-- 🔧 2c. Wire in `citations.py` and "No supporting notes found." (Sat). qa.py calls `check_answer`; ⬜ needs an ask route fed by `search.py` chunks
-- ⬜ 2d. Compare old decisions with newer notes (Sun), needs 1c, 2c
-- ✅ 2e. Unload the model on quit and forget (`models.unload` on forget, via `POST /api/engine/unload` from the launcher, and at exit; tests in `test_privacy_index.py`). qa.py should use `models.answer_model()`
+- ✅ 2a. Verified local Ollama inference and GPU acceleration. Tested `llama3.2:3b` and `qwen3:4b-instruct`; selected Qwen3 Instruct for more reliable citations and concise responses.
+- ✅ 2b. Implemented `qa.py` with source-aware prompts and structured JSON responses. Uses `models.answer_model()` for model selection. On `feature/ai-qa`, awaiting merge.
+- ✅ 2c. Integrated `citations.py` and no-evidence handling. Added `POST /api/ask` to connect `search.py` with `qa.py`. Live citation and no-evidence tests passed.
+- ⬜ 2d. Compare old decisions with newer notes (reassigned to Eoin).
+- ✅ 2e. Model lifecycle managed by `models.py`: kept warm during the session and unloaded on quit or "Forget everything". Removed per-request unloading from `qa.py`.
 
 **L: results UI** (step 3, 4, 6)
 - ✅ 3a. Results page with mock data (Sat)
@@ -140,10 +144,12 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 - ⬜ Run edge-case tests against answers: injected instructions, empty and broken notes (P0, Sun am)
 
 **S: answers, demo device**
-- ⬜ Merge feature/ai-qa into main (P0, Sat)
-- ⬜ Integrate citation validation and no-evidence handling (P0, Sat)
-- ⬜ Add the ask route and keep the answer model warm (P0, Sat)
-- ⬜ Build and run the app on the demo device with the sample notes (P0, Sun am)
+- 🔧 Merge `feature/ai-qa` into `main` (PR awaiting approval).
+- ✅ Integrate citation validation and no-evidence handling.
+- ✅ Implement `POST /api/ask` and integrate with existing search.
+- ✅ Verify local Qwen3 4B Instruct inference with valid and missing evidence.
+- ✅ Backend tests: 91 passed; frontend production build passed.
+- ⬜ Build and run the complete application on the demo device with fictional sample notes.
 
 **L: results UI**
 - ⬜ Build functional results page with mock data (P0, Sat)
