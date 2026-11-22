@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Local Notes Assistant",
+  "productName": "Haystack",
   "version": "0.1.0",
   "identifier": "local.notes.assistant",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Local Notes Assistant",
+        "title": "Haystack",
         "width": 1200,
         "height": 800,
         "minWidth": 900,
