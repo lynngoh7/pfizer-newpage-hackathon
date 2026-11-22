@@ -58,6 +58,29 @@ file and is not stored separately.
 }
 ```
 
+# Upcoming dates response
+
+`GET /api/upcoming` returns every line in the indexed notes that names a date,
+oldest first. Weekdays and dates without a year are read against the note's
+own date. Ticked to-dos, headings and the note's own date are left out. Rebuilt
+per request; nothing is stored. Home filters it to the next 14 days plus open
+to-dos (`todo: true`) whose date has passed.
+
+```json
+{
+  "items": [
+    {
+      "when": "2026-11-24",
+      "text": "- [ ] tell pilot customers new beta date (24 Nov)",
+      "todo": true,
+      "chunkID": 7,
+      "path": "/Users/me/Notes/todo.md",
+      "noteDate": "2026-11-12"
+    }
+  ]
+}
+```
+
 # Hooks `db.py` must register
 
 Without these, "remove folder" and "Forget everything" leave chunks in memory.
