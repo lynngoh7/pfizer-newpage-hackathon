@@ -48,7 +48,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ Tests: `test_qa.py` covers valid evidence, missing evidence and fabricated citations. `test_ask.py` verifies API integration.
 - ✅ Live Qwen3 4B Instruct tests: valid citation accepted; unsupported question returns no evidence.
 - ✅ Model lifecycle delegated to `models.py`: models remain warm during the session and are unloaded on quit or "Forget everything".
-- ⬜ Verify the full question-answering workflow through the desktop UI.
+- 🔧 Verify the full question-answering workflow through the desktop UI, including citation navigation and no-evidence handling.
 
 ## Step 5 — Trust panel 🔧
 Covers 20 of the 50 judging points. Sidebar → **Privacy**.
@@ -129,15 +129,15 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 **L: results UI** (step 3, 4, 6)
 - ✅ 3a. Results page with mock data (Sat)
 - ✅ 3b. Source cards and file excerpts (Sat)
-- 🔧 3c. Keyword and natural-language search call `/api/index` and `/api/search`; question answers await the QA API from 2c
+- ✅ 3c. Keyword and natural-language search call `/api/index` and `/api/search`; questions call `/api/ask` and link verified claims to their source cards
 - ⬜ 3d. Show decision changes and error states (Sun), needs 2d
-- 🔧 3e. Results-page polish adds visible citation targets, announced source counts, higher text contrast and formatted Markdown excerpts; VoiceOver announces the source count, while citation-jump testing awaits an answer with citations
+- 🔧 3e. Results-page polish adds visible citation targets, announced source counts, higher text contrast and formatted Markdown excerpts; verify citation navigation and question flow in the desktop app
 
 **C: privacy and trust** (step 2, 5)
 - ✅ 4a. Audit events for folder add/remove (Sat)
 - ✅ 4b. Revoking a folder drops its chunks, vectors, topics and search results at once, also mid-rebuild (`tests/test_privacy_index.py`)
 - ✅ 4c. Forget everything clears grants, prefs, log, index and unloads the model, also mid-rebuild. Fixed: a forget or revoke during the minutes-long embedding step used to put vectors and topics back
-- 🔧 4d. Test storage, network and offline claims (Sun). `tests/test_no_network.py` covers every route incl. index, search, model unload; ⬜ add the ask route when 2c lands (blocked on 2c)
+- 🔧 4d. Test storage, network and offline claims (Sun). `tests/test_no_network.py` covers index, search and ask with inference mocked; real-app storage check remains
 - ⬜ 4e. Edge-case tests and trust demo (Sun), needs everything above
 
 ### Remaining work (from Sat 21 Nov)
@@ -163,12 +163,12 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 **L: results UI**
 - ✅ Build functional results page with mock data (P0, Sat)
 - ✅ Display citation/source cards and file excerpts (P0, Sat)
-- 🔧 Connect question/search flow to backend (P0, Sat). Search done (PR #23); questions wait for the ask route
-- 🔧 Complete demo UI polish and accessibility check (P1, Sun am); VoiceOver count verified, citation-jump test awaits an answer with citations
+- ✅ Connect question/search flow to backend (P0, Sat). Search uses `/api/search`; questions use `/api/ask` with verified citations
+- 🔧 Complete demo UI polish and accessibility check (P1, Sun am); VoiceOver count verified, verify citation navigation with a supported answer
 
 **C: privacy and trust, demo**
 - ✅ Merge feat/privacy-index, feat/search, db, ingest into main (P0, Sat). PRs #15–#17
-- 🔧 Test storage, network and offline privacy claims (P0, Sat). Network test covers every route; ⬜ ask route (blocked on S), ⬜ real-app storage check (Step 5)
+- 🔧 Test storage, network and offline privacy claims (P0, Sat). Network test covers the ask route with inference mocked; ⬜ real-app storage check (Step 5)
 - ✅ Capture: Open in editor + New note (PR #24). See **Capture** above
 - ✅ Packaged desktop app for Mac, Windows and Linux (PR #19)
 - ⬜ Prepare trust demo and rehearse it with Wi-Fi off on the demo device (P0, Sun pm)
