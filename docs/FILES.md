@@ -47,6 +47,8 @@ Add a row whenever you create a file.
 | `pages/Home.tsx` | manager summary: Changes, Decisions and open To-dos cards (top 3 each, newest first) with links to the full pages; polls `/api/changes` until the scan is done | — |
 | `pages/SearchResults.tsx` | calls the local index/search API; shows answers, formatted Markdown excerpts, loading, empty and error states | step 4: connect question answers |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
+| `pages/Decisions.tsx` | lists decisions from `/api/decisions` with source file | — |
+| `pages/Todos.tsx` | lists to-dos from `/api/todos`; ticks are session-only (memory, never written), exported with `todoKey` so Home counts the same ticks; "Edit in note" opens the file in the user's editor | — |
 | `pages/Changes.tsx` | "Changes" page (view id `changes`, lazy-loaded): polls `/api/changes`, earlier vs latest note side by side with verified quotes (Markdown symbols stripped for display), gentle "Updated"/"Differs" tags | — |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
 | `pages/Settings.tsx` | engine, AI model picker (choice saved to `prefs.json`), indexing, accessibility note, built-in safety facts, forget everything (always last) | step 2c: indexing card; step 4: real model list from Ollama |
