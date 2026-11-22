@@ -240,7 +240,8 @@ body {
 
 .todo-card { gap: 6px; }
 .todo-task { display: flex; align-items: baseline; gap: 10px; }
-.todo-state { flex: 0 0 1em; color: var(--accent); }
+.todo-task { cursor: pointer; }
+.todo-check { flex: 0 0 auto; accent-color: var(--accent); cursor: pointer; }
 .todo-completed { color: var(--muted); text-decoration: line-through; }
 .todo-source { overflow-wrap: anywhere; font-size: 12px; }
 @media (max-width: 640px) {
