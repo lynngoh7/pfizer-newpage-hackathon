@@ -21,7 +21,7 @@ class Todo(TypedDict):
     end: int
 
 
-class IndexedChunk(TypedDict):
+class IndexedChunk(TypedDict): #recieved from database
     chunkID: int
     path: str
     date: str
@@ -36,7 +36,7 @@ def read_chunk(chunk_id: int) -> IndexedChunk | None:
     Unknown chunks, changed files, and inaccessible files are omitted rather
     than returning potentially stale or unauthorized text.
     """
-    info = db.chunk_info(chunk_id)
+    info = db.chunk_info(chunk_id) #get row of database via id
     if info is None:
         return None
     try:
@@ -45,7 +45,7 @@ def read_chunk(chunk_id: int) -> IndexedChunk | None:
         return None
     if text is None:
         return None
-    return {
+    return { #return database info as a IndexedChunk
         "chunkID": info["chunkID"],
         "path": info["filePath"],
         "date": info["noteDate"],
@@ -64,7 +64,7 @@ def read_chunks() -> list[IndexedChunk]:
             chunks.append(chunk)
     return chunks
 
-
+#regex magic
 _TODO = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+\[([ xX])\]\s+(.+?)\s*$")
 
 
@@ -76,7 +76,7 @@ def todos() -> dict[str, list[Todo]]:
         fence_marker = ""
         for line in chunk["text"].splitlines():
             stripped = line.lstrip()
-            if stripped.startswith(("```", "~~~")):
+            if stripped.startswith(("```", "~~~")): 
                 marker = stripped[:3]
                 if not in_fence:
                     in_fence = True
@@ -86,15 +86,15 @@ def todos() -> dict[str, list[Todo]]:
                 continue
             if in_fence:
                 continue
-            match = _TODO.match(line)
+            match = _TODO.match(line) #if chunk contains suspected todo
             if match is None:
                 continue
-            task = match.group(2).strip()
+            task = match.group(2).strip() #get
             if not task:
                 continue
             extracted.append({
                 "task": task,
-                "completed": match.group(1).lower() == "x",
+                "completed": match.group(1).lower() == "x", #check if completed
                 "chunkID": chunk["chunkID"],
                 "path": chunk["path"],
                 "date": chunk["date"],
