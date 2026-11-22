@@ -42,11 +42,10 @@ export function NavIcon({ id }: { id: Exclude<View, "home"> }) {
 const NAV: { id: Exclude<View, "home">; label: string }[] = [
   { id: "search", label: "Search" },
   { id: "newnote", label: "New note" },
-  { id: "decisions", label: "Decisions" },
-  { id: "todos", label: "To-dos" },
   { id: "upcoming", label: "Upcoming" },
+  { id: "todos", label: "To-dos" },
+  { id: "decisions", label: "Decisions" },
   { id: "changes", label: "Changes" },
-  { id: "privacy", label: "Privacy" },
 ];
 
 type Backend = "checking" | "online" | "offline";
@@ -102,6 +101,14 @@ export default function Sidebar({ view, onNavigate }: Props) {
           {backend === "online" && "Local engine ready"}
           {backend === "offline" && "Engine offline"}
         </div>
+        <button
+          className={`nav-item ${view === "privacy" ? "active" : ""}`}
+          aria-current={view === "privacy" ? "page" : undefined}
+          onClick={() => onNavigate("privacy")}
+        >
+          <NavIcon id="privacy" />
+          Privacy
+        </button>
         <button
           className={`nav-item ${view === "settings" ? "active" : ""}`}
           aria-current={view === "settings" ? "page" : undefined}

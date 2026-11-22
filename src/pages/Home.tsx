@@ -1,7 +1,7 @@
 /**
- * Home: the manager summary (P1 #11). Up to four quiet lists: upcoming dates
- * (next 14 days, plus overdue open to-dos), notes that changed, latest
- * decisions, open to-dos. Clicking an upcoming row opens its source note.
+ * Home: the manager summary (P1 #11). Up to four quiet lists, in this order: upcoming dates
+ * (next 14 days, plus overdue open to-dos), open to-dos, latest decisions, notes
+ * that changed. Clicking an upcoming row opens its source note.
  * Upcoming is loaded once by App.tsx so it survives switching pages. One line per item, newest first;
  * date and source file on hover. A list with nothing in it (or still loading)
  * is hidden, so the page stays calm. Each list is a card with its sidebar
@@ -185,9 +185,9 @@ export default function Home({ decisions, todos, upcoming, onNavigate }: Props) 
       <h1>What are you looking for?</h1>
       <div className="home-summary">
         <Upcoming items={upcoming} onNavigate={onNavigate} />
-        <Section title="Changes" to="changes" rows={changeRows} onNavigate={onNavigate} />
-        <Section title="Decisions" to="decisions" rows={decisionRows} onNavigate={onNavigate} />
         <Section title="Open to-dos" to="todos" rows={todoRows} onNavigate={onNavigate} />
+        <Section title="Decisions" to="decisions" rows={decisionRows} onNavigate={onNavigate} />
+        <Section title="Changes" to="changes" rows={changeRows} onNavigate={onNavigate} />
       </div>
     </div>
   );
