@@ -16,7 +16,7 @@ Rules (brief §6):
   * No network: Ollama on 127.0.0.1 via group._post.
 
 Called by: search.py (start() when the index is ready, reset() on reindex,
-flag() for each source card), api.py (GET/POST /api/conflicts).
+flag() for each source card), api.py (GET/POST /api/changes).
 """
 from __future__ import annotations
 
@@ -199,7 +199,7 @@ def flag(chunk_id: int) -> str | None:
 
 
 def report() -> dict:
-    """GET /api/conflicts: progress plus findings, newest change first."""
+    """GET /api/changes: progress plus findings, newest change first."""
     from . import search
     items = []
     for f in _live():

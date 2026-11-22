@@ -47,7 +47,7 @@ Add a row whenever you create a file.
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
 | `pages/SearchResults.tsx` | calls the local index/search API; shows answers, formatted Markdown excerpts, loading, empty and error states | step 4: connect question answers |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
-| `pages/Changes.tsx` | "Changes" page (view id `changes`, lazy-loaded): polls `/api/conflicts`, earlier vs latest note side by side with verified quotes (Markdown symbols stripped for display), gentle "Updated"/"Differs" tags | — |
+| `pages/Changes.tsx` | "Changes" page (view id `changes`, lazy-loaded): polls `/api/changes`, earlier vs latest note side by side with verified quotes (Markdown symbols stripped for display), gentle "Updated"/"Differs" tags | — |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
 | `pages/Settings.tsx` | engine, AI model picker (choice saved to `prefs.json`), indexing, accessibility note, built-in safety facts, forget everything (always last) | step 2c: indexing card; step 4: real model list from Ollama |
 
@@ -71,7 +71,7 @@ Add a row whenever you create a file.
 | `app/__init__.py` | version | — |
 | `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (the only saved file is `prefs.json`, see `prefs.py`) |
 | `app/auth.py` | bearer-token middleware, constant-time compare, every request; marks every response `no-store` | — |
-| `app/api.py` | routes under `/api`; health, folder/file grants (`GET/POST/DELETE /api/folders`, saved via `prefs`), `GET/PUT /api/settings`, search, `POST /api/ask`, `GET/POST /api/conflicts` | every step adds routes here (or split into routers) |
+| `app/api.py` | routes under `/api`; health, folder/file grants (`GET/POST/DELETE /api/folders`, saved via `prefs`), `GET/PUT /api/settings`, search, `POST /api/ask`, `GET/POST /api/changes` | every step adds routes here (or split into routers) |
 | `app/prefs.py` | the one file saved to disk: `prefs.json` with folder paths + allowlisted settings, never note content; restores folders on launch; deleted by forget | add a key to `SAVED_SETTINGS` for each new setting |
 | `app/permissions.py` | allowlist (filled from `prefs.json` on launch) + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |

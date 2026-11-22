@@ -241,5 +241,5 @@ export interface ConflictReport {
   items: ConflictItem[];
 }
 
-export const getConflicts = () => apiFetch<ConflictReport>("/api/conflicts");
-export const rescanConflicts = () => apiFetch<ConflictReport>("/api/conflicts", { method: "POST" });
+export const getConflicts = () => apiFetch<ConflictReport>("/api/changes");
+export const rescanConflicts = () => apiFetch<ConflictReport>("/api/changes", { method: "POST" });
