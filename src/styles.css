@@ -218,6 +218,27 @@ body {
   line-height: 1.55;
   overflow-wrap: anywhere;
 }
+.markdown-excerpt { display: flex; flex-direction: column; gap: 6px; }
+.markdown-heading { margin: 0; font-size: 13px; font-weight: 600; line-height: 1.4; }
+.markdown-paragraph { margin: 0; }
+.markdown-list { margin: 0; padding-left: 20px; }
+.markdown-list li + li { margin-top: 2px; }
+.markdown-task-list { padding-left: 0; list-style: none; }
+.markdown-task { display: flex; align-items: flex-start; gap: 7px; }
+.markdown-task input { flex: none; margin: 3px 0 0; accent-color: var(--accent); }
+.markdown-task input:disabled { opacity: 1; }
+.markdown-quote { margin: 0; padding-left: 10px; border-left: 2px solid var(--border); color: var(--muted); }
+.markdown-quote p { margin: 0; }
+.markdown-code {
+  margin: 0;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--bg);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.markdown-code code { font-size: 12px; }
+.markdown-link-target, .markdown-image { color: var(--muted); overflow-wrap: anywhere; }
 .no-results { margin-top: 24px; }
 .no-results h2 { margin: 0; font-size: 16px; }
 .no-results p { margin: 0; line-height: 1.5; }

@@ -45,8 +45,9 @@ Add a row whenever you create a file.
 | `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
-| `pages/SearchResults.tsx` | calls the local index/search API; shows answers, source excerpts, loading, empty and error states | step 4: connect question answers |
-| `pages/Conflicts.tsx` | "Changes" page (view id `conflicts`, lazy-loaded): polls `/api/conflicts`, earlier vs latest note side by side with verified quotes, gentle "Updated"/"Differs" tags | — |
+| `pages/SearchResults.tsx` | calls the local index/search API; shows answers, formatted Markdown excerpts, loading, empty and error states | step 4: connect question answers |
+| `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
+| `pages/Conflicts.tsx` | "Changes" page (view id `conflicts`, lazy-loaded): polls `/api/conflicts`, earlier vs latest note side by side with verified quotes (Markdown symbols stripped for display), gentle "Updated"/"Differs" tags | — |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
 | `pages/Settings.tsx` | engine, AI model picker (choice saved to `prefs.json`), indexing, accessibility note, built-in safety facts, forget everything (always last) | step 2c: indexing card; step 4: real model list from Ollama |
 
