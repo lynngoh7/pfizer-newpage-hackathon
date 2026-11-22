@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from . import __version__
 from . import permissions
 from . import models
+from . import notes
 from . import prefs
 from . import search as search_mod
 from . import qa
@@ -152,7 +153,6 @@ def index_stats() -> dict:
 def search(q: str = Query(min_length=1, max_length=500)) -> dict:
     return search_mod.search(q)
 
-
 @router.post("/ask", response_model=AskResponse)
 def ask(request: AskRequest) -> AskResponse:
     """Answer questions using locally stored, permitted notes."""
@@ -226,4 +226,44 @@ def ask(request: AskRequest) -> AskResponse:
         claims=claims,
         sources=sources,
     )
+
+
+class OpenFileRequest(BaseModel):
+    path: str = Field(min_length=1, max_length=4096)
+
+
+@router.post("/files/open")
+def open_file(request: OpenFileRequest) -> dict:
+    """Open an allowed file in the user's default app. The app itself never edits it."""
+    try:
+        real = notes.open_file(request.path)
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail="File does not exist") from error
+    except PermissionError as error:
+        raise HTTPException(status_code=403, detail=str(error)) from error
+    except OSError as error:
+        raise HTTPException(status_code=400, detail="Could not open the file") from error
+    return {"opened": str(real)}
+
+
+class NewNoteRequest(BaseModel):
+    folder: str = Field(min_length=1, max_length=4096)
+    title: str = Field(default="", max_length=200)
+    body: str = Field(min_length=1, max_length=200_000)
+
+
+@router.post("/notes")
+def create_note(request: NewNoteRequest) -> dict:
+    """Save a new note the user typed. Never overwrites; indexed only if tracked."""
+    try:
+        path, tracked = notes.create_note(request.folder, request.title, request.body)
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail="Folder does not exist") from error
+    except PermissionError as error:
+        raise HTTPException(status_code=403, detail=str(error)) from error
+    except OSError as error:
+        raise HTTPException(status_code=400, detail="Could not save the note") from error
+    if tracked:
+        search_mod.reindex()
+    return {"path": str(path), "tracked": tracked}
 

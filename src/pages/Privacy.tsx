@@ -28,6 +28,8 @@ const ACTION: Record<AuditEntry["action"], string> = {
   search: "Search",
   ask: "Question",
   forget: "Forgot everything",
+  open_in_editor: "Opened in editor",
+  note_created: "New note saved",
 };
 
 // Call `fn` now and every `ms` while the page is open. Returns [data, error, refresh].

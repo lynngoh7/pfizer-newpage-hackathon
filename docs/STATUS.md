@@ -36,9 +36,10 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ `db.py` registers `session.on_forget("index", db.clear)`. **Every new module holding session data must register too**
 - ✅ `sample_notes/`: fictional notes for the demo moment plus edge cases. Guide and expected answers in `docs/SAMPLE_NOTES.md`. Run `scripts/make_sample_notes.py` after cloning
 
-## Step 3 — Keyword search 🔧
+## Step 3 — Keyword search ✅
 - ✅ FTS5 table (contentless) in `db.py`, `db.keyword(q)`. `search.py` merges keyword + meaning
-- ✅ Results page with source cards and excerpts; search submits to `/api/index` and `/api/search`
+- ✅ Results page with source cards and excerpts; search submits to `/api/index` and `/api/search` (PR #23). Citations link only to source cards that exist
+- ✅ Requests wait for the backend at launch (up to 20 s) instead of showing "TypeError: Load failed"
 
 ## Step 4 — Questions with verified citations 🔧
 - ✅ `qa.py`: local Ollama question answering using `models.answer_model()`. Source-aware prompts treat notes as untrusted data and require exact quotations.
@@ -69,6 +70,11 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (`qwen3:4b-instruct`, chosen 2026-11-21)
 - ⬜ Step 2c: indexing card (files read, passages, skipped, re-index)
 - ⬜ Check in the real app with VoiceOver (⌘F5) and with Increase contrast on
+
+## Capture: open in editor + new note ✅
+- Source cards have **Open in editor**: the file opens in its default app (path-checked with `resolve_and_check`). The app never edits it. When the window regains focus after an Open, it re-indexes and re-runs the search, so edits show up.
+- Sidebar **New note**: saves a new `.md` file (`YYYY-MM-DD Title.md`). In an allowed folder it is searchable straight away; in another folder it is not tracked. Never overwrites. The audit log shows `open_in_editor` / `note_created` with paths only.
+- Code: `backend/app/notes.py`, `POST /api/files/open`, `POST /api/notes`, `src/pages/NewNote.tsx`. Tests: `backend/tests/test_notes.py`.
 
 ## Step 6 — Decisions, to-dos, conflicts ⬜
 - ⬜ Pull decisions and to-dos out of notes
@@ -145,6 +151,7 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 - ⬜ Run edge-case tests against answers: injected instructions, empty and broken notes (P0, Sun am)
 
 **S: answers, demo device**
+
 - 🔧 Merge `feature/ai-qa` into `main` (PR awaiting approval).
 - ✅ Integrate citation validation and no-evidence handling.
 - ✅ Implement `POST /api/ask` and integrate with existing search.
@@ -152,15 +159,18 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 - ✅ Backend tests: 91 passed; frontend production build passed.
 - ⬜ Build and run the complete application on the demo device with fictional sample notes.
 
+
 **L: results UI**
-- ⬜ Build functional results page with mock data (P0, Sat)
-- ⬜ Display citation/source cards and file excerpts (P0, Sat)
-- ⬜ Connect question/search flow to backend (P0, Sat)
+- ✅ Build functional results page with mock data (P0, Sat)
+- ✅ Display citation/source cards and file excerpts (P0, Sat)
+- 🔧 Connect question/search flow to backend (P0, Sat). Search done (PR #23); questions wait for the ask route
 - 🔧 Complete demo UI polish and accessibility check (P1, Sun am); VoiceOver count verified, citation-jump test awaits an answer with citations
 
 **C: privacy and trust, demo**
-- ⬜ Merge feat/privacy-index, feat/search, db, ingest into main (P0, Sat)
-- ⬜ Test storage, network and offline privacy claims (P0, Sat)
+- ✅ Merge feat/privacy-index, feat/search, db, ingest into main (P0, Sat). PRs #15–#17
+- 🔧 Test storage, network and offline privacy claims (P0, Sat). Network test covers every route; ⬜ ask route (blocked on S), ⬜ real-app storage check (Step 5)
+- ✅ Capture: Open in editor + New note (PR #24). See **Capture** above
+- ✅ Packaged desktop app for Mac, Windows and Linux (PR #19)
 - ⬜ Prepare trust demo and rehearse it with Wi-Fi off on the demo device (P0, Sun pm)
 - ⬜ Record the demo video and send the submission by 23:59 (P0, Sun pm)
 
