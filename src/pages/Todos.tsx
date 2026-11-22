@@ -10,7 +10,7 @@ interface Props {
   onRetry: () => void;
 }
 
-export default function Decisions({ todos, error, onRetry }: Props) {
+export default function Todos({ todos, error, onRetry }: Props) {
   return (
     <div className="page">
       <h2>To-dos</h2>
