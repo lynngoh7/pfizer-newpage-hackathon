@@ -79,7 +79,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 ## Step 6 — Decisions, to-dos, conflicts 🔧
 - ⬜ Pull decisions and to-dos out of notes
 - ✅ To-dos can be ticked on the To-dos page. Ticks are in memory for the session only: never written to the note or to disk
-- ✅ Flag notes that disagree, and newer notes that replace older ones. Sidebar page **Changes** (gentle wording and icon: a changed note is normal, not an error). Search cards get the "Superseded" / "Newer note" / "Conflict" badge once the scan is done
+- ✅ Flag notes that disagree, and newer notes that replace older ones. Sidebar page **Changes** (gentle wording and icon: a changed note is normal, not an error; Markdown symbols stripped from quotes and titles so they read as plain text). Search cards get the "Superseded" / "Newer note" / "Conflict" badge once the scan is done
   - How: after meaning search is ready, a background scan pairs passages from different notes dated in their file name (most similar first, at most 12 pairs; findings show as they arrive). The answer model says replaces / contradicts / none and quotes both; Python keeps a finding only if both quotes are really in the files. Memory only; cleared on reindex and forget
   - Undated files (e.g. `todo.md`) are left out: their date comes from mtime, which changes on copy
   - Code: `backend/app/conflicts.py`, `GET/POST /api/conflicts`, `src/pages/Conflicts.tsx`. Tests: `backend/tests/test_conflicts.py`

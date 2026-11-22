@@ -13,6 +13,22 @@ function fileName(path: string): string {
   return path.split(/[\\/]/).pop() || path;
 }
 
+/** Markdown symbols (#, **, - [ ], >, `) read as noise here. Strip them for
+ * display only; the quote was already verified against the raw file text. */
+function plain(text: string): string {
+  return text
+    .replace(/^\s*#{1,6}\s+/gm, "")
+    .replace(/^\s*>\s?/gm, "")
+    .replace(/^\s*[-*+]\s+\[[ xX]\]\s+/gm, "")
+    .replace(/^\s*[-*+]\s+/gm, "• ")
+    .replace(/(\*\*|__)(.+?)\1/g, "$2")
+    .replace(/(^|\W)[*_](\S.*?)[*_](?=\W|$)/g, "$1$2")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/\s*\n\s*/g, " ")
+    .trim();
+}
+
 function Side({ label, side }: { label: string; side: ConflictSide }) {
   const [error, setError] = useState<string | null>(null);
   return (
@@ -21,8 +37,8 @@ function Side({ label, side }: { label: string; side: ConflictSide }) {
         {label} · {side.date}
       </p>
       <h3>{fileName(side.path)}</h3>
-      <p className="source-location">{side.where}</p>
-      <blockquote className="conflict-quote">“{side.quote}”</blockquote>
+      <p className="source-location">{plain(side.where)}</p>
+      <blockquote className="conflict-quote">“{plain(side.quote)}”</blockquote>
       <div className="source-actions">
         <button
           className="btn btn-small"
@@ -43,8 +59,8 @@ function Item({ item }: { item: ConflictItem }) {
     <li className="card conflict-card">
       <div className="source-heading">
         <div>
-          {item.topic && <p className="results-eyebrow">{item.topic}</p>}
-          <h2>{item.summary || (superseded ? "A newer note changes this" : "These notes disagree")}</h2>
+          {item.topic && <p className="results-eyebrow">{plain(item.topic)}</p>}
+          <h2>{(item.summary && plain(item.summary)) || (superseded ? "A newer note changes this" : "These notes disagree")}</h2>
         </div>
         <span className="change-tag">{superseded ? "Updated" : "Differs"}</span>
       </div>
