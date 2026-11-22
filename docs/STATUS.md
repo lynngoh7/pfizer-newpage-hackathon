@@ -156,7 +156,7 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 - ✅ Pull decisions and to-dos out of notes (P0)
 - ✅ Compare old decisions with newer notes (P0). Changes page
 - ✅ Display decision changes (P0). Changes page, Home summary, search badges; to-dos tickable for the session
-- ⬜ Run edge-case tests against answers: injected instructions, empty and broken notes (P0, Sun am)
+- ✅ Edge-case tests: injected instructions (`test_changes.py`, `test_group.py`), empty and broken notes (`test_ingest.py`)
 
 **S: answers, demo device**
 
@@ -185,7 +185,7 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 ### Left to do before 23:59 Sun 22 Nov (priority order)
 1. 🔧 Build + install the app on the demo device with Ollama models pulled (`qwen3:4b-instruct`, `nomic-embed-text`); run the demo question end to end, incl. citation jump and "No supporting notes found"
 2. 🔧 Real-app storage check: Privacy page shows "Folder list and settings only" after a session (Step 5)
-3. ⬜ Edge-case run on answers: injected-instruction note, empty/broken notes, a question with no answer
+3. ⬜ Live check in the app: injected-instruction note and an unanswerable question give "No supporting notes found"
 4. ⬜ Rehearse trust demo with Wi-Fi off on the demo device
 5. ⬜ Record the video; email prototype + video to careers-uobinterns@bristol.ac.uk, subject "Pfizer Hackathon Submission"
 
