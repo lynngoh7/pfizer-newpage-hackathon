@@ -1,8 +1,9 @@
 /**
- * Home: the manager summary (P1 #11). Three quiet lists: notes that changed,
- * latest decisions, and open to-dos. One line per item (newest first) and a
- * "See all" link to the full page. Everything comes from the in-memory index;
- * nothing is saved.
+ * Home: the manager summary (P1 #11). Up to three quiet lists: notes that
+ * changed, latest decisions, open to-dos. One line per item, newest first;
+ * date and source file on hover. A list with nothing in it (or still loading)
+ * is hidden, so the page stays calm. Everything comes from the in-memory
+ * index; nothing is saved.
  *
  * Decisions and to-dos are loaded once by App.tsx and passed in. Changes are
  * polled here until the background scan finishes (same as the Changes page).
@@ -31,7 +32,7 @@ interface Row {
   key: string;
   text: string;
   date: string;
-  title: string; // full text + source file on hover, since the line is truncated
+  title: string; // full text, date and source file on hover, since the line is truncated
 }
 
 const byNewest = (a: Row, b: Row) => b.date.localeCompare(a.date); // ISO dates sort as strings
@@ -40,36 +41,27 @@ interface SectionProps {
   title: string;
   to: View;
   rows: Row[] | null;
-  loading: string;
-  empty: string;
   onNavigate: (v: View) => void;
 }
 
-function Section({ title, to, rows, loading, empty, onNavigate }: SectionProps) {
+function Section({ title, to, rows, onNavigate }: SectionProps) {
+  if (!rows || rows.length === 0) return null;
   const id = `home-${to}`;
   return (
     <section className="home-section" aria-labelledby={id}>
       <div className="home-section-head">
-        <h2 id={id}>
-          {title}
-          {rows && rows.length > 0 && <span className="home-count">{rows.length}</span>}
-        </h2>
+        <h2 id={id}>{title}</h2>
         <button className="link" onClick={() => onNavigate(to)} aria-label={`See all ${title.toLowerCase()}`}>
           See all
         </button>
       </div>
-      {rows === null && <p className="muted home-empty" role="status">{loading}</p>}
-      {rows?.length === 0 && <p className="muted home-empty">{empty}</p>}
-      {rows && rows.length > 0 && (
-        <ul className="home-list">
-          {rows.slice(0, SHOW).map((r) => (
-            <li key={r.key} title={r.title}>
-              <span className="home-text">{r.text}</span>
-              <span className="home-date">{r.date}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="home-list">
+        {rows.slice(0, SHOW).map((r) => (
+          <li key={r.key} title={r.title}>
+            {r.text}
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -105,25 +97,23 @@ export default function Home({ decisions, todos, onNavigate }: Props) {
     };
   }, [tick]);
 
-  const noEngine = changes?.phase === "no_engine";
-  const changeRows: Row[] | null =
-    changes && (changes.phase === "done" || noEngine || changes.items.length > 0)
-      ? changes.items.map((item) => {
+  const changeRows: Row[] | null = changes
+    ? changes.items.map((item) => {
           const text = plain(item.summary || item.topic || fileName(item.newer.path));
           return {
             key: `${item.older.chunkID}-${item.newer.chunkID}`,
             text,
             date: item.newer.date,
-            title: `${text}\n${fileName(item.older.path)} → ${fileName(item.newer.path)}`,
-          };
-        })
-      : null;
+            title: `${text}\n${item.newer.date} · ${fileName(item.older.path)} → ${fileName(item.newer.path)}`,
+        };
+      })
+    : null;
 
   const decisionRows: Row[] | null = decisions
     ? decisions
         .map((d, i) => {
           const text = plain(d.text);
-          return { key: `${d.chunkID}-${i}`, text, date: d.date, title: `${text}\n${fileName(d.path)}` };
+          return { key: `${d.chunkID}-${i}`, text, date: d.date, title: `${text}\n${d.date} · ${fileName(d.path)}` };
         })
         .sort(byNewest)
     : null;
@@ -133,26 +123,17 @@ export default function Home({ decisions, todos, onNavigate }: Props) {
     ? todos
         .map((t, i) => ({ t, i }))
         .filter(({ t, i }) => !(ticked.get(todoKey(t, i)) ?? t.completed))
-        .map(({ t, i }) => ({ key: `${t.chunkID}-${i}`, text: t.task, date: t.date, title: `${t.task}\n${fileName(t.path)}` }))
+        .map(({ t, i }) => ({ key: `${t.chunkID}-${i}`, text: t.task, date: t.date, title: `${t.task}\n${t.date} · ${fileName(t.path)}` }))
         .sort(byNewest)
     : null;
 
   return (
     <div className="home">
       <h1>What are you looking for?</h1>
-      <p className="muted">Search or ask a question. Answers come only from your files, on this computer.</p>
-
       <div className="home-summary">
-        <Section
-          title="Changes"
-          to="changes"
-          rows={changeRows}
-          loading="Comparing related notes…"
-          empty={noEngine ? "Start Ollama to compare notes." : "Nothing has changed."}
-          onNavigate={onNavigate}
-        />
-        <Section title="Decisions" to="decisions" rows={decisionRows} loading="Loading decisions…" empty="No decisions found." onNavigate={onNavigate} />
-        <Section title="Open to-dos" to="todos" rows={todoRows} loading="Loading to-dos…" empty="Nothing open." onNavigate={onNavigate} />
+        <Section title="Changes" to="changes" rows={changeRows} onNavigate={onNavigate} />
+        <Section title="Decisions" to="decisions" rows={decisionRows} onNavigate={onNavigate} />
+        <Section title="Open to-dos" to="todos" rows={todoRows} onNavigate={onNavigate} />
       </div>
     </div>
   );
