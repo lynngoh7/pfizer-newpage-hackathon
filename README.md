@@ -11,16 +11,35 @@ A desktop app that finds the note you mean. Everything runs on your own computer
 
 ## Contents
 
+- [The problem](#the-problem)
+- [What it does](#what-it-does)
+- [Your knowledge stays yours](#your-knowledge-stays-yours)
 - [Demo](#demo)
 - [Installation](#installation)
 - [Development](#development)
-  - [Tech stack](#tech-stack)
-  - [Prerequisites](#prerequisites)
-  - [Running locally](#running-locally)
-  - [Tests](#tests)
-  - [Project structure](#project-structure)
-  - [Documentation](#documentation)
 - [Team](#team)
+
+## The problem
+
+A manager knows they decided something weeks ago, but not where they wrote it or in what words. The decision sits in one note and the reason it later changed sits in another. And the notes are too personal to hand to a cloud AI.
+
+## What it does
+
+Ask *"What did we decide about the analytics vendor, and has it changed?"* and Haystack:
+
+- **Finds it by meaning**, not just exact words ("budget cut" finds "funding reduced").
+- **Answers with sources.** Every claim cites the file and passage it came from, and each quote is checked against the file. If nothing backs an answer, it says so.
+- **Flags what changed.** A newer note that replaces or contradicts an older one is shown alongside it.
+- **Pulls out the useful bits**: decisions, open to-dos and upcoming dates found in your notes.
+- **Reads messy notes**: Markdown, text, Word and PDF, including half-written drafts and duplicates.
+
+## Your knowledge stays yours
+
+- **On device.** The app has no network permission. The engine and the AI model (Ollama) only listen on this computer.
+- **No copies.** The search index lives in memory and is gone when the app quits. Passages are re-read from your files when shown. The only file the app saves is a short settings file listing which folders it may read.
+- **You can check.** The Privacy page shows network activity, everything the app has stored on disk, and a log of every file it read.
+- **You're in control.** Choose which folders it sees, remove one at any time, or press "Forget everything".
+- **Instructions in notes are ignored.** Only you give instructions; text inside files is treated as data.
 
 ## Demo
 
@@ -28,6 +47,8 @@ A desktop app that finds the note you mean. Everything runs on your own computer
 [![Demo video](docs/demo.png)](VIDEO_LINK) -->
 
 _Demo video coming soon._
+
+Try it with the fictional notes in `sample_notes/`. [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md) lists questions to ask and the answers to expect.
 
 ## Installation
 
@@ -68,22 +89,19 @@ Install these once:
    then close and reopen the terminal.
 4. **Ollama** (the local AI model) — https://ollama.com/download (Intel Mac with Homebrew: `brew install --cask ollama-app`). Then download the two models (about 2.3 GB):
    ```sh
-   ollama pull qwen3:4b-instruct      # answers and topic names
+   ollama pull qwen3:4b-instruct   # answers and topic names
    ollama pull nomic-embed-text   # search by meaning, grouping
    ```
 
 ### Running locally
 
 ```sh
-npm install          # first time only
-sh scripts/build-sidecar.sh # required once per machine/target before Tauri dev
-npm run tauri dev    # opens the desktop window
+npm install                   # first time only
+sh scripts/build-sidecar.sh   # builds the Python engine (repeat after backend changes)
+npm run tauri dev             # opens the desktop window
 ```
 
-The first run compiles Rust and can take a few minutes. Rebuild the sidecar after
-changing backend code or Python dependencies. After that, Tauri dev is fast.
-If a new feature answers `404 Not Found`, the sidecar is out of date: rebuild it and restart.
-The Python backend sets itself up automatically on first run (it creates `backend/.venv`).
+The first run compiles Rust and can take a few minutes; after that it is fast. The Python engine sets itself up on first run (it creates `backend/.venv`).
 
 **Sample notes:** some files in `sample_notes/` are generated. Run this once after cloning (see [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md)):
 
@@ -91,21 +109,6 @@ The Python backend sets itself up automatically on first run (it creates `backen
 python3 -m venv /tmp/gen && /tmp/gen/bin/pip install pymupdf python-docx
 /tmp/gen/bin/python scripts/make_sample_notes.py
 ```
-
-**Backend dependencies changed?** (e.g. after a pull) Reinstall:
-
-```sh
-backend/.venv/bin/pip install -U pip            # old pip can't do the next line
-backend/.venv/bin/pip install -e "backend[dev]"
-```
-
-**No Rust yet?** You can still work on the UI in a browser:
-
-```sh
-npm run dev:all      # then open http://127.0.0.1:1420
-```
-
-This is for development only. It still runs only on your computer, but it is not the real app and must not be used for the demo.
 
 ### Tests
 
@@ -142,4 +145,4 @@ CI runs the same three checks on every push.
 | Cathy | [@cathyc-c](https://github.com/cathyc-c) |
 | Eoin | [@ARandomGuyTH](https://github.com/ARandomGuyTH) |
 | Lynn | [@lynngoh7](https://github.com/lynngoh7) |
-| Shek | [@Reverie-974](https://github.com/Reverie-974)  |
+| Shek | [@Reverie-974](https://github.com/Reverie-974) |

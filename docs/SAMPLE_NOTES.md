@@ -19,7 +19,7 @@ This creates the .docx, .pdf and .png files, the symlinks and the file dates. Yo
 - 22 Sep: decided on **Corvid**, with beta on 3 Nov (`meetings/2026-09-22 …`)
 - 6 Oct: legal found that Corvid keeps data in the US only, which is a problem for the two pilots that need UK hosting (`1on1s/2026-10-06 …`)
 - 20 Oct: **switched to Ledgerly**, beta moved to 17 Nov. The older decision is replaced (`meetings/2026-10-20 …`)
-- 10–12 Nov: beta slipped again to **24 Nov** (`inbox/2026-11-12 quick note.txt`, plus the Slack screenshot)
+- 10–12 Nov: beta slipped again to **24 Nov** (`inbox/2026-11-12 quick note.txt`; the Slack screenshot says the same but is not read yet)
 - Show a "superseded" badge on the 22 Sep note
 
 ## The story in date order
@@ -39,7 +39,7 @@ This creates the .docx, .pdf and .png files, the symlinks and the file dates. Yo
 | 28 Oct | `personal/2026-10-28 Imogen perf notes.md` | Sensitive. Use it to demo removing a folder |
 | 3 Nov | `inbox/2026-11-03 status update DRAFT.md` | Half-written, and says 17 Nov, which is now out of date |
 | 5 Nov | `meetings/2026-11-05 team weekly.md` | Hiring paused until January (replaces 15 Sep) |
-| 10 Nov | `screenshots/2026-11-10 slack Ollie.png` | Image only: beta 24 Nov. Needs OCR |
+| 10 Nov | `screenshots/2026-11-10 slack Ollie.png` | Image only: beta 24 Nov. Not read: images aren't supported yet (local OCR is the next step), so the app lists it as skipped |
 | 12 Nov | `inbox/2026-11-12 quick note.txt` | Beta 24 Nov confirmed (the newest fact) |
 | 18 Nov | `inbox/2026-11-18 reminders.md` | Quick reminders: dentist 28 Nov, offsite agenda 30 Nov, Q1 draft 4 Dec (Upcoming) |
 | 19 Nov | `meetings/2026-11-19 team weekly.md` | Beta still 24 Nov; walkthrough 25 Nov; leadership review moved to 1 Dec; go/no-go email "Friday" (20 Nov, so overdue) |
