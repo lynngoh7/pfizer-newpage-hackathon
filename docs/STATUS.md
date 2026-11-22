@@ -66,7 +66,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Settings page: engine, AI model picker (one fixed model until step 4), indexing placeholder (step 2c), built-in safety facts, forget everything (always last)
 - ✅ Follows macOS appearance, Increase contrast, Reduce motion. ⌘+ / ⌘− change text size (`zoomHotkeysEnabled`, needs `core:webview:allow-set-webview-zoom`)
 - ✅ Keyboard focus ring on every control; `<main>` and `<nav>` landmarks; `aria-current` on the open page; engine status announced to VoiceOver
-- ✅ Sidebar icons (Lucide paths inlined, no icon package; decorative, hidden from VoiceOver). Licence in `docs/THIRD_PARTY.md`
+- ✅ Sidebar icons (Lucide paths inlined, no icon package; decorative, hidden from VoiceOver). Decisions and To-dos have their own icons (list-checks, square-check). Licence in `docs/THIRD_PARTY.md`
 - ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (`qwen3:4b-instruct`, chosen 2026-11-21)
 - ⬜ Step 2c: indexing card (files read, passages, skipped, re-index)
 - ⬜ Check in the real app with VoiceOver (⌘F5) and with Increase contrast on

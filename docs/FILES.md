@@ -38,7 +38,7 @@ Add a row whenever you create a file.
 | `styles.css` | all styling; CSS variables; follows macOS light/dark, increase contrast, reduce motion; focus rings; system fonts only | per feature |
 | `lib/trust.ts` | client + types for the Trust panel routes (audit, network, storage, forget) | step 5 |
 | `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); typed functions for health, folders, indexing and search | add a typed function per new route |
-| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes; inline Lucide nav icons (no icon package) | — |
+| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes; inline Lucide nav icons (no icon package), one per page: Decisions and To-dos are separate pages with different icons | — |
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
 | `components/FolderAccess.tsx` | add/remove folders and files the app may read this session (Tauri dialog); re-indexes after adding locations | step 2c: show indexing progress |
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
