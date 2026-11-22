@@ -1,4 +1,4 @@
-"""Conflicts: find notes that disagree, and newer notes that replace older ones.
+"""Changes: find notes that disagree, and newer notes that replace older ones.
 
 How: we pair passages from *different* dated files, most similar first
 (vectors from group.embed), and ask the local model whether the newer one
@@ -16,7 +16,7 @@ Rules (brief §6):
   * No network: Ollama on 127.0.0.1 via group._post.
 
 Called by: search.py (start() when the index is ready, reset() on reindex,
-flag() for each source card), api.py (GET/POST /api/conflicts).
+flag() for each source card), api.py (GET/POST /api/changes).
 """
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ def reset(*_) -> int:
     return n
 
 
-session.on_forget("conflicts", reset)
+session.on_forget("changes", reset)
 
 
 def status() -> dict:
@@ -199,7 +199,7 @@ def flag(chunk_id: int) -> str | None:
 
 
 def report() -> dict:
-    """GET /api/conflicts: progress plus findings, newest change first."""
+    """GET /api/changes: progress plus findings, newest change first."""
     from . import search
     items = []
     for f in _live():

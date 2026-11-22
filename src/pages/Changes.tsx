@@ -1,11 +1,11 @@
 /**
- * Changes (view id "conflicts"): pairs of notes where a newer one replaces or disagrees with an
+ * Changes (view id "changes"): pairs of notes where a newer one replaces or disagrees with an
  * older one. The backend finds them in the background once the index is
- * ready (backend/app/conflicts.py); this page polls until the scan is done.
+ * ready (backend/app/changes.py); this page polls until the scan is done.
  * Both quotes are checked against the files before they reach this page.
  */
 import { useEffect, useState } from "react";
-import { ConflictItem, ConflictReport, ConflictSide, ensureSearchIndex, getConflicts, openFile, rescanConflicts } from "../lib/api";
+import { ChangeItem, ChangeReport, ChangeSide, ensureSearchIndex, getChanges, openFile, rescanChanges } from "../lib/api";
 
 const POLL_MS = 2000;
 
@@ -29,7 +29,7 @@ function plain(text: string): string {
     .trim();
 }
 
-function Side({ label, side }: { label: string; side: ConflictSide }) {
+function Side({ label, side }: { label: string; side: ChangeSide }) {
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="conflict-side">
@@ -53,7 +53,7 @@ function Side({ label, side }: { label: string; side: ConflictSide }) {
   );
 }
 
-function Item({ item }: { item: ConflictItem }) {
+function Item({ item }: { item: ChangeItem }) {
   const superseded = item.kind === "superseded";
   return (
     <li className="card conflict-card">
@@ -72,8 +72,8 @@ function Item({ item }: { item: ConflictItem }) {
   );
 }
 
-export default function Conflicts() {
-  const [report, setReport] = useState<ConflictReport | null>(null);
+export default function Changes() {
+  const [report, setReport] = useState<ChangeReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
@@ -83,7 +83,7 @@ export default function Conflicts() {
     (async () => {
       try {
         await ensureSearchIndex();
-        const r = await getConflicts();
+        const r = await getChanges();
         if (!active) return;
         setReport(r);
         setError(null);
@@ -101,7 +101,7 @@ export default function Conflicts() {
 
   async function rescan() {
     try {
-      setReport(await rescanConflicts());
+      setReport(await rescanChanges());
       setTick((t) => t + 1);
     } catch (e) {
       setError(String(e));
@@ -111,9 +111,9 @@ export default function Conflicts() {
   const busy = report?.phase === "idle" || report?.phase === "scanning";
 
   return (
-    <section className="search-results" aria-labelledby="conflicts-title">
+    <section className="search-results" aria-labelledby="changes-title">
       <p className="results-eyebrow">Changes</p>
-      <h1 id="conflicts-title">Notes that were updated or differ</h1>
+      <h1 id="changes-title">Notes that were updated or differ</h1>
       <p className="results-note">
         Compared on this computer by the local model. Each quote below was checked against the file before it was shown.
       </p>

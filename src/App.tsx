@@ -6,7 +6,7 @@
  * they carry real code; everything here is intentionally tiny.
  *
  * Fills in: step 3 (search results), step 4 (answer + citations),
- * step 6 (decisions, conflicts). Privacy (step 5) is lazy-loaded.
+ * step 6 (decisions, changes). Privacy (step 5) is lazy-loaded.
  */
 import { lazy, Suspense, useEffect, useState } from "react";
 import Sidebar, { View } from "./components/Sidebar";
@@ -26,7 +26,7 @@ const DECISION_MAX_ATTEMPTS = 60;
 // Lazy: this page's code downloads only when first opened, keeping startup fast.
 const Privacy = lazy(() => import("./pages/Privacy"));
 const NewNote = lazy(() => import("./pages/NewNote"));
-const Conflicts = lazy(() => import("./pages/Conflicts"));
+const Changes = lazy(() => import("./pages/Changes"));
 
 export default function App() {
   const [view, setView] = useState<View>("home");
@@ -141,10 +141,10 @@ export default function App() {
         />
       );
       break;
-    case "conflicts":
+    case "changes":
       main = (
         <Suspense fallback={null}>
-          <Conflicts />
+          <Changes />
         </Suspense>
       );
       break;
