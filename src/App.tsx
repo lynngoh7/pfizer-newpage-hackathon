@@ -74,6 +74,7 @@ export default function App() {
     async function loadTodos() {
       for (let attempt = 1; attempt <= TODO_MAX_ATTEMPTS && active; attempt += 1) {
         try {
+          await ensureSearchIndex();
           const { todos: extracted } = await getTodos();
           if (active) {
             setTodos(extracted);
@@ -103,6 +104,7 @@ export default function App() {
     async function loadDecisions() {
       for (let attempt = 1; attempt <= DECISION_MAX_ATTEMPTS && active; attempt += 1) {
         try {
+          await ensureSearchIndex();
           const { decisions: extracted } = await getDecisions();
           if (active) {
             setDecisions(extracted);
