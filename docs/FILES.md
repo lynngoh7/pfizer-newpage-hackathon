@@ -44,7 +44,7 @@ Add a row whenever you create a file.
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
 | `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
-| `pages/Home.tsx` | manager summary: three cards with sidebar icons (Changes, Decisions, open To-dos; rows open the full page, gentle fade-in), top 3 one-line items each, newest first, date and file on hover; empty or loading lists are hidden; "See all" links to the full pages; polls `/api/changes` until the scan is done | — |
+| `pages/Home.tsx` | manager summary: an Upcoming card (dates in the next 14 days plus overdue open to-dos, row opens the source note) and three cards with sidebar icons (Changes, Decisions, open To-dos; rows open the full page, gentle fade-in), top 3 one-line items each, newest first, date and file on hover; empty or loading lists are hidden; "See all" links to the full pages; polls `/api/changes` until the scan is done | — |
 | `pages/SearchResults.tsx` | calls the local index/search API; shows answers, formatted Markdown excerpts, loading, empty and error states | step 4: connect question answers |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
 | `pages/Decisions.tsx` | lists decisions from `/api/decisions` with source file | — |
@@ -84,6 +84,7 @@ Add a row whenever you create a file.
 | `app/db.py` | in-memory SQLite index: Files/Chunks/Groups, contentless FTS5 keyword search, vectors (Python dict until sqlite-vec loads), `passage()` re-reads text and refuses changed files; revoke + forget hooks; `topics()` names groups lazily | — (`search.py` calls it) |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
 | `app/extractions.py` | extracts to-dos and decisions from indexed passages (text re-read from the file): `todos()` returns checkbox items, `decisions()` returns `## Decision` sections and `DECISION:` labels | — |
+| `app/dates.py` | finds lines that name a date ("24 Nov", "2026-12-01", "next Friday" read against the note's date) for `/api/upcoming`; vague phrases skipped; nothing stored | — |
 | `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders (`prefs.json` is expected, anything else is flagged) | — |
 | `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/saved`, `/api/trust/storage`, `DELETE /api/session` | — |
 | `app/citations.py` | citation checker: verifies each cited quote is in its chunk, drops unbacked claims, returns NO_SUPPORT if none survive. Pure, no I/O | step 4: called by `qa.py` |

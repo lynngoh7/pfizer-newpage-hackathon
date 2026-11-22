@@ -243,3 +243,14 @@ export interface ChangeReport {
 
 export const getChanges = () => apiFetch<ChangeReport>("/api/changes");
 export const rescanChanges = () => apiFetch<ChangeReport>("/api/changes", { method: "POST" });
+
+export interface DatedLine {
+  when: string; // ISO date the line refers to
+  text: string;
+  todo: boolean; // open checkbox: a past date means overdue
+  chunkID: number;
+  path: string;
+  noteDate: string;
+}
+
+export const getUpcoming = () => apiFetch<{ items: DatedLine[] }>("/api/upcoming");

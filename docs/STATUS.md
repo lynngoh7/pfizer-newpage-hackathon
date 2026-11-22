@@ -87,6 +87,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 
 ## Step 7 — Later ⬜
 - ✅ Search by meaning (`nomic-embed-text` vectors, merged with keyword in `search.py`). ⬜ Embed in the background so keyword search is ready first on launch
+- ✅ Upcoming on Home: dates found in notes (next 14 days, plus overdue open to-dos in red), resolved against the note's own date; click opens the note. `/api/upcoming`, `app/dates.py`
 - ✅ Summary page for managers: on Home, three short lists (Changes, Decisions, open To-dos) linking to the full pages. Nothing saved; built from the in-memory index
 
 ## Packaged app ✅

@@ -431,3 +431,5 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1
   font-weight: 600;
   white-space: nowrap;
 }
+.home-row-date { display: inline-block; min-width: 56px; color: var(--muted); font-size: 13px; }
+.home-row-date.overdue { color: var(--danger); }
