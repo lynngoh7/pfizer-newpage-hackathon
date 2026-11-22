@@ -12,7 +12,7 @@ class Chunk:
         self.text = text
 
 def chunkText(filePath:str):
-    with open(filePath, 'r') as file:
+    with open(filePath, 'r', encoding='utf-8') as file:
         start =  0
         end = 1
         text = ""
@@ -31,7 +31,7 @@ def chunkText(filePath:str):
             chunks.append(Chunk(filePath, start, text, end))
 
 def chunkMD(filePath:str):
-    with open(filePath, 'r') as file:
+    with open(filePath, 'r', encoding='utf-8') as file:
             start =  0
             end = 1
             text = ""
