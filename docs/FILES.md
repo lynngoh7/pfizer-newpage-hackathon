@@ -38,13 +38,13 @@ Add a row whenever you create a file.
 | `styles.css` | all styling; CSS variables; follows macOS light/dark, increase contrast, reduce motion; focus rings; system fonts only | per feature |
 | `lib/trust.ts` | client + types for the Trust panel routes (audit, network, storage, forget) | step 5 |
 | `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); typed functions for health, folders, indexing and search | add a typed function per new route |
-| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes; inline Lucide nav icons (no icon package), one per page: Decisions and To-dos are separate pages with different icons | — |
+| `components/Sidebar.tsx` | nav + engine status dot; exports `NavIcon` (also used on Home) (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes; inline Lucide nav icons (no icon package), one per page: Decisions and To-dos are separate pages with different icons | — |
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
 | `components/FolderAccess.tsx` | add/remove folders and files the app may read this session (Tauri dialog); re-indexes after adding locations | step 2c: show indexing progress |
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
 | `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
-| `pages/Home.tsx` | manager summary: three quiet lists (Changes, Decisions, open To-dos), top 3 one-line items each, newest first, date and file on hover; empty or loading lists are hidden; "See all" links to the full pages; polls `/api/changes` until the scan is done | — |
+| `pages/Home.tsx` | manager summary: three cards with sidebar icons (Changes, Decisions, open To-dos; rows open the full page, gentle fade-in), top 3 one-line items each, newest first, date and file on hover; empty or loading lists are hidden; "See all" links to the full pages; polls `/api/changes` until the scan is done | — |
 | `pages/SearchResults.tsx` | calls the local index/search API; shows answers, formatted Markdown excerpts, loading, empty and error states | step 4: connect question answers |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
 | `pages/Decisions.tsx` | lists decisions from `/api/decisions` with source file | — |

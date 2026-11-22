@@ -2,14 +2,15 @@
  * Home: the manager summary (P1 #11). Up to three quiet lists: notes that
  * changed, latest decisions, open to-dos. One line per item, newest first;
  * date and source file on hover. A list with nothing in it (or still loading)
- * is hidden, so the page stays calm. Everything comes from the in-memory
+ * is hidden, so the page stays calm. Each list is a card with its sidebar
+ * icon; clicking a row opens the full page. Everything comes from the in-memory
  * index; nothing is saved.
  *
  * Decisions and to-dos are loaded once by App.tsx and passed in. Changes are
  * polled here until the background scan finishes (same as the Changes page).
  */
 import { useEffect, useState } from "react";
-import type { View } from "../components/Sidebar";
+import { NavIcon, type View } from "../components/Sidebar";
 import { ChangeReport, ExtractedDecision, ExtractedTodo, ensureSearchIndex, getChanges } from "../lib/api";
 import { ticked, todoKey } from "./Todos";
 
@@ -48,17 +49,23 @@ function Section({ title, to, rows, onNavigate }: SectionProps) {
   if (!rows || rows.length === 0) return null;
   const id = `home-${to}`;
   return (
-    <section className="home-section" aria-labelledby={id}>
+    <section className="card home-section" aria-labelledby={id}>
       <div className="home-section-head">
-        <h2 id={id}>{title}</h2>
+        <h2 id={id}>
+          <NavIcon id={to as Exclude<View, "home">} />
+          {title}
+        </h2>
         <button className="link" onClick={() => onNavigate(to)} aria-label={`See all ${title.toLowerCase()}`}>
           See all
         </button>
       </div>
       <ul className="home-list">
         {rows.slice(0, SHOW).map((r) => (
-          <li key={r.key} title={r.title}>
-            {r.text}
+          <li key={r.key}>
+            {/* The whole row opens the full page; full text, date and file on hover. */}
+            <button className="home-row" title={r.title} onClick={() => onNavigate(to)}>
+              {r.text}
+            </button>
           </li>
         ))}
       </ul>
