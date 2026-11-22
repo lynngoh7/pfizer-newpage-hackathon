@@ -261,7 +261,14 @@ body {
 
 .todo-card { gap: 6px; }
 .todo-task { display: flex; align-items: baseline; gap: 10px; }
-.todo-task { cursor: pointer; }
+.todo-task { cursor: pointer; flex: 1; }
+.todo-row { display: flex; align-items: center; gap: 12px; }
+.todo-edit { flex: 0 0 auto; }
+.todo-notice {
+  margin: 0 0 20px; padding: 12px 14px; font-size: 14px;
+  border: 1px solid var(--border); border-left: 3px solid var(--accent);
+  border-radius: 6px; background: var(--card);
+}
 .todo-check {
   appearance: none; -webkit-appearance: none; margin: 0;
   flex: 0 0 16px; width: 16px; height: 16px; align-self: center;
