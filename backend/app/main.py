@@ -1,7 +1,8 @@
 """ASGI app factory and sidecar entry point."""
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from .api import router
@@ -29,6 +30,15 @@ def create_app(settings: Settings) -> FastAPI:
     app.state.settings = settings
     # Order matters: Starlette applies the last-added middleware first, so CORS
     # wraps auth and can answer preflights before the token check runs.
+    # Innermost: turn a crash into a normal 500 *inside* CORS, so the window
+    # sees the real message instead of a bare "TypeError: Failed to fetch".
+    @app.middleware("http")
+    async def crash_to_500(request: Request, call_next):
+        try:
+            return await call_next(request)
+        except Exception as e:  # noqa: BLE001
+            return JSONResponse({"detail": f"{type(e).__name__}: {e}"}, status_code=500)
+
     app.add_middleware(SessionTokenMiddleware, token=settings.session_token)
     app.add_middleware(
         CORSMiddleware,

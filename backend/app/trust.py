@@ -99,11 +99,16 @@ def storage() -> dict:
         else:
             files = []
         files = [f for f in files if f.resolve() != saved]  # the one expected file
+        # Windows: WebView2 keeps the window's own browser profile (EBWebView).
+        # Expected, and holds no notes: every API reply is no-store (auth.py).
+        engine = [f for f in files if "EBWebView" in f.relative_to(path).parts[:1]]
+        files = [f for f in files if f not in engine]
         total += len(files)
         locations.append({
             "path": str(path),
             "exists": path.exists(),
             "files": len(files),
+            "engine": len(engine),
             "bytes": sum(f.stat().st_size for f in files),
             "listed": [str(f.relative_to(path)) if f != path else f.name for f in files[:MAX_LISTED_FILES]],
         })
