@@ -1,5 +1,5 @@
 # Node
-node_modules/
+node_modules
 dist/
 *.local
 
@@ -9,7 +9,7 @@ src-tauri/gen/
 src-tauri/binaries/
 
 # Python
-backend/.venv/
+backend/.venv
 backend/__pycache__/
 **/__pycache__/
 backend/build/
