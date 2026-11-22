@@ -186,7 +186,7 @@ export default function Privacy() {
             <ul className="paths">
               {disk.locations.map((l) => (
                 <li key={l.path}>
-                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : disk.saved.path.startsWith(l.path + "/") ? "only prefs.json" : l.exists ? "empty" : "not there"}</span>
+                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : /^[\\/]/.test(disk.saved.path.slice(l.path.length)) && disk.saved.path.startsWith(l.path) ? "only prefs.json" : l.exists ? "empty" : "not there"}</span>
                 </li>
               ))}
             </ul>
