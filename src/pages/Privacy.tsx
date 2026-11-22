@@ -168,7 +168,7 @@ export default function Privacy() {
         {disk && disk.files === 0 && (
           <p className="muted">
             Apart from that, the {disk.locations.length} places where apps usually keep data hold
-            {disk.locations.some((l) => l.engine) ? " only the window's own browser files (no notes)" : " nothing"}. Checked just now.
+            {disk.locations.some((l) => l.engine || l.system) ? " only the window's own system files (no notes)" : " nothing"}. Checked just now.
           </p>
         )}
         {disk && disk.files > 0 && (
@@ -191,7 +191,7 @@ export default function Privacy() {
             <ul className="paths">
               {disk.locations.map((l) => (
                 <li key={l.path}>
-                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : l.engine ? `window's own browser files (${l.engine}), no notes` : /^[\\/]/.test(disk.saved.path.slice(l.path.length)) && disk.saved.path.startsWith(l.path) ? "only prefs.json" : l.exists ? "empty" : "not there"}</span>
+                  <code>{l.path}</code> <span className="muted">— {l.files ? `${l.files} files` : l.engine ? `window's own browser files (${l.engine}), no notes` : l.system ? "macOS window settings only, no notes" : /^[\\/]/.test(disk.saved.path.slice(l.path.length)) && disk.saved.path.startsWith(l.path) ? "only prefs.json" : l.exists ? "empty" : "not there"}</span>
                 </li>
               ))}
             </ul>

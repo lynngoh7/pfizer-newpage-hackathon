@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import ipaddress
 import os
+import plistlib
 import sys
 from pathlib import Path
 
@@ -85,6 +86,20 @@ def _app_dirs() -> list[Path]:
     return [home / d / n for d in (".local/share", ".config", ".cache") for n in (APP_ID, BIN_NAME)]
 
 
+def _os_window_state(f: Path) -> bool:
+    """True for the macOS .plist that holds only the system's own window and
+    file-picker state (keys starting "NS", e.g. the picker's size and last
+    folder). macOS writes it when the folder picker opens; it holds no notes."""
+    if f.suffix != ".plist":
+        return False
+    try:
+        with f.open("rb") as fh:
+            data = plistlib.load(fh)
+    except Exception:
+        return False  # unreadable: report it as unexpected
+    return isinstance(data, dict) and all(str(k).startswith("NS") for k in data)
+
+
 def storage() -> dict:
     from . import prefs  # late import: prefs imports session, keep trust import-light
 
@@ -103,12 +118,15 @@ def storage() -> dict:
         # Expected, and holds no notes: every API reply is no-store (auth.py).
         engine = [f for f in files if "EBWebView" in f.relative_to(path).parts[:1]]
         files = [f for f in files if f not in engine]
+        system = [f for f in files if _os_window_state(f)]
+        files = [f for f in files if f not in system]
         total += len(files)
         locations.append({
             "path": str(path),
             "exists": path.exists(),
             "files": len(files),
             "engine": len(engine),
+            "system": len(system),
             "bytes": sum(f.stat().st_size for f in files),
             "listed": [str(f.relative_to(path)) if f != path else f.name for f in files[:MAX_LISTED_FILES]],
         })

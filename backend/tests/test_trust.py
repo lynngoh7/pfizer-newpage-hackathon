@@ -73,7 +73,7 @@ def test_storage_reports_files_in_app_dirs(tmp_path, monkeypatch):
     monkeypatch.setattr(trust, "_app_dirs", lambda: [empty, used])
     report = trust.storage()
     assert report["files"] == 1
-    assert report["locations"][0] == {"path": str(empty), "exists": False, "files": 0, "engine": 0, "bytes": 0, "listed": []}
+    assert report["locations"][0] == {"path": str(empty), "exists": False, "files": 0, "engine": 0, "system": 0, "bytes": 0, "listed": []}
     assert report["locations"][1]["listed"] == ["sub/cache.db"]
     assert report["locations"][1]["bytes"] == 4
 
@@ -100,3 +100,20 @@ def test_storage_does_not_flag_webview2_profile(tmp_path, monkeypatch):
     report = trust.storage()
     assert report["files"] == 0
     assert report["locations"][0]["engine"] == 1
+
+
+def test_storage_does_not_flag_macos_window_state(tmp_path, monkeypatch):
+    import plistlib
+    plist = tmp_path / "app.plist"
+    plist.write_bytes(plistlib.dumps({"NSWindow Frame NSNavPanelAutosaveName": "0 0 800 448"}))
+    monkeypatch.setattr(trust, "_app_dirs", lambda: [plist])
+    report = trust.storage()
+    assert report["files"] == 0 and report["locations"][0]["system"] == 1
+
+
+def test_storage_flags_plist_with_other_keys(tmp_path, monkeypatch):
+    import plistlib
+    plist = tmp_path / "app.plist"
+    plist.write_bytes(plistlib.dumps({"NSWindow Frame": "x", "lastQuery": "budget"}))
+    monkeypatch.setattr(trust, "_app_dirs", lambda: [plist])
+    assert trust.storage()["files"] == 1

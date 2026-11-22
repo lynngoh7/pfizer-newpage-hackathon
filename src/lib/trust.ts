@@ -32,7 +32,7 @@ export interface NetworkReport {
 
 export interface StorageReport {
   files: number;
-  locations: { path: string; exists: boolean; files: number; engine?: number; bytes: number; listed: string[] }[]; // engine: Windows WebView2 profile, expected
+  locations: { path: string; exists: boolean; files: number; engine?: number; system?: number; bytes: number; listed: string[] }[]; // engine: Windows WebView2 profile; system: macOS window-state plist. Both expected
   saved: { path: string; bytes: number }; // prefs.json: expected, not counted in `files`
 }
 
