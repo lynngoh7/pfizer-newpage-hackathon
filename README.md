@@ -43,10 +43,10 @@ Ask *"What did we decide about the analytics vendor, and has it changed?"* and H
 
 ## Demo
 
-<!-- Add the demo video link and a screenshot here, e.g.
-[![Demo video](docs/demo.png)](VIDEO_LINK) -->
+<!-- Add screenshots to docs/screenshots/ and list them here, e.g.
+![Asking about the vendor decision](docs/screenshots/answer.png) -->
 
-_Demo video coming soon._
+_Screenshots coming soon._
 
 Try it with the fictional notes in `sample_notes/`. [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md) lists questions to ask and the answers to expect.
 
