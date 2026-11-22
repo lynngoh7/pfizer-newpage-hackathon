@@ -1,7 +1,6 @@
 /**
- * Single wide input, browser-style. Handles both keyword search and plain
- * English questions; the backend decides which (step 3/4). Controlled input,
- * submits only trimmed non-empty text.
+ * Single wide input, browser-style. The results page routes plain-English
+ * questions to /api/ask and other queries to /api/search. Submits trimmed text.
  */
 import { FormEvent, useState } from "react";
 

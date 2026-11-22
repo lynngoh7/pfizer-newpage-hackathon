@@ -40,7 +40,7 @@ export default function Todos({ todos, error, onRetry }: Props) {
       </p>
 
       <p className="todo-notice" role="note">
-        <strong>Ticks here are for this session only.</strong> They are not saved and
+        <strong>Ticks here are for this session only,</strong> to maintain the read-only rule. They are not saved and
         do not change your notes. To tick a task for good, use <strong>Edit in note</strong>.
       </p>
 
