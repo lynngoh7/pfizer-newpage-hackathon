@@ -43,10 +43,17 @@ Ask *"What did we decide about the analytics vendor, and has it changed?"* and H
 
 ## Demo
 
-<!-- Add screenshots to docs/screenshots/ and list them here, e.g.
-![Asking about the vendor decision](docs/screenshots/answer.png) -->
+**Home:** upcoming dates, open to-dos, decisions and changes, all pulled from your notes.
 
-_Screenshots coming soon._
+![Home screen](docs/screenshots/home.png)
+
+**Asking a question:** the answer cites its sources, each quote is checked against the file, and a newer note is flagged.
+
+![Answer with verified sources](docs/screenshots/answer.png)
+
+**Privacy:** proof that nothing left the computer or was saved, plus folder access and "Forget everything".
+
+![Privacy page](docs/screenshots/privacy.png)
 
 Try it with the fictional notes in `sample_notes/`. [docs/SAMPLE_NOTES.md](docs/SAMPLE_NOTES.md) lists questions to ask and the answers to expect.
 
