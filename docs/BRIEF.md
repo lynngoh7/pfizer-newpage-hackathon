@@ -67,7 +67,7 @@ Our original plan stores parsed text in an encrypted SQLite index. Even encrypte
 - **Sample data:** create a `sample_notes/` folder of realistic, fictional manager notes (meetings, action items, a contradicting update, an outdated decision, a half-written status update, a screenshot) designed to show off the demo moment.
 
 ## 2. Current focus (this phase)
-Build the **core search + answer loop only**. Calendar, to-dos and other dashboard widgets are **future add-ons**. Do not build them now, but keep the home screen layout able to host widgets later.
+Build the **core search + answer loop only**. Calendar, to-dos and other dashboard widgets are **future add-ons**. Do not build them now, but keep the home screen layout able to host widgets later. Exception (2026-11-22): Home has an **Upcoming** card built from dates found in the notes (`app/dates.py`, `/api/upcoming`). No calendar connection, nothing stored.
 
 ## 3. Feature checklist
 
