@@ -69,7 +69,7 @@ Add a row whenever you create a file.
 | `app/__init__.py` | version | — |
 | `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (the only saved file is `prefs.json`, see `prefs.py`) |
 | `app/auth.py` | bearer-token middleware, constant-time compare, every request; marks every response `no-store` | — |
-| `app/api.py` | routes under `/api`; health, folder/file grants (`GET/POST/DELETE /api/folders`, saved via `prefs`), `GET/PUT /api/settings` | every step adds routes here (or split into routers) |
+| `app/api.py` | Backend API routes for health, folder access, settings, search and `POST /api/ask` for AI question answering | Add routes as needed |
 | `app/prefs.py` | the one file saved to disk: `prefs.json` with folder paths + allowlisted settings, never note content; restores folders on launch; deleted by forget | add a key to `SAVED_SETTINGS` for each new setting |
 | `app/permissions.py` | allowlist (filled from `prefs.json` on launch) + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
@@ -99,6 +99,10 @@ Add a row whenever you create a file.
 | `tests/test_prefs.py` | saved folders/settings, paths only, allowlist, restore, forget, disk check | — |
 | `tests/test_permissions.py` | grants, protected paths, symlink escape, revoke | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
+| `app/qa.py` | Local Ollama Q&A using retrieved excerpts; generates claims and validates citations through `citations.py`. Uses `models.answer_model()` | Test full desktop workflow |
+| `tests/test_qa.py` | Tests valid citations, missing evidence and fabricated quotations using mocked Ollama responses | Add further edge cases |
+| `tests/test_ask.py` | Tests `POST /api/ask` integration with mocked search and Q&A results | Test real authenticated workflow |
+
 
 ### Planned backend modules (not yet created)
-`db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py`
+`extract.py` · `conflicts.py`

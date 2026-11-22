@@ -135,7 +135,7 @@ def _where(info: dict, text: str) -> str:
     return f"lines {info['start'] + 1}–{info['end'] + 1}"
 
 
-def source(cid: int) -> dict | None:
+def source(cid: int, *, full: bool = False) -> dict | None:
     """One source card, snippet re-read from the file now. None if the file
     changed, moved or is no longer allowed."""
     info = db.chunk_info(cid)
@@ -148,7 +148,7 @@ def source(cid: int) -> dict | None:
     if text is None:
         return None
     return {"chunkID": cid, "path": info["filePath"], "date": info["noteDate"],
-            "where": _where(info, text), "snippet": text.strip()[:MAX_SNIPPET], "flag": None}
+            "where": _where(info, text), "snippet": text.strip() if full else text.strip()[:MAX_SNIPPET], "flag": None}
 
 
 def search(query: str, k: int = K) -> dict:

@@ -15,6 +15,7 @@ from . import models
 from . import notes
 from . import prefs
 from . import search as search_mod
+from . import qa
 from . import extractions as extraction_mod
 
 router = APIRouter(prefix="/api")
@@ -85,6 +86,40 @@ class SavedSettings(BaseModel):
     answer_model: str | None = None
 
 
+class AskRequest(BaseModel):
+    """Question submitted by the manager."""
+
+    # Only accept the question, not arbitrary note contents.
+    question: str = Field(min_length=1, max_length=500)
+
+
+class AskCitation(BaseModel):
+    """A verified quotation from a retrieved note."""
+
+    chunk_id: int
+    quote: str
+    start: int
+    end: int
+
+
+class AskClaim(BaseModel):
+    """An AI-generated claim with verified citations."""
+
+    text: str
+    citations: list[AskCitation]
+
+
+class AskResponse(BaseModel):
+    """Structured response returned to the frontend."""
+
+    status: str
+    supported: bool
+    answer: str | None
+    message: str | None
+    claims: list[AskClaim]
+    sources: list[dict]
+
+
 @router.get("/settings", response_model=SavedSettings)
 def get_settings() -> SavedSettings:
     return SavedSettings(**prefs.load()["settings"])
@@ -117,6 +152,80 @@ def index_stats() -> dict:
 @router.get("/search")
 def search(q: str = Query(min_length=1, max_length=500)) -> dict:
     return search_mod.search(q)
+
+@router.post("/ask", response_model=AskResponse)
+def ask(request: AskRequest) -> AskResponse:
+    """Answer questions using locally stored, permitted notes."""
+
+    # Search notes that the user has permitted the app to access.
+    search_result = search_mod.search(request.question)
+
+    # The AI receives the full passage
+    full_sources = [
+        search_mod.source(source["chunkID"], full=True)
+        for source in search_result["sources"]
+    ]
+
+    # Search results still display short previews.
+    chunks = {
+        str(source["chunkID"]): source["snippet"]
+        for source in full_sources
+        if source is not None
+    }
+
+    try:
+        # Generate an answer and validate its citations.
+        result = qa.ask_question(request.question, chunks)
+
+    except qa.QAError as error:
+        # Report inference failure without exposing note contents.
+        raise HTTPException(
+            status_code=503,
+            detail="Local AI inference is unavailable",
+        ) from error
+
+    # Convert validated claims into API response objects.
+    claims = [
+        AskClaim(
+            text=claim.text,
+            citations=[
+                AskCitation(
+                    chunk_id=int(citation.chunk_id),
+                    quote=citation.quote,
+                    start=citation.start,
+                    end=citation.end,
+                )
+                for citation in claim.citations
+            ],
+        )
+        for claim in result.claims
+    ]
+
+    # Identify which source cards support accepted claims.
+    cited_ids = {
+        citation.chunk_id
+        for claim in claims
+        for citation in claim.citations
+    }
+
+    # Return source cards only for cited excerpts.
+    sources = [
+        source
+        for source in search_result["sources"]
+        if source["chunkID"] in cited_ids
+    ]
+
+    return AskResponse(
+        status="ok" if result.supported else "no_support",
+        supported=result.supported,
+        answer=(
+            "\n".join(claim.text for claim in claims)
+            if result.supported else None
+        ),
+        message=result.message,
+        claims=claims,
+        sources=sources,
+    )
 
 
 class OpenFileRequest(BaseModel):
@@ -157,3 +266,4 @@ def create_note(request: NewNoteRequest) -> dict:
     if tracked:
         search_mod.reindex()
     return {"path": str(path), "tracked": tracked}
+
