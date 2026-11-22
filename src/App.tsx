@@ -6,7 +6,7 @@
  * they carry real code; everything here is intentionally tiny.
  *
  * Fills in: step 3 (search results), step 4 (answer + citations),
- * step 6 (decisions, conflicts). Privacy (step 5) is lazy-loaded.
+ * step 6 (decisions, changes). Privacy (step 5) is lazy-loaded.
  */
 import { lazy, Suspense, useEffect, useState } from "react";
 import Sidebar, { View } from "./components/Sidebar";
@@ -14,7 +14,6 @@ import SearchBar from "./components/SearchBar";
 import Home from "./pages/Home";
 import Decisions from "./pages/Decisions";
 import Todos from "./pages/Todos";
-import Placeholder from "./pages/Placeholder";
 import SearchResults from "./pages/SearchResults";
 import Settings from "./pages/Settings";
 import { ExtractedDecision, ExtractedTodo, getDecisions, getTodos } from "./lib/api";
@@ -27,6 +26,7 @@ const DECISION_MAX_ATTEMPTS = 60;
 // Lazy: this page's code downloads only when first opened, keeping startup fast.
 const Privacy = lazy(() => import("./pages/Privacy"));
 const NewNote = lazy(() => import("./pages/NewNote"));
+const Changes = lazy(() => import("./pages/Changes"));
 
 export default function App() {
   const [view, setView] = useState<View>("home");
@@ -141,8 +141,12 @@ export default function App() {
         />
       );
       break;
-    case "conflicts":
-      main = <Placeholder title="Conflicts" note="Contradiction and superseded-note detection arrives in build step 6." />;
+    case "changes":
+      main = (
+        <Suspense fallback={null}>
+          <Changes />
+        </Suspense>
+      );
       break;
     case "privacy":
       main = (

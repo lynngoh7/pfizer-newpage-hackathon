@@ -10,6 +10,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from . import __version__
+from . import changes
 from . import permissions
 from . import models
 from . import notes
@@ -147,6 +148,20 @@ def build_index() -> dict:
 def index_stats() -> dict:
     """Counts plus build progress; the UI polls this while meaning search builds."""
     return {**search_mod.db.stats(), **search_mod.status()}
+
+
+@router.get("/changes")
+def get_changes() -> dict:
+    """Progress and findings. Starts a scan once meaning search is ready."""
+    if changes.status()["phase"] == "idle" and search_mod.status()["phase"] == "ready":
+        changes.start()
+    return changes.report()
+
+
+@router.post("/changes")
+def rescan_changes() -> dict:
+    changes.start()
+    return changes.report()
 
 
 @router.get("/search")
