@@ -95,6 +95,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Tested on macOS (Intel): the built backend reads all `sample_notes/` and search works; quitting the app stops the backend
 - ✅ `sh scripts/build-app.sh` builds and installs the app: Mac → /Applications, Windows → silent installer (Start menu), Linux → .deb/.rpm (app menu); `--install` skips the build. Re-tested on macOS (Intel): installs, starts, backend stops on quit
 - ✅ Windows fixes: backend `.exe` naming, no console window, whole backend process tree stopped on quit
+- ✅ Windows: notes read as UTF-8 (Windows defaulted to cp1252, so notes with `—` or `’` were skipped and showing a passage crashed the backend); Changes page date check works with `\` paths
 - ⬜ Windows, Linux and Apple Silicon builds not yet run: run the **Build app** workflow (`.github/workflows/build-app.yml`) once the branch is pushed. Install steps per OS: `docs/INSTALL.md`
 - ⚠ First launch takes about 15 s before the engine dot goes green (the backend unpacks itself; macOS scans the new binary). Later launches are faster
 - ⚠ Not signed: the first time, right-click the app → Open. Ollama is still installed separately

@@ -25,6 +25,7 @@ import operator
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from . import audit, db, group, models, session
 
@@ -84,7 +85,7 @@ def _pairs() -> list[tuple[int, int]]:
     with db._lock:
         rows = [r for r in db._db.execute(
             "SELECT c.chunkID, c.fileID, f.noteDate, f.filePath FROM Chunks c JOIN Files f USING (fileID)")
-            if db._DATE.search(r[3].rsplit("/", 1)[-1]) and r[0] in db._vecs]
+            if db._DATE.search(Path(r[3]).name) and r[0] in db._vecs]
         vecs = {r[0]: db._vecs[r[0]] for r in rows}
     best: dict[tuple[int, int], tuple[float, int, int]] = {}
     for i, a in enumerate(rows):

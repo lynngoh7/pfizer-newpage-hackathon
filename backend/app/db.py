@@ -270,7 +270,7 @@ def _units(path: str, expected_hash: str) -> list[str] | None:
     if suffix == ".docx":
         from markitdown import MarkItDown
         return MarkItDown(enable_plugins=False).convert_local(str(real)).text_content.splitlines(keepends=True)
-    return real.read_text().splitlines(keepends=True)
+    return real.read_text(encoding="utf-8").splitlines(keepends=True)
 
 
 def passage(chunk_id: int) -> str | None:
