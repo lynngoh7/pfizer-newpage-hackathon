@@ -219,3 +219,27 @@ export interface NewNoteResult {
 
 export const createNote = (folder: string, title: string, body: string) =>
   apiFetch<NewNoteResult>("/api/notes", { method: "POST", body: JSON.stringify({ folder, title, body }) });
+
+// Conflicts (backend/app/conflicts.py): notes that disagree or replace older ones.
+// Found by the local model, quotes verified in Python, kept in memory only.
+export interface ConflictSide extends SearchSource {
+  quote: string;
+}
+
+export interface ConflictItem {
+  kind: "superseded" | "conflict";
+  summary: string;
+  topic: string | null;
+  older: ConflictSide;
+  newer: ConflictSide;
+}
+
+export interface ConflictReport {
+  phase: "idle" | "scanning" | "done" | "no_engine";
+  done: number;
+  total: number;
+  items: ConflictItem[];
+}
+
+export const getConflicts = () => apiFetch<ConflictReport>("/api/conflicts");
+export const rescanConflicts = () => apiFetch<ConflictReport>("/api/conflicts", { method: "POST" });

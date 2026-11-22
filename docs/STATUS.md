@@ -66,7 +66,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Settings page: engine, AI model picker (one fixed model until step 4), indexing placeholder (step 2c), built-in safety facts, forget everything (always last)
 - ✅ Follows macOS appearance, Increase contrast, Reduce motion. ⌘+ / ⌘− change text size (`zoomHotkeysEnabled`, needs `core:webview:allow-set-webview-zoom`)
 - ✅ Keyboard focus ring on every control; `<main>` and `<nav>` landmarks; `aria-current` on the open page; engine status announced to VoiceOver
-- ✅ Sidebar icons (Lucide paths inlined, no icon package; decorative, hidden from VoiceOver). Licence in `docs/THIRD_PARTY.md`
+- ✅ Sidebar icons (Lucide paths inlined, no icon package; decorative, hidden from VoiceOver). Decisions and To-dos have their own icons (list-checks, square-check). Licence in `docs/THIRD_PARTY.md`
 - ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (`qwen3:4b-instruct`, chosen 2026-11-21)
 - ⬜ Step 2c: indexing card (files read, passages, skipped, re-index)
 - ⬜ Check in the real app with VoiceOver (⌘F5) and with Increase contrast on
@@ -76,9 +76,13 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - Sidebar **New note**: saves a new `.md` file (`YYYY-MM-DD Title.md`). In an allowed folder it is searchable straight away; in another folder it is not tracked. Never overwrites. The audit log shows `open_in_editor` / `note_created` with paths only.
 - Code: `backend/app/notes.py`, `POST /api/files/open`, `POST /api/notes`, `src/pages/NewNote.tsx`. Tests: `backend/tests/test_notes.py`.
 
-## Step 6 — Decisions, to-dos, conflicts ⬜
+## Step 6 — Decisions, to-dos, conflicts 🔧
 - ⬜ Pull decisions and to-dos out of notes
-- ⬜ Flag notes that disagree, and newer notes that replace older ones ("superseded" badge)
+- ✅ To-dos can be ticked on the To-dos page. Ticks are in memory for the session only: never written to the note or to disk
+- ✅ Flag notes that disagree, and newer notes that replace older ones. Sidebar page **Changes** (gentle wording and icon: a changed note is normal, not an error; Markdown symbols stripped from quotes and titles so they read as plain text). Search cards get the "Superseded" / "Newer note" / "Conflict" badge once the scan is done
+  - How: after meaning search is ready, a background scan pairs passages from different notes dated in their file name (most similar first, at most 12 pairs; findings show as they arrive). The answer model says replaces / contradicts / none and quotes both; Python keeps a finding only if both quotes are really in the files. Memory only; cleared on reindex and forget
+  - Undated files (e.g. `todo.md`) are left out: their date comes from mtime, which changes on copy
+  - Code: `backend/app/conflicts.py`, `GET/POST /api/conflicts`, `src/pages/Conflicts.tsx`. Tests: `backend/tests/test_conflicts.py`
 
 ## Step 7 — Later ⬜
 - ✅ Search by meaning (`nomic-embed-text` vectors, merged with keyword in `search.py`). ⬜ Embed in the background so keyword search is ready first on launch
