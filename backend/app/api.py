@@ -151,7 +151,7 @@ def index_stats() -> dict:
 
 
 @router.get("/changes")
-def get_conflicts() -> dict:
+def get_changes() -> dict:
     """Progress and findings. Starts a scan once meaning search is ready."""
     if changes.status()["phase"] == "idle" and search_mod.status()["phase"] == "ready":
         changes.start()
@@ -159,7 +159,7 @@ def get_conflicts() -> dict:
 
 
 @router.post("/changes")
-def rescan_conflicts() -> dict:
+def rescan_changes() -> dict:
     changes.start()
     return changes.report()
 

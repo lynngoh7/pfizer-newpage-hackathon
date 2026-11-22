@@ -5,7 +5,7 @@
  * Both quotes are checked against the files before they reach this page.
  */
 import { useEffect, useState } from "react";
-import { ConflictItem, ConflictReport, ConflictSide, ensureSearchIndex, getConflicts, openFile, rescanConflicts } from "../lib/api";
+import { ChangeItem, ChangeReport, ChangeSide, ensureSearchIndex, getChanges, openFile, rescanChanges } from "../lib/api";
 
 const POLL_MS = 2000;
 
@@ -29,7 +29,7 @@ function plain(text: string): string {
     .trim();
 }
 
-function Side({ label, side }: { label: string; side: ConflictSide }) {
+function Side({ label, side }: { label: string; side: ChangeSide }) {
   const [error, setError] = useState<string | null>(null);
   return (
     <div className="conflict-side">
@@ -53,7 +53,7 @@ function Side({ label, side }: { label: string; side: ConflictSide }) {
   );
 }
 
-function Item({ item }: { item: ConflictItem }) {
+function Item({ item }: { item: ChangeItem }) {
   const superseded = item.kind === "superseded";
   return (
     <li className="card conflict-card">
@@ -73,7 +73,7 @@ function Item({ item }: { item: ConflictItem }) {
 }
 
 export default function Changes() {
-  const [report, setReport] = useState<ConflictReport | null>(null);
+  const [report, setReport] = useState<ChangeReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
 
@@ -83,7 +83,7 @@ export default function Changes() {
     (async () => {
       try {
         await ensureSearchIndex();
-        const r = await getConflicts();
+        const r = await getChanges();
         if (!active) return;
         setReport(r);
         setError(null);
@@ -101,7 +101,7 @@ export default function Changes() {
 
   async function rescan() {
     try {
-      setReport(await rescanConflicts());
+      setReport(await rescanChanges());
       setTick((t) => t + 1);
     } catch (e) {
       setError(String(e));

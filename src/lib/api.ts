@@ -222,24 +222,24 @@ export const createNote = (folder: string, title: string, body: string) =>
 
 // Changes (backend/app/changes.py): notes that disagree or replace older ones.
 // Found by the local model, quotes verified in Python, kept in memory only.
-export interface ConflictSide extends SearchSource {
+export interface ChangeSide extends SearchSource {
   quote: string;
 }
 
-export interface ConflictItem {
+export interface ChangeItem {
   kind: "superseded" | "conflict";
   summary: string;
   topic: string | null;
-  older: ConflictSide;
-  newer: ConflictSide;
+  older: ChangeSide;
+  newer: ChangeSide;
 }
 
-export interface ConflictReport {
+export interface ChangeReport {
   phase: "idle" | "scanning" | "done" | "no_engine";
   done: number;
   total: number;
-  items: ConflictItem[];
+  items: ChangeItem[];
 }
 
-export const getConflicts = () => apiFetch<ConflictReport>("/api/changes");
-export const rescanConflicts = () => apiFetch<ConflictReport>("/api/changes", { method: "POST" });
+export const getChanges = () => apiFetch<ChangeReport>("/api/changes");
+export const rescanChanges = () => apiFetch<ChangeReport>("/api/changes", { method: "POST" });
