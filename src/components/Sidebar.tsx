@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import { health } from "../lib/api";
 
-export type View = "home" | "search" | "newnote" | "decisions" | "todos" | "changes" | "privacy" | "settings";
+export type View = "home" | "search" | "newnote" | "decisions" | "todos" | "upcoming" | "changes" | "privacy" | "settings";
 
 interface Props {
   view: View;
@@ -22,14 +22,15 @@ const ICONS: Record<Exclude<View, "home">, JSX.Element> = {
   decisions: <><path d="m3 17 2 2 4-4" /><path d="m3 7 2 2 4-4" /><path d="M13 6h8" /><path d="M13 12h8" /><path d="M13 18h8" /></>,
   // decisions = list with ticks; to-dos = a single ticked box, so the two read apart
   todos: <><path d="M21 10.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.5" /><path d="m9 11 3 3L22 4" /></>,
+  upcoming: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></>,
   // "history": a calm clock, not a warning sign; most findings are just updates
   changes: <><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></>,
   privacy: <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />,
   settings: <><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></>,
 };
 
-// Decorative: the button text already names the tab.
-function NavIcon({ id }: { id: Exclude<View, "home"> }) {
+// Decorative: the button text already names the tab. Also used by Home's lists.
+export function NavIcon({ id }: { id: Exclude<View, "home"> }) {
   return (
     <svg className="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -41,10 +42,10 @@ function NavIcon({ id }: { id: Exclude<View, "home"> }) {
 const NAV: { id: Exclude<View, "home">; label: string }[] = [
   { id: "search", label: "Search" },
   { id: "newnote", label: "New note" },
-  { id: "decisions", label: "Decisions" },
+  { id: "upcoming", label: "Upcoming" },
   { id: "todos", label: "To-dos" },
+  { id: "decisions", label: "Decisions" },
   { id: "changes", label: "Changes" },
-  { id: "privacy", label: "Privacy" },
 ];
 
 type Backend = "checking" | "online" | "offline";
@@ -100,6 +101,14 @@ export default function Sidebar({ view, onNavigate }: Props) {
           {backend === "online" && "Local engine ready"}
           {backend === "offline" && "Engine offline"}
         </div>
+        <button
+          className={`nav-item ${view === "privacy" ? "active" : ""}`}
+          aria-current={view === "privacy" ? "page" : undefined}
+          onClick={() => onNavigate("privacy")}
+        >
+          <NavIcon id="privacy" />
+          Privacy
+        </button>
         <button
           className={`nav-item ${view === "settings" ? "active" : ""}`}
           aria-current={view === "settings" ? "page" : undefined}

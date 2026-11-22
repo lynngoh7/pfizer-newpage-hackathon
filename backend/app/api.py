@@ -18,6 +18,7 @@ from . import prefs
 from . import search as search_mod
 from . import qa
 from . import extractions as extraction_mod
+from . import dates as dates_mod
 
 router = APIRouter(prefix="/api")
 
@@ -45,6 +46,10 @@ def decisions() -> dict:
 @router.get("/todos")
 def todos() -> dict:
     return extraction_mod.todos()
+
+@router.get("/upcoming")
+def upcoming() -> dict:
+    return dates_mod.upcoming()
 
 @router.get("/health", response_model=Health)
 def health() -> Health:

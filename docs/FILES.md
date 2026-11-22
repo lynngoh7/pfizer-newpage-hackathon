@@ -38,15 +38,18 @@ Add a row whenever you create a file.
 | `styles.css` | all styling; CSS variables; follows macOS light/dark, increase contrast, reduce motion; focus rings; system fonts only | per feature |
 | `lib/trust.ts` | client + types for the Trust panel routes (audit, network, storage, forget) | step 5 |
 | `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); typed functions for health, folders, indexing and search | add a typed function per new route |
-| `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes; inline Lucide nav icons (no icon package), one per page: Decisions and To-dos are separate pages with different icons | — |
+| `components/Sidebar.tsx` | nav + engine status dot; exports `NavIcon` (also used on Home) (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes; inline Lucide nav icons (no icon package), one per page: Decisions and To-dos are separate pages with different icons | — |
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
 | `components/FolderAccess.tsx` | add/remove folders and files the app may read this session (Tauri dialog); re-indexes after adding locations | step 2c: show indexing progress |
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
 | `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
-| `pages/SearchResults.tsx` | calls the local index/search API; shows answers, formatted Markdown excerpts, loading, empty and error states | step 4: connect question answers |
+| `pages/SearchResults.tsx` | routes keyword queries to `/api/search` and questions to `/api/ask`; links verified answer claims to their source cards | demo polish and accessibility checks |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
+| `pages/Decisions.tsx` | lists decisions from `/api/decisions` with source file | — |
+| `pages/Todos.tsx` | lists to-dos from `/api/todos`; ticks are session-only (memory, never written), exported with `todoKey` so Home counts the same ticks; "Edit in note" opens the file in the user's editor | — |
+| `pages/Upcoming.tsx` | full list from `/api/upcoming`: overdue open to-dos, then everything from today on; "Open note" opens the file. Lazy-loaded; data passed in from `App.tsx` | — |
 | `pages/Changes.tsx` | "Changes" page (view id `changes`, lazy-loaded): polls `/api/changes`, earlier vs latest note side by side with verified quotes (Markdown symbols stripped for display), gentle "Updated"/"Differs" tags | — |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
 | `pages/Settings.tsx` | engine, AI model picker (choice saved to `prefs.json`), indexing, accessibility note, built-in safety facts, forget everything (always last) | step 2c: indexing card; step 4: real model list from Ollama |
@@ -82,6 +85,7 @@ Add a row whenever you create a file.
 | `app/db.py` | in-memory SQLite index: Files/Chunks/Groups, contentless FTS5 keyword search, vectors (Python dict until sqlite-vec loads), `passage()` re-reads text and refuses changed files; revoke + forget hooks; `topics()` names groups lazily | — (`search.py` calls it) |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
 | `app/extractions.py` | extracts to-dos and decisions from indexed passages (text re-read from the file): `todos()` returns checkbox items, `decisions()` returns `## Decision` sections and `DECISION:` labels | — |
+| `app/dates.py` | finds lines that name a date ("24 Nov", "2026-12-01", "next Friday" read against the note's date) for `/api/upcoming`; vague phrases skipped; nothing stored | — |
 | `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders (`prefs.json` is expected, anything else is flagged) | — |
 | `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/saved`, `/api/trust/storage`, `DELETE /api/session` | — |
 | `app/citations.py` | citation checker: verifies each cited quote is in its chunk, drops unbacked claims, returns NO_SUPPORT if none survive. Pure, no I/O | step 4: called by `qa.py` |
@@ -99,7 +103,7 @@ Add a row whenever you create a file.
 | `tests/test_search.py` | folder walk, search shape, Ollama fallback, stale files, revoke/forget, `/api/index` + `/api/search` | — |
 | `tests/test_db.py` | keyword search, no text stored, FTS syntax safe, revoke/forget empty the index, changed file not shown, groups and meaning search | — |
 | `tests/test_group.py` | clustering, one naming call per group, injected/bad topics fall back, Ollama local only (Ollama faked) | — |
-| `tests/test_no_network.py` | blocks non-loopback connects and DNS, runs a whole session through the API; fails on any outbound attempt | 4d: add search and ask calls when 1d and 2c land |
+| `tests/test_no_network.py` | blocks non-loopback connects and DNS, runs a whole session through the API; includes `/api/ask` with inference mocked | step 5: real-app storage and offline demo checks |
 | `tests/test_prefs.py` | saved folders/settings, paths only, allowlist, restore, forget, disk check | — |
 | `tests/test_permissions.py` | grants, protected paths, symlink escape, revoke | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |

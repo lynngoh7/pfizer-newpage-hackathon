@@ -48,7 +48,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ Tests: `test_qa.py` covers valid evidence, missing evidence and fabricated citations. `test_ask.py` verifies API integration.
 - ✅ Live Qwen3 4B Instruct tests: valid citation accepted; unsupported question returns no evidence.
 - ✅ Model lifecycle delegated to `models.py`: models remain warm during the session and are unloaded on quit or "Forget everything".
-- ⬜ Verify the full question-answering workflow through the desktop UI.
+- 🔧 Verify the full question-answering workflow through the desktop UI, including citation navigation and no-evidence handling.
 
 ## Step 5 — Trust panel 🔧
 Covers 20 of the 50 judging points. Sidebar → **Privacy**.
@@ -69,7 +69,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Sidebar icons (Lucide paths inlined, no icon package; decorative, hidden from VoiceOver). Decisions and To-dos have their own icons (list-checks, square-check). Licence in `docs/THIRD_PARTY.md`
 - ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (`qwen3:4b-instruct`, chosen 2026-11-21)
 - ⬜ Step 2c: indexing card (files read, passages, skipped, re-index)
-- ⬜ Check in the real app with VoiceOver (⌘F5) and with Increase contrast on
+- ✅ Checked in the real app with VoiceOver (⌘F5)
 
 ## Capture: open in editor + new note ✅
 - Source cards have **Open in editor**: the file opens in its default app (path-checked with `resolve_and_check`). The app never edits it. When the window regains focus after an Open, it re-indexes and re-runs the search, so edits show up.
@@ -80,13 +80,15 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ⬜ Pull decisions and to-dos out of notes
 - ✅ To-dos can be ticked on the To-dos page. Ticks are in memory for the session only: never written to the note or to disk A clear notice says so; "Edit in note" opens the file in the user's own editor (path-checked, audit-logged)
 - ✅ Flag notes that disagree, and newer notes that replace older ones. Sidebar page **Changes** (gentle wording and icon: a changed note is normal, not an error; Markdown symbols stripped from quotes and titles so they read as plain text). Search cards get the "Superseded" / "Newer note" / "Conflict" badge once the scan is done
-  - How: after meaning search is ready, a background scan pairs passages from different notes dated in their file name (most similar first, at most 12 pairs; findings show as they arrive). The answer model says replaces / contradicts / none and quotes both; Python keeps a finding only if both quotes are really in the files. Memory only; cleared on reindex and forget
+  - How: after meaning search is ready, a background scan pairs passages from different notes dated in their file name (most similar first, at most 8 pairs; findings show as they arrive). The answer model says replaces / contradicts / none and quotes both; Python keeps a finding only if both quotes are really in the files. Memory only; cleared on reindex and forget
   - Undated files (e.g. `todo.md`) are left out: their date comes from mtime, which changes on copy
+  - Speed: pairs are judged 4 at a time (`WORKERS`). Pair finding is O(n²) in passages (not n!); `map(operator.mul)` makes it ~2.5x faster (200 passages: 0.9s → 0.36s). The model calls are still most of the time. Findings appear on the page as they come in
   - Code: `backend/app/changes.py`, `GET/POST /api/changes`, `src/pages/Changes.tsx`. Tests: `backend/tests/test_changes.py`
 
 ## Step 7 — Later ⬜
 - ✅ Search by meaning (`nomic-embed-text` vectors, merged with keyword in `search.py`). ⬜ Embed in the background so keyword search is ready first on launch
-- ⬜ Summary page for managers
+- ✅ Upcoming on Home: dates found in notes (next 14 days, plus overdue open to-dos in red), resolved against the note's own date; click opens the note. Sidebar tab **Upcoming** shows the full list. `/api/upcoming`, `app/dates.py`, `pages/Upcoming.tsx`
+- ✅ Summary page for managers: on Home, three short lists (Changes, Decisions, open To-dos) linking to the full pages. Nothing saved; built from the in-memory index
 
 ## Packaged app ✅
 - ✅ `sh scripts/build-sidecar.sh` then `npm run tauri build` makes `Local Notes Assistant.app` (about 51 MB): double-click to open, no terminal. The backend is bundled inside and starts and stops with the app
@@ -134,15 +136,15 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 **L: results UI** (step 3, 4, 6)
 - ✅ 3a. Results page with mock data (Sat)
 - ✅ 3b. Source cards and file excerpts (Sat)
-- 🔧 3c. Keyword and natural-language search call `/api/index` and `/api/search`; question answers await the QA API from 2c
+- ✅ 3c. Keyword and natural-language search call `/api/index` and `/api/search`; questions call `/api/ask` and link verified claims to their source cards
 - ⬜ 3d. Show decision changes and error states (Sun), needs 2d
-- 🔧 3e. Results-page polish adds visible citation targets, announced source counts, higher text contrast and formatted Markdown excerpts; VoiceOver announces the source count, while citation-jump testing awaits an answer with citations
+- 🔧 3e. Results-page polish adds visible citation targets, announced source counts, higher text contrast and formatted Markdown excerpts; verify citation navigation and question flow in the desktop app
 
 **C: privacy and trust** (step 2, 5)
 - ✅ 4a. Audit events for folder add/remove (Sat)
 - ✅ 4b. Revoking a folder drops its chunks, vectors, topics and search results at once, also mid-rebuild (`tests/test_privacy_index.py`)
 - ✅ 4c. Forget everything clears grants, prefs, log, index and unloads the model, also mid-rebuild. Fixed: a forget or revoke during the minutes-long embedding step used to put vectors and topics back
-- 🔧 4d. Test storage, network and offline claims (Sun). `tests/test_no_network.py` covers every route incl. index, search, model unload; ⬜ add the ask route when 2c lands (blocked on 2c)
+- 🔧 4d. Test storage, network and offline claims (Sun). `tests/test_no_network.py` covers index, search and ask with inference mocked; real-app storage check remains
 - ⬜ 4e. Edge-case tests and trust demo (Sun), needs everything above
 
 ### Remaining work (from Sat 21 Nov)
@@ -168,12 +170,12 @@ Prototype done by Saturday night, Sunday midday at the latest. The second half o
 **L: results UI**
 - ✅ Build functional results page with mock data (P0, Sat)
 - ✅ Display citation/source cards and file excerpts (P0, Sat)
-- 🔧 Connect question/search flow to backend (P0, Sat). Search done (PR #23); questions wait for the ask route
-- 🔧 Complete demo UI polish and accessibility check (P1, Sun am); VoiceOver count verified, citation-jump test awaits an answer with citations
+- ✅ Connect question/search flow to backend (P0, Sat). Search uses `/api/search`; questions use `/api/ask` with verified citations
+- 🔧 Complete demo UI polish and accessibility check (P1, Sun am); VoiceOver count verified, verify citation navigation with a supported answer
 
 **C: privacy and trust, demo**
 - ✅ Merge feat/privacy-index, feat/search, db, ingest into main (P0, Sat). PRs #15–#17
-- 🔧 Test storage, network and offline privacy claims (P0, Sat). Network test covers every route; ⬜ ask route (blocked on S), ⬜ real-app storage check (Step 5)
+- 🔧 Test storage, network and offline privacy claims (P0, Sat). Network test covers the ask route with inference mocked; ⬜ real-app storage check (Step 5)
 - ✅ Capture: Open in editor + New note (PR #24). See **Capture** above
 - ✅ Packaged desktop app for Mac, Windows and Linux (PR #19)
 - ⬜ Prepare trust demo and rehearse it with Wi-Fi off on the demo device (P0, Sun pm)
