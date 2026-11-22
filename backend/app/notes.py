@@ -57,7 +57,16 @@ def is_tracked(folder: Path) -> bool:
 
 
 def _safe_name(title: str) -> str:
+    """Turn a note title into a filename that is valid on Mac, Windows and Linux."""
+    # Replace characters that are illegal in filenames on some OS with a space:
+    #   \ /          path separators (would create subfolders / escape the folder)
+    #   : * ? " < > |  reserved on Windows
+    #   \x00-\x1f    control characters (newline, tab, NUL, ...)
+    # Then trim leading/trailing spaces and dots (Windows drops trailing dots,
+    # and a leading dot would make the note a hidden file).
     name = re.sub(r"[\\/:*?\"<>|\x00-\x1f]", " ", title).strip(" .")
+    # Collapse runs of whitespace into one space and cap length at 80 chars
+    # so the full path stays well under OS limits.
     name = re.sub(r"\s+", " ", name)[:80] or "Untitled"
     return f"{date.today().isoformat()} {name}"
 
