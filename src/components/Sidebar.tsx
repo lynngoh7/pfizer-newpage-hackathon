@@ -75,7 +75,7 @@ export default function Sidebar({ view, onNavigate }: Props) {
   return (
     <aside className="sidebar">
       <button className="brand" onClick={() => onNavigate("home")} aria-label="Home">
-        <img className="logo" src="/haystack-icon.svg" alt="" aria-hidden="true" />
+        <img className="logo" src="/haystack-logo.svg" alt="" aria-hidden="true" />
         <span className="brand-name">Haystack</span>
       </button>
 
