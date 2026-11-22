@@ -102,6 +102,51 @@ export function revokePath(path: string): Promise<FolderAccess> {
   });
 }
 
+export interface ExtractedTodo {
+  task: string;
+  completed: boolean;
+  chunkID: number;
+  path: string;
+  date: string;
+  start: number;
+  end: number;
+}
+
+let todosPromise: Promise<{ todos: ExtractedTodo[] }> | null = null;
+
+export function getTodos(): Promise<{ todos: ExtractedTodo[] }> {
+  if (!todosPromise) {
+    todosPromise = apiFetch<{ todos: ExtractedTodo[] }>("/api/todos").catch((error: unknown) => {
+      todosPromise = null;
+      throw error;
+    });
+  }
+  return todosPromise;
+}
+
+export interface ExtractedDecision {
+  text: string;
+  chunkID: number;
+  path: string;
+  date: string;
+  start: number;
+  end: number;
+}
+
+let decisionsPromise: Promise<{ decisions: ExtractedDecision[] }> | null = null;
+
+export function getDecisions(): Promise<{ decisions: ExtractedDecision[] }> {
+  if (!decisionsPromise) {
+    decisionsPromise = apiFetch<{ decisions: ExtractedDecision[] }>("/api/decisions").catch(
+      (error: unknown) => {
+        decisionsPromise = null;
+        throw error;
+      },
+    );
+  }
+  return decisionsPromise;
+}
+
 export interface SearchSource {
   chunkID: number;
   path: string;

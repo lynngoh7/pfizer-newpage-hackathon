@@ -48,6 +48,8 @@ def main() -> None:
 
     settings = load_settings()
     prefs.restore_folders()  # saved folder list from last time (paths only)
+    from . import search
+    search.reindex()  # populate the in-memory index from restored folders before serving requests
     from . import models
     models.start()  # warm Ollama models now; unload on quit and on forget
     uvicorn.run(create_app(settings), host=HOST, port=settings.port, log_level="info")

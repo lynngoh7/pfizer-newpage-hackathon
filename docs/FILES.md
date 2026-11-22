@@ -70,7 +70,7 @@ Add a row whenever you create a file.
 | `app/__init__.py` | version | — |
 | `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (the only saved file is `prefs.json`, see `prefs.py`) |
 | `app/auth.py` | bearer-token middleware, constant-time compare, every request; marks every response `no-store` | — |
-| `app/api.py` | routes under `/api`; health, folder/file grants (`GET/POST/DELETE /api/folders`, saved via `prefs`), `GET/PUT /api/settings`, `GET/POST /api/conflicts` | every step adds routes here (or split into routers) |
+| `app/api.py` | routes under `/api`; health, folder/file grants (`GET/POST/DELETE /api/folders`, saved via `prefs`), `GET/PUT /api/settings`, search, `POST /api/ask`, `GET/POST /api/conflicts` | every step adds routes here (or split into routers) |
 | `app/prefs.py` | the one file saved to disk: `prefs.json` with folder paths + allowlisted settings, never note content; restores folders on launch; deleted by forget | add a key to `SAVED_SETTINGS` for each new setting |
 | `app/permissions.py` | allowlist (filled from `prefs.json` on launch) + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
@@ -80,6 +80,7 @@ Add a row whenever you create a file.
 | `app/models.py` | warm `nomic-embed-text` + answer model at startup (keep_alive -1), the one place that unloads them (`unload()`: forget hook, `POST /api/engine/unload` on quit, atexit), only models Ollama reports as loaded. Ollama on 127.0.0.1, no note text sent | step 4: qa uses `answer_model()` |
 | `app/db.py` | in-memory SQLite index: Files/Chunks/Groups, contentless FTS5 keyword search, vectors (Python dict until sqlite-vec loads), `passage()` re-reads text and refuses changed files; revoke + forget hooks; `topics()` names groups lazily | — (`search.py` calls it) |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
+| `app/extractions.py` | extracts to-dos and decisions from indexed passages (text re-read from the file): `todos()` returns checkbox items, `decisions()` returns `## Decision` sections and `DECISION:` labels | — |
 | `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders (`prefs.json` is expected, anything else is flagged) | — |
 | `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/saved`, `/api/trust/storage`, `DELETE /api/session` | — |
 | `app/citations.py` | citation checker: verifies each cited quote is in its chunk, drops unbacked claims, returns NO_SUPPORT if none survive. Pure, no I/O | step 4: called by `qa.py` |
@@ -101,6 +102,10 @@ Add a row whenever you create a file.
 | `tests/test_prefs.py` | saved folders/settings, paths only, allowlist, restore, forget, disk check | — |
 | `tests/test_permissions.py` | grants, protected paths, symlink escape, revoke | — |
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
+| `app/qa.py` | Local Ollama Q&A using retrieved excerpts; generates claims and validates citations through `citations.py`. Uses `models.answer_model()` | Test full desktop workflow |
+| `tests/test_qa.py` | Tests valid citations, missing evidence and fabricated quotations using mocked Ollama responses | Add further edge cases |
+| `tests/test_ask.py` | Tests `POST /api/ask` integration with mocked search and Q&A results | Test real authenticated workflow |
+
 
 ### Planned backend modules (not yet created)
-`db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py`
+`extract.py`
