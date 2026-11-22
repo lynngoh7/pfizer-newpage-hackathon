@@ -127,6 +127,8 @@ export default function SearchResults({ query }: { query: string }) {
   const answer = isQuestion(trimmedQuery) ? response?.answer : null;
   const noFiles = index?.files === 0;
   const meaningIndexing = index?.phase === "meaning" || index?.phase === "grouping";
+  const sourceCount = response?.sources.length ?? 0;
+  const sourceCountLabel = `${sourceCount} ${sourceCount === 1 ? "source" : "sources"}`;
 
   return (
     <section className="search-results" aria-labelledby="results-title" aria-busy={loading}>
@@ -180,9 +182,9 @@ export default function SearchResults({ query }: { query: string }) {
 
           <section aria-labelledby="sources-title">
             <div className="sources-heading">
-              <h2 id="sources-title">Sources</h2>
-              <span className="muted" role="status" aria-atomic="true">
-                {response.sources.length} {response.sources.length === 1 ? "source" : "sources"}
+              <h2 id="sources-title" aria-label={`Sources, ${sourceCountLabel}`}>Sources</h2>
+              <span className="muted" role="status" aria-live="polite" aria-atomic="true">
+                {sourceCountLabel}
               </span>
             </div>
             <ol className="source-list">
