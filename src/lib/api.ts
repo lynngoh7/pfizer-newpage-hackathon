@@ -41,9 +41,15 @@ export function getSession(): Promise<Session> {
 // requests fail at the network level ("TypeError: Load failed" in WebKit).
 // Retry those quietly for a while instead of showing red errors at launch.
 // HTTP errors (401, 404, 500...) are real answers and are never retried.
-const STARTUP_WAIT_MS = 20000;
+const STARTUP_WAIT_MS = 60000; // first launch unpacks the sidecar, which can be slow
 const RETRY_MS = 300;
 const startedAt = Date.now();
+
+// True when the request never reached the engine (it is still starting),
+// as opposed to a real error answer from it. Callers show "starting" for these.
+export function isStarting(e: unknown): boolean {
+  return e instanceof TypeError;
+}
 
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const { port, token } = await getSession();

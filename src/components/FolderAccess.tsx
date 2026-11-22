@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from "react";
 import { open } from "@tauri-apps/plugin-dialog";
-import { allowPath, getAllowedPaths, reindex, revokePath } from "../lib/api";
+import { allowPath, getAllowedPaths, isStarting, reindex, revokePath } from "../lib/api";
 
 function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -15,11 +15,23 @@ export default function FolderAccess() {
   const [allowedPaths, setAllowedPaths] = useState<string[]>([]);
   const [accessError, setAccessError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [starting, setStarting] = useState(false);
 
   useEffect(() => {
-    getAllowedPaths()
-      .then(({ paths }) => setAllowedPaths(paths))
-      .catch((e) => setAccessError(String(e)));
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout>;
+    // Engine not up yet: say so quietly and try again, no red error.
+    function load() {
+      getAllowedPaths()
+        .then(({ paths }) => { if (alive) { setAllowedPaths(paths); setStarting(false); } })
+        .catch((e) => {
+          if (!alive) return;
+          if (isStarting(e)) { setStarting(true); timer = setTimeout(load, 2000); }
+          else setAccessError(String(e));
+        });
+    }
+    load();
+    return () => { alive = false; clearTimeout(timer); };
   }, []);
 
   async function addLocations(directory: boolean) {
@@ -85,7 +97,9 @@ export default function FolderAccess() {
         </button>
       </div>
       {accessError && <p className="error" role="alert">{accessError}</p>}
-      {allowedPaths.length === 0 ? (
+      {starting ? (
+        <p className="muted">Engine is still starting…</p>
+      ) : allowedPaths.length === 0 ? (
         <p className="muted">No folders or files are currently allowed.</p>
       ) : (
         <ul className="access-list">
