@@ -16,7 +16,7 @@ from __future__ import annotations
 import math
 import threading
 
-from . import audit, conflicts, db, group, ingest, session
+from . import audit, changes, db, group, ingest, session
 
 K = 5            # sources returned (API_SHAPES: 5 at most)
 POOL = 20        # candidates taken from each ranker before merging
@@ -32,7 +32,7 @@ def _bump(*_) -> None:
     global _gen
     _gen += 1
     _progress.update(phase="empty", done=0, total=0)
-    conflicts.reset()  # findings point at chunk IDs from the old index
+    changes.reset()  # findings point at chunk IDs from the old index
 
 
 session.on_forget("search", _bump)  # forget mid-build must not let vectors come back
@@ -91,7 +91,7 @@ def _build_meaning(chunks, gen: int) -> None:
             if gen == _gen:
                 db.set_groups(rows, kept)
                 _progress["phase"] = "ready"
-                conflicts.start()  # background; flags appear once it finishes
+                changes.start()  # background; flags appear once it finishes
     except OSError:  # Ollama not running: keyword search still works
         if gen == _gen:
             _progress["phase"] = "keyword_only"
@@ -152,7 +152,7 @@ def source(cid: int, *, full: bool = False) -> dict | None:
     return {"chunkID": cid, "path": info["filePath"], "date": info["noteDate"],
             "where": _where(info, text),
             "snippet": text.strip() if full else text.strip()[:MAX_SNIPPET],
-            "flag": conflicts.flag(cid)}
+            "flag": changes.flag(cid)}
 
 
 def search(query: str, k: int = K) -> dict:

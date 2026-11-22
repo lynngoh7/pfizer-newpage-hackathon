@@ -401,7 +401,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1
 .note-body { resize: vertical; line-height: 1.55; min-height: 160px; }
 .note-title:focus, .note-body:focus { outline: none; border-color: var(--accent); }
 
-/* Conflicts page: older and newer passage side by side, stacked on narrow windows. */
+/* Changes page: older and newer passage side by side, stacked on narrow windows. */
 .source-flag-conflict { color: var(--warn); }
 .conflict-card { margin: 0; }
 .conflict-card h2 { font-size: 15px; }

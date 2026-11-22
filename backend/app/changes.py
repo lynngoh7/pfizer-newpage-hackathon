@@ -1,4 +1,4 @@
-"""Conflicts: find notes that disagree, and newer notes that replace older ones.
+"""Changes: find notes that disagree, and newer notes that replace older ones.
 
 How: we pair passages from *different* dated files, most similar first
 (vectors from group.embed), and ask the local model whether the newer one
@@ -51,7 +51,7 @@ def reset(*_) -> int:
     return n
 
 
-session.on_forget("conflicts", reset)
+session.on_forget("changes", reset)
 
 
 def status() -> dict:

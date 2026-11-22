@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from . import __version__
-from . import conflicts
+from . import changes
 from . import permissions
 from . import models
 from . import notes
@@ -153,15 +153,15 @@ def index_stats() -> dict:
 @router.get("/conflicts")
 def get_conflicts() -> dict:
     """Progress and findings. Starts a scan once meaning search is ready."""
-    if conflicts.status()["phase"] == "idle" and search_mod.status()["phase"] == "ready":
-        conflicts.start()
-    return conflicts.report()
+    if changes.status()["phase"] == "idle" and search_mod.status()["phase"] == "ready":
+        changes.start()
+    return changes.report()
 
 
 @router.post("/conflicts")
 def rescan_conflicts() -> dict:
-    conflicts.start()
-    return conflicts.report()
+    changes.start()
+    return changes.report()
 
 
 @router.get("/search")
