@@ -35,6 +35,10 @@ class FolderAccess(BaseModel):
 class FolderAccessRequest(BaseModel):
     path: str = Field(min_length=1)
 
+@router.get("/decisions")
+def decisions() -> dict:
+    return extraction_mod.decisions()
+
 @router.get("/todos")
 def todos() -> dict:
     return extraction_mod.todos()
