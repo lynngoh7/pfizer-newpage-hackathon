@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from . import audit, db, group, models, session
 
-MAX_PAIRS = 12    # pairs per scan; the most similar pairs hold the real changes
+MAX_PAIRS = 8     # pairs per scan; the most similar pairs hold the real changes
 MIN_SIM = 0.7     # skip pairs that are only loosely related
 MAX_TEXT = 700    # chars per passage: prompt size drives the time per call
 MAX_SUMMARY = 200
