@@ -44,7 +44,7 @@ Add a row whenever you create a file.
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
 | `pages/NewNote.tsx` | Capture: write a new note, save as `.md` in an allowed folder (searchable) or another folder (not tracked) | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
-| `pages/Home.tsx` | manager summary: Changes, Decisions and open To-dos cards (top 3 each, newest first) with links to the full pages; polls `/api/changes` until the scan is done | — |
+| `pages/Home.tsx` | manager summary: three quiet lists (Changes, Decisions, open To-dos), top 3 one-line items each, newest first, date on the right, full text on hover; "See all" links to the full pages; polls `/api/changes` until the scan is done | — |
 | `pages/SearchResults.tsx` | calls the local index/search API; shows answers, formatted Markdown excerpts, loading, empty and error states | step 4: connect question answers |
 | `components/MarkdownExcerpt.tsx` | safely formats common Markdown headings, lists, task checkboxes, quotes, code and inline emphasis in source excerpts; links remain text | expand Markdown support if needed |
 | `pages/Decisions.tsx` | lists decisions from `/api/decisions` with source file | — |

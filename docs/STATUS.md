@@ -86,7 +86,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 
 ## Step 7 — Later ⬜
 - ✅ Search by meaning (`nomic-embed-text` vectors, merged with keyword in `search.py`). ⬜ Embed in the background so keyword search is ready first on launch
-- ✅ Summary page for managers: on Home, three cards (Changes, Decisions, open To-dos) linking to the full pages. Nothing saved; built from the in-memory index
+- ✅ Summary page for managers: on Home, three short lists (Changes, Decisions, open To-dos) linking to the full pages. Nothing saved; built from the in-memory index
 
 ## Packaged app ✅
 - ✅ `sh scripts/build-sidecar.sh` then `npm run tauri build` makes `Local Notes Assistant.app` (about 51 MB): double-click to open, no terminal. The backend is bundled inside and starts and stops with the app
