@@ -95,8 +95,16 @@ export interface ExtractedTodo {
   end: number;
 }
 
+let todosPromise: Promise<{ todos: ExtractedTodo[] }> | null = null;
+
 export function getTodos(): Promise<{ todos: ExtractedTodo[] }> {
-  return apiFetch<{ todos: ExtractedTodo[] }>("/api/todos");
+  if (!todosPromise) {
+    todosPromise = apiFetch<{ todos: ExtractedTodo[] }>("/api/todos").catch((error: unknown) => {
+      todosPromise = null;
+      throw error;
+    });
+  }
+  return todosPromise;
 }
 
 // Saved settings (backend/app/prefs.py). Only allowlisted values, never note text.
