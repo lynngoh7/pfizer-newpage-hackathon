@@ -31,6 +31,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 - ✅ Revoke drops chunks: `db.py` registers `permissions.on_revoke("index", db.drop_under)`; tests in `tests/test_db.py`
 - ✅ Read PDF (pypdf) and DOCX / TXT / MD (markitdown), split into chunks with path and start/end line (page for PDFs). Unreadable files are skipped
 - ✅ In-memory SQLite (`db.py`, schema in `docs/DB_DESIGN.md`): path, mtime, hash, noteDate, offsets, groups. No readable note text in any table
+- ✅ Index rebuilds from restored folders on launch and after a folder is added
 - ✅ Audit log `audit.py` (in memory). **Ingest/permissions must call** `audit.record("read" | "skipped" | "blocked" | "folder_added" | "folder_removed", path=..., outcome="short reason")`. Never pass note text
 - ✅ `db.py` registers `session.on_forget("index", db.clear)`. **Every new module holding session data must register too**
 - ✅ `sample_notes/`: fictional notes for the demo moment plus edge cases. Guide and expected answers in `docs/SAMPLE_NOTES.md`. Run `scripts/make_sample_notes.py` after cloning

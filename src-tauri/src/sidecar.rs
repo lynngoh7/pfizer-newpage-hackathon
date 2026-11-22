@@ -54,20 +54,9 @@ fn packaged_binary() -> Option<PathBuf> {
 /// Build the command for the backend. Packaged binary if present; otherwise,
 /// in debug builds only, run the Python sources directly for development.
 fn backend_command() -> Option<Command> {
-    if let Some(bin) = packaged_binary() {
-        #[cfg_attr(not(windows), allow(unused_mut))]
-        let mut cmd = Command::new(bin);
-        // The backend is a console program; without this flag Windows opens
-        // an empty terminal window next to the app.
-        #[cfg(windows)]
-        {
-            use std::os::windows::process::CommandExt;
-            const CREATE_NO_WINDOW: u32 = 0x0800_0000;
-            cmd.creation_flags(CREATE_NO_WINDOW);
-        }
-        return Some(cmd);
-    }
     if cfg!(debug_assertions) {
+        // Always run the working-tree source in `tauri dev`. A packaged
+        // sidecar can be stale and would otherwise mask backend edits.
         let backend_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../backend");
         let venv_python = if cfg!(windows) {
             backend_dir.join(".venv/Scripts/python.exe")
@@ -83,7 +72,19 @@ fn backend_command() -> Option<Command> {
         cmd.arg("-m").arg("app.main").current_dir(backend_dir);
         return Some(cmd);
     }
-    None
+
+    let bin = packaged_binary()?;
+    #[cfg_attr(not(windows), allow(unused_mut))]
+    let mut cmd = Command::new(bin);
+    // The backend is a console program; without this flag Windows opens
+    // an empty terminal window next to the app.
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    Some(cmd)
 }
 
 impl Backend {
