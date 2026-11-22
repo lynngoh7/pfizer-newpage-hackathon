@@ -348,3 +348,26 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1
 .note-title { font-size: 16px; font-weight: 600; }
 .note-body { resize: vertical; line-height: 1.55; min-height: 160px; }
 .note-title:focus, .note-body:focus { outline: none; border-color: var(--accent); }
+
+/* Conflicts page: older and newer passage side by side, stacked on narrow windows. */
+.source-flag-conflict { color: var(--warn); }
+.conflict-card { margin: 0; }
+.conflict-card h2 { font-size: 15px; }
+.conflict-sides { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 720px) { .conflict-sides { grid-template-columns: 1fr; } }
+.conflict-side { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.conflict-side h3 { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+.conflict-side .source-location { margin: 0; }
+.conflict-side-label { margin: 0; color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; }
+.conflict-quote { margin: 4px 0; padding-left: 12px; border-left: 2px solid var(--border); line-height: 1.55; }
+/* Gentle tag: a changed note is normal, not an error, so no red here. */
+.change-tag {
+  flex: none;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}

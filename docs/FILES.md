@@ -46,6 +46,7 @@ Add a row whenever you create a file.
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
 | `pages/SearchResults.tsx` | calls the local index/search API; shows answers, source excerpts, loading, empty and error states | step 4: connect question answers |
+| `pages/Conflicts.tsx` | "Changes" page (view id `conflicts`, lazy-loaded): polls `/api/conflicts`, earlier vs latest note side by side with verified quotes, gentle "Updated"/"Differs" tags | — |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
 | `pages/Settings.tsx` | engine, AI model picker (choice saved to `prefs.json`), indexing, accessibility note, built-in safety facts, forget everything (always last) | step 2c: indexing card; step 4: real model list from Ollama |
 
@@ -69,7 +70,7 @@ Add a row whenever you create a file.
 | `app/__init__.py` | version | — |
 | `app/config.py` | env → `Settings`; host hard-coded 127.0.0.1; exits if token missing; `dev` flag from `NOTES_DEV` | — (the only saved file is `prefs.json`, see `prefs.py`) |
 | `app/auth.py` | bearer-token middleware, constant-time compare, every request; marks every response `no-store` | — |
-| `app/api.py` | routes under `/api`; health, folder/file grants (`GET/POST/DELETE /api/folders`, saved via `prefs`), `GET/PUT /api/settings` | every step adds routes here (or split into routers) |
+| `app/api.py` | routes under `/api`; health, folder/file grants (`GET/POST/DELETE /api/folders`, saved via `prefs`), `GET/PUT /api/settings`, `GET/POST /api/conflicts` | every step adds routes here (or split into routers) |
 | `app/prefs.py` | the one file saved to disk: `prefs.json` with folder paths + allowlisted settings, never note content; restores folders on launch; deleted by forget | add a key to `SAVED_SETTINGS` for each new setting |
 | `app/permissions.py` | allowlist (filled from `prefs.json` on launch) + denylist; `resolve_and_check(path)` is the one path check every file read uses | step 2c: ingest calls it; add audit records |
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
@@ -90,6 +91,8 @@ Add a row whenever you create a file.
 | `tests/test_ingest.py` | TXT/MD/DOCX chunk boundaries; broken files skipped and logged with no content, no half-read chunks left + blocked paths and symlink escapes | — |
 | `app/notes.py` | Capture: `open_file` (path-checked, opens in the default app, never edits) and `create_note` (new `.md` only, never overwrites, denylist-checked) | — |
 | `app/search.py` | build the index from allowed folders (`reindex`: keyword at once, vectors + groups in a background thread, `status()` for progress), hybrid search (keyword + meaning, RRF), source cards re-read from files; keyword only without Ollama | 2b: `qa.py` uses `rank()` + `source()` |
+| `app/conflicts.py` | "Changes": pairs passages from different dated notes (most similar first, max 12), asks the answer model if the newer one replaces or contradicts the older, keeps only findings whose two quotes are really in the files. Background scan once the index is ready; memory only; cleared on reindex/forget, revoked files filtered. `flag()` sets the search badge | — |
+| `tests/test_conflicts.py` | verified quotes only, injected/unknown replies ignored, search flags, forget/revoke, Ollama down | — |
 | `tests/test_notes.py` | open: allowlist/denylist enforced; new note: tracked/untracked, never overwrites, no text in audit | — |
 | `tests/test_search.py` | folder walk, search shape, Ollama fallback, stale files, revoke/forget, `/api/index` + `/api/search` | — |
 | `tests/test_db.py` | keyword search, no text stored, FTS syntax safe, revoke/forget empty the index, changed file not shown, groups and meaning search | — |
@@ -100,4 +103,4 @@ Add a row whenever you create a file.
 | `tests/test_health.py` | token required; health payload; dev origin blocked unless dev mode | add a test file per module |
 
 ### Planned backend modules (not yet created)
-`db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py` · `conflicts.py`
+`db.py` (in-memory SQLite, no note text on disk) · `search.py` · `qa.py` (calls `citations.check_answer`) · `extract.py`

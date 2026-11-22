@@ -19,6 +19,7 @@ import Settings from "./pages/Settings";
 // Lazy: this page's code downloads only when first opened, keeping startup fast.
 const Privacy = lazy(() => import("./pages/Privacy"));
 const NewNote = lazy(() => import("./pages/NewNote"));
+const Conflicts = lazy(() => import("./pages/Conflicts"));
 
 export default function App() {
   const [view, setView] = useState<View>("home");
@@ -49,7 +50,11 @@ export default function App() {
       main = <Placeholder title="Decisions & To-dos" note="Extraction arrives in build step 6." />;
       break;
     case "conflicts":
-      main = <Placeholder title="Conflicts" note="Contradiction and superseded-note detection arrives in build step 6." />;
+      main = (
+        <Suspense fallback={null}>
+          <Conflicts />
+        </Suspense>
+      );
       break;
     case "privacy":
       main = (
