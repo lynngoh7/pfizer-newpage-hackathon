@@ -105,6 +105,55 @@ export function getTodos(): Promise<{ todos: ExtractedTodo[] }> {
     });
   }
   return todosPromise;
+export interface SearchSource {
+  chunkID: number;
+  path: string;
+  date: string;
+  where: string;
+  snippet: string;
+  flag: "superseded" | "newer" | "conflict" | null;
+}
+
+export interface SearchResponse {
+  status: "ok" | "no_support";
+  answer: string | null;
+  sources: SearchSource[];
+}
+
+export interface IndexStatus {
+  files: number;
+  chunks: number;
+  groups: number;
+  vectors: number;
+  phase: "empty" | "meaning" | "grouping" | "ready" | "keyword_only";
+  done: number;
+  total: number;
+  read?: number;
+}
+
+export function getIndexStatus(): Promise<IndexStatus> {
+  return apiFetch<IndexStatus>("/api/index");
+}
+
+export function reindex(): Promise<IndexStatus> {
+  return apiFetch<IndexStatus>("/api/index", { method: "POST" });
+}
+
+let indexPromise: Promise<IndexStatus> | null = null;
+
+export function ensureSearchIndex(): Promise<IndexStatus> {
+  if (!indexPromise) {
+    indexPromise = getIndexStatus()
+      .then((status) => (status.phase === "empty" ? reindex() : status))
+      .finally(() => {
+        indexPromise = null;
+      });
+  }
+  return indexPromise;
+}
+
+export function searchNotes(query: string): Promise<SearchResponse> {
+  return apiFetch<SearchResponse>(`/api/search?q=${encodeURIComponent(query)}`);
 }
 
 // Saved settings (backend/app/prefs.py). Only allowlisted values, never note text.

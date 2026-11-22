@@ -34,16 +34,17 @@ Add a row whenever you create a file.
 | File | Purpose | Next edit |
 |---|---|---|
 | `main.tsx` | React entry | — |
-| `App.tsx` | view switch (home/search/decisions/conflicts/privacy/settings); owns the current query; Privacy is lazy-loaded | step 3: render `SearchResults`; step 4: answer view |
+| `App.tsx` | view switch (home/search/decisions/conflicts/privacy/settings); owns the current query; Privacy is lazy-loaded | step 4: connect the answer view |
 | `styles.css` | all styling; CSS variables; follows macOS light/dark, increase contrast, reduce motion; focus rings; system fonts only | per feature |
 | `lib/trust.ts` | client + types for the Trust panel routes (audit, network, storage, forget) | step 5 |
-| `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); `apiFetch` adds bearer header | add a typed function per new route |
+| `lib/api.ts` | backend client; gets port+token from Tauri `get_session` (or Vite env in browser dev); typed functions for health, folders, indexing and search | add a typed function per new route |
 | `components/Sidebar.tsx` | nav + engine status dot (polls `/api/health` every 5 s); status is a plain label (not clickable), announced to VoiceOver when it changes; inline Lucide nav icons (no icon package) | — |
 | `components/SearchBar.tsx` | single input; submits query to `App` | step 3/4: loading state |
-| `components/FolderAccess.tsx` | add/remove folders and files the app may read this session (Tauri dialog); first card on Privacy | step 2c: show indexing progress |
+| `components/FolderAccess.tsx` | add/remove folders and files the app may read this session (Tauri dialog); re-indexes after adding locations | step 2c: show indexing progress |
 | `components/ForgetButton.tsx` | "Forget everything" with confirm step and visible result; used on Privacy and Settings | — |
 | `pages/Privacy.tsx` | Trust panel: folder access (`FolderAccess`), summary, network, saved to disk, activity log, forget everything | — |
 | `pages/Home.tsx` | empty state; `.widget-grid` reserved for future widgets | out of scope now |
+| `pages/SearchResults.tsx` | calls the local index/search API; shows answers, source excerpts, loading, empty and error states | step 4: connect question answers |
 | `pages/Placeholder.tsx` | stub view shown for not-yet-built screens | delete once all views exist |
 | `pages/Settings.tsx` | engine, AI model picker (choice saved to `prefs.json`), indexing, accessibility note, built-in safety facts, forget everything (always last) | step 2c: indexing card; step 4: real model list from Ollama |
 
@@ -73,7 +74,7 @@ Add a row whenever you create a file.
 | `app/main.py` | `create_app(settings)` + uvicorn entry; CORS allows the Tauri window only, plus Vite in dev mode | — |
 | `app/audit.py` | in-memory activity log: fixed action list, path, query, short outcome. Never note text | step 2: ingest/permissions call `record` |
 | `app/ingest.py` | split TXT (blank lines), MD and DOCX (headings; DOCX via markitdown), PDF (pages, pypdf) into `Chunk`s with path + start/end line or page; broken files skipped and logged; every read via `resolve_and_check`; `ingestAllowed()` walks allowed folders; `mergeSmall()` joins small neighbouring chunks | — |
-| `app/group.py` | group chunks by topic: `nomic-embed-text` vectors → similarity groups (≥ 0.75) → one `llama3.2:3b` call names each group. Memory only, Ollama on 127.0.0.1. | — (`db.build` calls it) |
+| `app/group.py` | group chunks by topic: `nomic-embed-text` vectors → similarity groups (≥ 0.75) → one `qwen3:4b-instruct` call names each group. Memory only, Ollama on 127.0.0.1. | — (`db.build` calls it) |
 | `app/models.py` | warm `nomic-embed-text` + answer model at startup (keep_alive -1), the one place that unloads them (`unload()`: forget hook, `POST /api/engine/unload` on quit, atexit), only models Ollama reports as loaded. Ollama on 127.0.0.1, no note text sent | step 4: qa uses `answer_model()` |
 | `app/db.py` | in-memory SQLite index: Files/Chunks/Groups, contentless FTS5 keyword search, vectors (Python dict until sqlite-vec loads), `passage()` re-reads text and refuses changed files; revoke + forget hooks; `topics()` names groups lazily | — (`search.py` calls it) |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |

@@ -14,7 +14,7 @@ import ForgetButton from "../components/ForgetButton";
 
 // Fixed until step 4 lists installed models. The picker stays so the layout is final.
 // Placeholder name: confirm the demo model in step 4.
-const ANSWER_MODELS = ["llama3.2:3b"];
+const ANSWER_MODELS = ["qwen3:4b-instruct"];
 const SEARCH_MODEL = "nomic-embed-text";
 
 // Short labels so they fit the .props label column.

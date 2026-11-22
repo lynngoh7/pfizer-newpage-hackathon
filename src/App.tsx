@@ -15,6 +15,7 @@ import Home from "./pages/Home";
 import Decisions from "./pages/Decisions";
 import Todos from "./pages/Todos";
 import Placeholder from "./pages/Placeholder";
+import SearchResults from "./pages/SearchResults";
 import Settings from "./pages/Settings";
 import { ExtractedTodo, getTodos } from "./lib/api";
 
@@ -72,12 +73,7 @@ export default function App() {
       main = <Home />;
       break;
     case "search":
-      main = (
-        <Placeholder
-          title={query ? `Results for “${query}”` : "Search"}
-          note="Keyword search arrives in build step 3; Q&A with verified citations in step 4."
-        />
-      );
+      main = <SearchResults query={query} />;
       break;
     case "todos":
       main = (

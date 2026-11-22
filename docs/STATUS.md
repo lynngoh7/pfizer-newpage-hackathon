@@ -38,7 +38,7 @@ New files: `backend/app/permissions.py`, `ingest.py`, `db.py`. Edit: `api.py`, `
 
 ## Step 3 — Keyword search 🔧
 - ✅ FTS5 table (contentless) in `db.py`, `db.keyword(q)`. `search.py` merges keyword + meaning
-- ⬜ Results page: source cards (file, path, snippet re-read from the file, open-file button)
+- ✅ Results page with source cards and excerpts; search submits to `/api/index` and `/api/search`
 
 ## Step 4 — Questions with verified citations 🔧
 - 🔧 Ollama client `qa.py` (localhost only, on `feature/ai-qa`, not merged). System prompt treats note excerpts as untrusted data and asks for chunk ID + exact quote per claim. ⬜ Not yet called from an API route
@@ -62,7 +62,7 @@ Nothing in Settings is saved (that would put a file on disk). Accessibility foll
 - ✅ Follows macOS appearance, Increase contrast, Reduce motion. ⌘+ / ⌘− change text size (`zoomHotkeysEnabled`, needs `core:webview:allow-set-webview-zoom`)
 - ✅ Keyboard focus ring on every control; `<main>` and `<nav>` landmarks; `aria-current` on the open page; engine status announced to VoiceOver
 - ✅ Sidebar icons (Lucide paths inlined, no icon package; decorative, hidden from VoiceOver). Licence in `docs/THIRD_PARTY.md`
-- ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (placeholder `llama3.2:3b`)
+- ⬜ Step 4: list installed Ollama models in the picker and show loaded/unloaded; confirm the answer model (`qwen3:4b-instruct`, chosen 2026-11-21)
 - ⬜ Step 2c: indexing card (files read, passages, skipped, re-index)
 - ⬜ Check in the real app with VoiceOver (⌘F5) and with Increase contrast on
 
@@ -110,16 +110,16 @@ Tick a box here in the same PR as the code. The list below is what was planned o
 - ✅ Models warmed at startup and kept loaded (`models.py`); unloaded on quit and Forget everything (registered in `session.py`). Warm-up takes about 6 s in the background
 
 **S: answers and decisions** (step 4, 6)
-- ✅ 2a. Check local Ollama model and inference (Fri). `nomic-embed-text` and `llama3.2:3b` run locally (timings under Performance notes); qa.py defaults to `qwen3:4b-instruct`
+- ✅ 2a. Check local Ollama model and inference (Fri). `nomic-embed-text` and `llama3.2:3b` run locally (timings under Performance notes); answer model switched to `qwen3:4b-instruct` on 2026-11-21 (no thinking step, faster)
 - ✅ 2b. `qa.py` with source-aware prompts (Sat), on `feature/ai-qa`, not merged yet
 - 🔧 2c. Wire in `citations.py` and "No supporting notes found." (Sat). qa.py calls `check_answer`; ⬜ needs an ask route fed by `search.py` chunks
 - ⬜ 2d. Compare old decisions with newer notes (Sun), needs 1c, 2c
 - ✅ 2e. Unload the model on quit and forget (`models.unload` on forget, via `POST /api/engine/unload` from the launcher, and at exit; tests in `test_privacy_index.py`). qa.py should use `models.answer_model()`
 
 **L: results UI** (step 3, 4, 6)
-- ⬜ 3a. Results page with mock data (Sat)
-- ⬜ 3b. Source cards and file excerpts (Sat)
-- ⬜ 3c. Connect search and questions to the backend (Sat), needs 1d, 2c
+- ✅ 3a. Results page with mock data (Sat)
+- ✅ 3b. Source cards and file excerpts (Sat)
+- 🔧 3c. Keyword and natural-language search call `/api/index` and `/api/search`; question answers await the QA API from 2c
 - ⬜ 3d. Show decision changes and error states (Sun), needs 2d
 - ⬜ 3e. Demo polish and accessibility check (Sun, P1)
 
