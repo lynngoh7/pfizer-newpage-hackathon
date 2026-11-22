@@ -100,6 +100,13 @@ def _os_window_state(f: Path) -> bool:
     return isinstance(data, dict) and all(str(k).startswith("NS") for k in data)
 
 
+def _safe_is_file(f: Path) -> bool:
+    try:  # Windows raises on broken/looping links instead of returning False
+        return f.is_file()
+    except OSError:
+        return False
+
+
 def storage() -> dict:
     from . import prefs  # late import: prefs imports session, keep trust import-light
 
@@ -108,7 +115,7 @@ def storage() -> dict:
     for path in _app_dirs():
         # Each location is a folder, a single file (e.g. a .plist), or absent.
         if path.is_dir():
-            files = sorted(f for f in path.rglob("*") if f.is_file())
+            files = sorted(f for f in path.rglob("*") if _safe_is_file(f))
         elif path.is_file():
             files = [path]
         else:

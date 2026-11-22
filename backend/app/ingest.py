@@ -128,6 +128,15 @@ def mergeSmall(chunkList, limit: int | None = None):
     return out
 
 
+def _is_readable_file(f: Path) -> bool:
+    # Windows raises (e.g. WinError 1920) on symlink loops/unreadable links
+    # instead of returning False; one bad entry must not stop the whole folder.
+    try:
+        return f.is_file()
+    except OSError:
+        return False
+
+
 def ingestAllowed() -> int:
     """Chunk every supported file in the allowed folders into `chunks`.
     Hidden files/folders are skipped (editor and OS clutter). Returns files read."""
@@ -138,7 +147,7 @@ def ingestAllowed() -> int:
         files = [root] if root.is_file() else sorted(root.rglob("*"))
         for f in files:
             rel = f.relative_to(root) if f != root else Path(f.name)
-            if f in seen or not f.is_file() or any(p.startswith(".") for p in rel.parts):
+            if f in seen or not _is_readable_file(f) or any(p.startswith(".") for p in rel.parts):
                 continue
             seen.add(f)
             if f.suffix.lower() in SUPPORTED:
