@@ -73,7 +73,7 @@ def read_chunks() -> list[IndexedChunk]:
             chunks.append(chunk)
     return chunks
 
-#regex magic
+# A Markdown checkbox list item: "- [ ] task", "* [x] task", "1. [ ] task"
 _TODO = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+\[([ xX])\]\s+(.+?)\s*$")
 
 
