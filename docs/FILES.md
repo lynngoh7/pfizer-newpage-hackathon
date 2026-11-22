@@ -78,7 +78,7 @@ Add a row whenever you create a file.
 | `app/models.py` | warm `nomic-embed-text` + answer model at startup (keep_alive -1), the one place that unloads them (`unload()`: forget hook, `POST /api/engine/unload` on quit, atexit), only models Ollama reports as loaded. Ollama on 127.0.0.1, no note text sent | step 4: qa uses `answer_model()` |
 | `app/db.py` | in-memory SQLite index: Files/Chunks/Groups, contentless FTS5 keyword search, vectors (Python dict until sqlite-vec loads), `passage()` re-reads text and refuses changed files; revoke + forget hooks; `topics()` names groups lazily | — (`search.py` calls it) |
 | `app/session.py` | "forget everything": modules register a reset with `on_forget`; `forget()` runs them all | every module that holds session data |
-| `app/extractions.py` | extracts to-dos and decisions from the collected chunks:  `todos()` returns a list of all the todos; `todos()` returns a list of all decisions found| — |
+| `app/extractions.py` | extracts to-dos and decisions from indexed passages (text re-read from the file): `todos()` returns checkbox items, `decisions()` returns `## Decision` sections and `DECISION:` labels | — |
 | `app/trust.py` | read-only checks: app processes' sockets (psutil), files in the app's data folders (`prefs.json` is expected, anything else is flagged) | — |
 | `app/routes_trust.py` | `/api/audit`, `/api/trust/network`, `/api/trust/saved`, `/api/trust/storage`, `DELETE /api/session` | — |
 | `app/citations.py` | citation checker: verifies each cited quote is in its chunk, drops unbacked claims, returns NO_SUPPORT if none survive. Pure, no I/O | step 4: called by `qa.py` |
