@@ -112,7 +112,7 @@ def todos() -> dict[str, list[Todo]]:
             })
     return {"todos": extracted}
 
-#regex magic part 2
+# A Markdown heading, a "DECISION:" label, and a list item (which ends a decision paragraph)
 _HEADING = re.compile(r"^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*$")
 _DECISION_LABEL = re.compile(r"^\s*(?:[-*+]\s*)?(?:\*\*)?DECISION(?:S)?\s*:\s*(.*?)(?:\*\*)?\s*$", re.IGNORECASE)
 _LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+")
